@@ -199,12 +199,13 @@ function handleGetHotTopics($post, $params) {
 
     try {
         global $conn;
-        // Lấy các chủ đề nổi bật dựa trên view_count và số bình luận (tính bằng subquery), join users để lấy full_name
-        $queryHot = "SELECT p.*, u.full_name, (
-                SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id AND c.status = 'active'
+        // Lấy các chủ đề nổi bật dựa trên view_count và số bình luận, join users và categories để lấy full_name và category_name
+        $queryHot = "SELECT p.*, u.full_name, c.name as category_name, (
+                SELECT COUNT(*) FROM comments cmt WHERE cmt.post_id = p.id AND cmt.status = 'active'
             ) AS comment_count
             FROM posts p
             LEFT JOIN users u ON p.user_id = u.id
+            LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.status = 'active' AND u.status = 'active'
             ORDER BY p.view_count DESC, comment_count DESC, p.created_at DESC
             LIMIT :limit";
