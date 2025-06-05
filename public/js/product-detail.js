@@ -102,14 +102,17 @@ async function loadProductDetails(productId) {
 
 // Helper: render stars for both summary and main info
 function renderStars(avgRating) {
-    const roundedRating = Math.round(avgRating * 2) / 2;
-    const fullStars = Math.floor(roundedRating);
-    const halfStar = roundedRating % 1 !== 0;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-    let starsHtml = '★'.repeat(fullStars);
-    if (halfStar) starsHtml += '½';
-    starsHtml += '☆'.repeat(emptyStars);
-    return starsHtml;
+    const numRating = parseFloat(avgRating);
+    if (isNaN(numRating) || numRating < 0) avgRating = 0;
+    if (numRating > 5) avgRating = 5;
+    const fullStars = Math.floor(numRating);
+    const halfStar = numRating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
+    let starsHTML = "";
+    for (let i = 0; i < fullStars; i++) starsHTML += '<i class="fas fa-star"></i>';
+    if (halfStar) starsHTML += '<i class="fas fa-star-half-alt"></i>';
+    for (let i = 0; i < emptyStars; i++) starsHTML += '<i class="far fa-star"></i>';
+    return starsHTML;
 }
 
 // Update product rating display (main info)
@@ -117,10 +120,9 @@ function updateProductRating(avgRating, reviewCount) {
     const ratingElement = document.getElementById('product-avg-rating');
     const countElement = document.getElementById('product-review-count');
     if (ratingElement) {
-        ratingElement.innerHTML = `<span class="stars">${renderStars(avgRating)}</span>` + (avgRating > 0 ? ` <span class="rating-number">${avgRating.toFixed(1)}</span>` : '');
+        ratingElement.innerHTML = renderStars(avgRating) + (avgRating > 0 ? ` <span class="rating-number">${avgRating.toFixed(1)}</span>` : '');
     }
     if (countElement) {
-        // Luôn ưu tiên lấy số đánh giá từ API stats (reviewCount truyền vào)
         countElement.textContent = `(${reviewCount} đánh giá)`;
     }
 }
@@ -304,26 +306,21 @@ async function loadProductReviews(productId, sortBy = 'newest') {
             reviews.forEach(review => {
                 const reviewItem = document.createElement('div');
                 reviewItem.className = 'review-item';
-                
                 // Format date
                 const reviewDate = new Date(review.created_at);
                 const formattedDate = reviewDate.toLocaleDateString('vi-VN');
-                
-                // Create star display
-                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
-                
+                // Create star display (Font Awesome)
+                const stars = renderStars(review.rating);
                 reviewItem.innerHTML = `
                     <div class="review-header">
                         <div class="author-info">
                             ${getUserAvatarHtml(review, 'user-avatar-review')}
                             <span>${getDisplayName(review)}</span>
                         </div>
-                        <div class="rating">${stars}</div>
-                        <div class="date">${formattedDate}</div>
+                        <div class="review-rating">${stars}</div>
+                        <div class="review-date">${formattedDate}</div>
                     </div>
-                    <div class="review-body">
-                        <p>${review.comment}</p>
-                    </div>
+                    <div class="review-body">${review.content ? review.content : ''}</div>
                 `;
                 
                 // Add media if available
@@ -491,35 +488,38 @@ function setupReviewForm(productId) {
         });
     }
 
-    // Modern star rating logic
+    // Modern star rating logic (Font Awesome)
     const stars = document.querySelectorAll('#review-rating-stars .star');
     const ratingInput = document.getElementById('review-rating');
     let selectedRating = 0;
 
-    stars.forEach(star => {
-        star.addEventListener('mouseenter', function() {
-            fillStars(this.dataset.value);
-        });
-        star.addEventListener('mouseleave', function() {
-            fillStars(selectedRating);
-        });
-        star.addEventListener('click', function() {
-            selectedRating = this.dataset.value;
-            ratingInput.value = selectedRating;
-            fillStars(selectedRating);
-        });
-    });
-    function fillStars(val) {
-        stars.forEach(star => {
-            if (parseInt(star.dataset.value) <= parseInt(val)) {
-                star.classList.add('filled');
+    function updateStarIcons(val) {
+        stars.forEach((star, idx) => {
+            if (idx < val) {
+                star.classList.remove('far');
+                star.classList.add('fas', 'selected');
             } else {
-                star.classList.remove('filled');
+                star.classList.remove('fas', 'selected');
+                star.classList.add('far');
             }
         });
     }
+
+    stars.forEach(star => {
+        star.addEventListener('mouseenter', function() {
+            updateStarIcons(parseInt(this.dataset.value));
+        });
+        star.addEventListener('mouseleave', function() {
+            updateStarIcons(selectedRating);
+        });
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.value);
+            ratingInput.value = selectedRating;
+            updateStarIcons(selectedRating);
+        });
+    });
     // Khởi tạo trạng thái ban đầu
-    fillStars(0);
+    updateStarIcons(0);
 
     // Gửi form đánh giá
     form.addEventListener('submit', async function(e) {
@@ -532,7 +532,7 @@ function setupReviewForm(productId) {
         }
         const formData = new FormData();
         formData.append('product_id', productId);
-        formData.append('content', content);
+        formData.append('comment', content); // Sửa từ 'content' thành 'comment' để backend nhận đúng
         formData.append('rating', rating);
         try {
             const res = await fetch('/src/api/reviews.php?action=create', {
@@ -545,7 +545,7 @@ function setupReviewForm(productId) {
                 alert('Đánh giá của bạn đã được gửi!');
                 form.reset();
                 selectedRating = 0;
-                fillStars(0);
+                updateStarIcons(0);
                 // Reload reviews
                 loadProductReviews(productId);
             } else {
