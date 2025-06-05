@@ -76,6 +76,8 @@ class Post {
     * @param int $page Số trang cho phân trang
     * @param int $limit Số bài viết mỗi trang
     * @return array Phản hồi với trạng thái thành công và dữ liệu
+    *
+    * Lưu ý: Để tìm kiếm, truyền từ khóa vào tham số $search. Không cần gọi searchPosts riêng.
     */
     public function getPosts($categoryId = null, $userId = null, $productId = null, $postType = null, $search = null, $sort = 'newest', $page = 1, $limit = 10) {
         try {

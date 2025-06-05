@@ -22,7 +22,7 @@
 }
 
 .breadcrumbs a {
-    color: var(--color-accent2);
+    color: var(--color-primary);
 }
 
 .product-main-info {
@@ -93,7 +93,7 @@
 .price {
     font-size: 1.5em;
     font-weight: bold;
-    color: var(--color-accent1);
+    color: var(--color-primary);
     margin-bottom: 20px;
 }
 
@@ -173,7 +173,7 @@
 
 .tab-link.active {
     border-bottom-color: var(--color-primary);
-    color: var(--color-accent1);
+    color: var(--color-primary);
     font-weight: bold;
 }
 
@@ -302,18 +302,6 @@
     border: none;
     color: var(--color-accent2);
     cursor: pointer;
-}
-
-/* Related Products */
-#related-products {
-    margin-top: 50px;
-    padding-top: 30px;
-    border-top: 1px solid var(--color-border);
-}
-
-#related-products h2 {
-    text-align: center;
-    margin-bottom: 30px;
 }
 
 /* Responsive Product Detail */

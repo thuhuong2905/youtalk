@@ -329,5 +329,21 @@ class Product {
             return null;
         }
     }
+    
+    /**
+     * Increment product view count
+     * @param int $productId
+     * @return bool
+     */
+    public function incrementViewCount($productId) {
+        try {
+            $stmt = $this->db->prepare("UPDATE products SET view_count = IFNULL(view_count,0) + 1 WHERE id = :id");
+            $stmt->bindParam(':id', $productId, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log('Error incrementing product view count: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

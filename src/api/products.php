@@ -37,6 +37,49 @@ $product = new Product($conn);
 // Get the request data
 $requestData = getRequestData();
 
+// Process based on the requested action
+switch ($action) {
+    case 'get_by_id':
+        handleGetProductById($product, $requestData);
+        break;
+        
+    case 'get_by_category':
+        handleGetProductsByCategory($product, $requestData);
+        break;
+        
+    case 'search':
+        handleSearchProducts($product, $requestData);
+        break;
+        
+    case 'get_featured':
+        handleGetFeaturedProducts($product, $requestData);
+        break;
+        
+    case 'create':
+        handleCreateProduct($product, $requestData);
+        break;
+        
+    case 'update':
+        handleUpdateProduct($product, $requestData);
+        break;
+        
+    case 'get_categories':
+        handleGetCategories($product);
+        break;
+        
+    case 'get_category':
+        handleGetCategoryById($product, $requestData);
+        break;
+        
+    case 'view':
+        handleIncrementProductView($product, $requestData);
+        break;
+        
+    default:
+        sendResponse(false, 'Invalid action specified', null, 400);
+        break;
+}
+
 /**
  * Handle getting a product by ID
  */
@@ -166,35 +209,6 @@ function handleGetFeaturedProducts($product, $requestData) {
 }
 
 /**
- * Handle getting related products
- */
-function handleGetRelatedProducts($product, $requestData) {
-    // Validate required parameters
-    if (!isset($requestData['product_id']) || empty($requestData['product_id'])) {
-        sendResponse(false, 'Product ID is required', null, 400);
-        return;
-    }
-    
-    $productId = (int)$requestData['product_id'];
-    $limit = isset($requestData['limit']) ? (int)$requestData['limit'] : 4;
-    
-    $products = $product->getRelatedProducts($productId, $limit);
-    
-    // Process any JSON fields in each product
-    foreach ($products as &$productItem) {
-        if (isset($productItem['images']) && !empty($productItem['images'])) {
-            $productItem['images'] = json_decode($productItem['images'], true);
-        }
-        
-        if (isset($productItem['specs']) && !empty($productItem['specs'])) {
-            $productItem['specs'] = json_decode($productItem['specs'], true);
-        }
-    }
-    
-    sendResponse(true, 'Related products retrieved successfully', ['products' => $products]);
-}
-
-/**
  * Handle creating a new product
  */
 function handleCreateProduct($product, $requestData) {
@@ -309,66 +323,21 @@ function handleGetCategoryById($product, $requestData) {
  * Handle incrementing product view count
  */
 function handleIncrementProductView($product, $requestData) {
-    // Accept product_id from either POST body or GET
+    // Accept both product_id and id for compatibility
     $productId = null;
     if (isset($requestData['product_id']) && !empty($requestData['product_id'])) {
         $productId = (int)$requestData['product_id'];
-    } elseif (isset($_GET['product_id']) && !empty($_GET['product_id'])) {
-        $productId = (int)$_GET['product_id'];
+    } elseif (isset($requestData['id']) && !empty($requestData['id'])) {
+        $productId = (int)$requestData['id'];
     }
-    if (empty($productId)) {
-        sendResponse(false, 'Product ID is required (in POST body or URL parameter)', null, 400);
+    if (!$productId) {
+        sendResponse(false, 'Product ID is required', null, 400);
         return;
     }
-    try {
-        $db = new Database();
-        $conn = $db->getConnection();
-        $stmt = $conn->prepare("UPDATE products SET view_count = IFNULL(view_count,0) + 1 WHERE id = :id");
-        $stmt->bindParam(':id', $productId, PDO::PARAM_INT);
-        $stmt->execute();
-        sendResponse(true, 'Product view count incremented');
-    } catch (PDOException $e) {
-        error_log('Error incrementing product view count: ' . $e->getMessage());
-        sendResponse(false, 'Error incrementing product view count: ' . $e->getMessage(), null, 500);
+    $success = $product->incrementViewCount($productId);
+    if ($success) {
+        sendResponse(true, 'View count incremented');
+    } else {
+        sendResponse(false, 'Failed to increment view count', null, 500);
     }
-}
-
-// Get action from query parameters
-$action = isset($_GET['action']) ? $_GET['action'] : '';
-
-// Process based on the requested action
-switch ($action) {
-    case 'view':
-        handleIncrementProductView($product, $requestData);
-        break;
-    case 'get_by_id':
-        handleGetProductById($product, $requestData);
-        break;
-    case 'get_by_category':
-        handleGetProductsByCategory($product, $requestData);
-        break;
-    case 'search':
-        handleSearchProducts($product, $requestData);
-        break;
-    case 'get_featured':
-        handleGetFeaturedProducts($product, $requestData);
-        break;
-    case 'get_related':
-        handleGetRelatedProducts($product, $requestData);
-        break;
-    case 'create':
-        handleCreateProduct($product, $requestData);
-        break;
-    case 'update':
-        handleUpdateProduct($product, $requestData);
-        break;
-    case 'get_categories':
-        handleGetCategories($product);
-        break;
-    case 'get_category':
-        handleGetCategoryById($product, $requestData);
-        break;
-    default:
-        sendResponse(false, 'Invalid action specified', null, 400);
-        break;
 }

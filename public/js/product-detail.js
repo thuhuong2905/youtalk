@@ -17,9 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Load product reviews
         loadProductReviews(productId);
         
-        // Load related products
-        loadRelatedProducts(productId);
-        
         // Load related discussions (by product name)
         loadRelatedDiscussions(productName);
         
@@ -45,10 +42,14 @@ async function loadProductDetails(productId) {
             method: 'POST',
             body: { id: productId }
         });
-        
-        if (response.success && response.product) {
-            const product = response.product;
-            
+        // Đọc đúng nhánh dữ liệu trả về từ API (response.data.product hoặc response.product)
+        let product = null;
+        if (response && response.data && response.data.product) {
+            product = response.data.product;
+        } else if (response && response.product) {
+            product = response.product;
+        }
+        if (response.success && product) {
             // Update page title
             document.title = `${product.name} - YouTalk`;
             
@@ -289,83 +290,88 @@ async function loadProductReviews(productId, sortBy = 'newest') {
         const reviewsList = document.getElementById('reviews-list');
         if (!reviewsList) return;
         reviewsList.innerHTML = '';
-        if (reviewsResponse.success && Array.isArray(reviewsResponse.reviews)) {
-            if (reviewsResponse.reviews.length === 0) {
-                reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
-            } else {
-                reviewsResponse.reviews.forEach(review => {
-                    const reviewItem = document.createElement('div');
-                    reviewItem.className = 'review-item';
-                    
-                    // Format date
-                    const reviewDate = new Date(review.created_at);
-                    const formattedDate = reviewDate.toLocaleDateString('vi-VN');
-                    
-                    // Create star display
-                    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
-                    
-                    reviewItem.innerHTML = `
-                        <div class="review-header">
-                            <div class="author-info">
-                                <img src="${review.profile_picture || 'images/default-avatar.png'}" alt="${getDisplayName(review)}">
-                                <span>${getDisplayName(review)}</span>
-                            </div>
-                            <div class="rating">${stars}</div>
-                            <div class="date">${formattedDate}</div>
+        // Sửa: lấy đúng trường reviews từ response.data.reviews hoặc response.reviews
+        let reviews = [];
+        if (reviewsResponse && reviewsResponse.data && Array.isArray(reviewsResponse.data.reviews)) {
+            reviews = reviewsResponse.data.reviews;
+        } else if (reviewsResponse && Array.isArray(reviewsResponse.reviews)) {
+            reviews = reviewsResponse.reviews;
+        }
+        if (reviewsResponse.success && reviews.length > 0) {
+            reviews.forEach(review => {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                
+                // Format date
+                const reviewDate = new Date(review.created_at);
+                const formattedDate = reviewDate.toLocaleDateString('vi-VN');
+                
+                // Create star display
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                
+                reviewItem.innerHTML = `
+                    <div class="review-header">
+                        <div class="author-info">
+                            <img src="${review.profile_picture || 'images/default-avatar.png'}" alt="${getDisplayName(review)}">
+                            <span>${getDisplayName(review)}</span>
                         </div>
-                        <div class="review-body">
-                            <p>${review.comment}</p>
-                        </div>
-                    `;
+                        <div class="rating">${stars}</div>
+                        <div class="date">${formattedDate}</div>
+                    </div>
+                    <div class="review-body">
+                        <p>${review.comment}</p>
+                    </div>
+                `;
+                
+                // Add media if available
+                if (review.media && review.media.length > 0) {
+                    const mediaContainer = document.createElement('div');
+                    mediaContainer.className = 'review-media';
                     
-                    // Add media if available
-                    if (review.media && review.media.length > 0) {
-                        const mediaContainer = document.createElement('div');
-                        mediaContainer.className = 'review-media';
+                    review.media.forEach(mediaUrl => {
+                        // Determine if it's an image or video based on extension
+                        const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaUrl);
                         
-                        review.media.forEach(mediaUrl => {
-                            // Determine if it's an image or video based on extension
-                            const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaUrl);
-                            
-                            if (isVideo) {
-                                const video = document.createElement('video');
-                                video.controls = true;
-                                video.src = mediaUrl;
-                                mediaContainer.appendChild(video);
-                            } else {
-                                const img = document.createElement('img');
-                                img.src = mediaUrl;
-                                img.alt = 'Review media';
-                                mediaContainer.appendChild(img);
-                            }
-                        });
-                        
-                        reviewItem.querySelector('.review-body').appendChild(mediaContainer);
-                    }
-                    
-                    // Add helpful button
-                    const reviewFooter = document.createElement('div');
-                    reviewFooter.className = 'review-footer';
-                    reviewFooter.innerHTML = `
-                        <div class="helpful-vote">
-                            <span>Đánh giá này có hữu ích? </span>
-                            <button class="helpful-btn">Có (${review.helpful_count || 0})</button>
-                        </div>
-                    `;
-                    
-                    // Add event listener for helpful button
-                    reviewFooter.querySelector('.helpful-btn').addEventListener('click', async () => {
-                        // This would call an API endpoint to mark review as helpful
-                        // For now, just increment the count locally
-                        const helpfulBtn = reviewFooter.querySelector('.helpful-btn');
-                        const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
-                        helpfulBtn.textContent = `Có (${currentCount + 1})`;
+                        if (isVideo) {
+                            const video = document.createElement('video');
+                            video.controls = true;
+                            video.src = mediaUrl;
+                            mediaContainer.appendChild(video);
+                        } else {
+                            const img = document.createElement('img');
+                            img.src = mediaUrl;
+                            img.alt = 'Review media';
+                            mediaContainer.appendChild(img);
+                        }
                     });
                     
-                    reviewItem.appendChild(reviewFooter);
-                    reviewsList.appendChild(reviewItem);
+                    reviewItem.querySelector('.review-body').appendChild(mediaContainer);
+                }
+                
+                // Add helpful button
+                const reviewFooter = document.createElement('div');
+                reviewFooter.className = 'review-footer';
+                reviewFooter.innerHTML = `
+                    <div class="helpful-vote">
+                        <span>Đánh giá này có hữu ích? </span>
+                        <button class="helpful-btn">Có (${review.helpful_count || 0})</button>
+                    </div>
+                `;
+                
+                // Add event listener for helpful button
+                reviewFooter.querySelector('.helpful-btn').addEventListener('click', async () => {
+                    // This would call an API endpoint to mark review as helpful
+                    // For now, just increment the count locally
+                    const helpfulBtn = reviewFooter.querySelector('.helpful-btn');
+                    const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
+                    helpfulBtn.textContent = `Có (${currentCount + 1})`;
                 });
-            }
+                
+                reviewItem.appendChild(reviewFooter);
+                reviewsList.appendChild(reviewItem);
+            });
+        } else if (reviewsResponse.success && reviews.length === 0) {
+            reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
         } else {
             reviewsList.innerHTML = '<p>Không thể tải đánh giá.</p>';
         }
@@ -438,65 +444,6 @@ function updateReviewSummary(stats) {
     `;
 }
 
-// Load related products
-async function loadRelatedProducts(productId) {
-    try {
-        const response = await fetchApi('/src/api/products.php?action=get_related', {
-            method: 'POST',
-            body: {
-                product_id: productId,
-                limit: 4
-            }
-        });
-        
-        if (response.success) {
-            const productList = document.getElementById('related-product-list');
-            if (!productList) return;
-            
-            // Clear any existing content
-            productList.innerHTML = '';
-            
-            if (response.products.length === 0) {
-                productList.innerHTML = '<p>Không có sản phẩm liên quan.</p>';
-                return;
-            }
-            
-            response.products.forEach(product => {
-                // Get first image or use default
-                const imageUrl = product.images && product.images.length > 0 
-                    ? product.images[0] 
-                    : 'images/products/default.png';
-                
-                // Format price or show "Contact for price"
-                const priceDisplay = product.price 
-                    ? `${product.price.toLocaleString('vi-VN')} đ` 
-                    : 'Liên hệ để biết giá';
-                
-                // Calculate star rating display
-                const rating = product.avg_rating || 0;
-                const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
-                
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <img src="${imageUrl}" alt="${product.name}">
-                    <div class="product-card-content">
-                        <h3>${product.name}</h3>
-                        <div class="rating">${stars} (${product.review_count || 0})</div>
-                        <div class="price">${priceDisplay}</div>
-                        <a href="product-detail.html?id=${product.id}" class="cta-button">Xem chi tiết</a>
-                    </div>
-                `;
-                productList.appendChild(productCard);
-            });
-        } else {
-            console.error('Failed to load related products:', response.message);
-        }
-    } catch (error) {
-        console.error('Error loading related products:', error);
-    }
-}
-
 // Load related discussions
 async function loadRelatedDiscussions(productName) {
     try {
@@ -512,12 +459,15 @@ async function loadRelatedDiscussions(productName) {
         const discussionList = document.getElementById('related-discussion-list');
         if (!discussionList) return;
         discussionList.innerHTML = '';
-        if (response.success && Array.isArray(response.posts)) {
-            if (response.posts.length === 0) {
-                discussionList.innerHTML = '<p>Chưa có thảo luận nào liên quan đến sản phẩm này.</p>';
-                return;
-            }
-            response.posts.forEach(post => {
+        // Sửa: lấy đúng trường posts từ response.data.posts hoặc response.posts
+        let posts = [];
+        if (response && response.data && Array.isArray(response.data.posts)) {
+            posts = response.data.posts;
+        } else if (response && Array.isArray(response.posts)) {
+            posts = response.posts;
+        }
+        if (response.success && posts.length > 0) {
+            posts.forEach(post => {
                 const discussionItem = document.createElement('div');
                 discussionItem.className = 'discussion-item';
                 
@@ -535,6 +485,8 @@ async function loadRelatedDiscussions(productName) {
                 `;
                 discussionList.appendChild(discussionItem);
             });
+        } else if (response.success && posts.length === 0) {
+            discussionList.innerHTML = '<p>Chưa có thảo luận nào liên quan đến sản phẩm này.</p>';
         } else {
             discussionList.innerHTML = '<p>Không thể tải thảo luận liên quan.</p>';
         }

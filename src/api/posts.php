@@ -415,33 +415,24 @@ function handleSearchPosts($post, $params) {
         sendResponse(false, 'Truy vấn tìm kiếm là bắt buộc', null, 400);
         return;
     }
-    
     $query = $params['query'];
     $category_id = isset($params['category_id']) ? intval($params['category_id']) : null;
     $post_type = isset($params['post_type']) ? $params['post_type'] : null;
-    
     // Hỗ trợ cả hai phương thức phân trang
     $page = isset($params['page']) ? intval($params['page']) : 1;
     $limit = isset($params['limit']) ? intval($params['limit']) : 10;
     $offset = isset($params['offset']) ? intval($params['offset']) : ($page - 1) * $limit;
-    
-    // Tìm kiếm bài viết
-    $result = $post->searchPosts($query, $category_id, $post_type, $limit, $offset);
-    
+    // Sử dụng getPosts để tìm kiếm
+    $result = $post->getPosts(null, null, null, $post_type, $query, 'newest', $page, $limit);
     if ($result['success']) {
-        // Định dạng lại dữ liệu phản hồi để bao gồm phân trang
         $responseData = $result['data'];
-        
-        // Thêm thông tin phân trang nếu chưa có
         if (!isset($responseData['pagination'])) {
             $responseData['pagination'] = [
                 'page' => $page,
                 'limit' => $limit,
-                'total' => isset($responseData['total']) ? $responseData['total'] : count($responseData['posts']),
-                'pages' => isset($responseData['total']) ? ceil($responseData['total'] / $limit) : 1
+                'offset' => $offset
             ];
         }
-        
         sendResponse(true, 'Lấy kết quả tìm kiếm thành công', $responseData);
     } else {
         sendResponse(false, $result['message']);
