@@ -152,17 +152,21 @@ function handleGetFeaturedReviews($review, $requestData) {
  * Handle getting reviews for a product
  */
 function handleGetReviewsByProduct($review, $requestData) {
-    // Validate required parameters
-    if (!isset($_GET['product_id']) || empty($_GET['product_id'])) {
-        sendResponse(false, 'Product ID is required in URL parameter (?product_id=...)', null, 400);
+    // Accept product_id from either GET or POST/body
+    $productId = null;
+    if (isset($requestData['product_id']) && !empty($requestData['product_id'])) {
+        $productId = (int)$requestData['product_id'];
+    } elseif (isset($_GET['product_id']) && !empty($_GET['product_id'])) {
+        $productId = (int)$_GET['product_id'];
+    }
+    if (empty($productId)) {
+        sendResponse(false, 'Product ID is required (in POST body or URL parameter)', null, 400);
         return;
     }
-
-    $productId = (int)$_GET['product_id'];
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
-    $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-    $sortBy = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'created_at';
-    $sortOrder = isset($_GET['sort_order']) ? $_GET['sort_order'] : 'DESC';
+    $limit = isset($requestData['limit']) ? (int)$requestData['limit'] : (isset($_GET['limit']) ? (int)$_GET['limit'] : 10);
+    $offset = isset($requestData['offset']) ? (int)$requestData['offset'] : (isset($_GET['offset']) ? (int)$_GET['offset'] : 0);
+    $sortBy = isset($requestData['sort_by']) ? $requestData['sort_by'] : (isset($_GET['sort_by']) ? $_GET['sort_by'] : 'created_at');
+    $sortOrder = isset($requestData['sort_order']) ? $requestData['sort_order'] : (isset($_GET['sort_order']) ? $_GET['sort_order'] : 'DESC');
 
     // Basic validation for sort columns to prevent SQL injection
     $allowedSortColumns = ['created_at', 'rating', 'helpful_count'];
@@ -506,14 +510,17 @@ function handleDeleteReview($review, $requestData) {
  * Handle getting review statistics for a product
  */
 function handleGetReviewStats($review, $requestData) {
-    // Validate required parameters
-    if (!isset($_GET['product_id']) || empty($_GET['product_id'])) {
-        sendResponse(false, 'Product ID is required in URL parameter (?product_id=...)', null, 400);
+    // Accept product_id from either GET or POST/body
+    $productId = null;
+    if (isset($requestData['product_id']) && !empty($requestData['product_id'])) {
+        $productId = (int)$requestData['product_id'];
+    } elseif (isset($_GET['product_id']) && !empty($_GET['product_id'])) {
+        $productId = (int)$_GET['product_id'];
+    }
+    if (empty($productId)) {
+        sendResponse(false, 'Product ID is required (in POST body or URL parameter)', null, 400);
         return;
     }
-
-    $productId = (int)$_GET['product_id'];
-
     try {
         $query = "SELECT 
                     COUNT(*) as total_reviews, 
@@ -529,12 +536,10 @@ function handleGetReviewStats($review, $requestData) {
         $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
         $stmt->execute();
         $stats = $stmt->fetch(PDO::FETCH_ASSOC);
-
         // Format average rating
         if ($stats && $stats['average_rating'] !== null) {
             $stats['average_rating'] = round((float)$stats['average_rating'], 1);
         }
-
         sendResponse(true, 'Review statistics retrieved successfully', ['stats' => $stats]);
     } catch (PDOException $e) {
         error_log("Get review stats error: " . $e->getMessage());

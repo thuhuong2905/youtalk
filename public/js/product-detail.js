@@ -1,16 +1,18 @@
 // JavaScript for product detail page functionality
 // Handles loading product details, reviews, and related products
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('YouTalk Product Detail JS Loaded');
     
     // Get product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
+    let productName = '';
     
     if (productId) {
-        // Load product details
-        loadProductDetails(productId);
+        // Load product details and get product name for related discussions
+        const product = await loadProductDetails(productId);
+        productName = product && product.name ? product.name : '';
         
         // Load product reviews
         loadProductReviews(productId);
@@ -18,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Load related products
         loadRelatedProducts(productId);
         
-        // Load related discussions
-        loadRelatedDiscussions(productId);
+        // Load related discussions (by product name)
+        loadRelatedDiscussions(productName);
         
         // Set up tab switching
         setupTabs();
@@ -27,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set up review form
         setupReviewForm(productId);
         
-        // Increment view count
+        // Increment view count (use product_id param)
         incrementViewCount(productId);
     } else {
         // No product ID provided, show error or redirect
@@ -44,8 +46,8 @@ async function loadProductDetails(productId) {
             body: { id: productId }
         });
         
-        if (response.success) {
-            const product = response;
+        if (response.success && response.product) {
+            const product = response.product;
             
             // Update page title
             document.title = `${product.name} - YouTalk`;
@@ -66,7 +68,7 @@ async function loadProductDetails(productId) {
             
             // Update price
             const priceDisplay = product.price 
-                ? `${product.price.toLocaleString('vi-VN')} đ` 
+                ? `${Number(product.price).toLocaleString('vi-VN')} đ` 
                 : 'Liên hệ để biết giá';
             document.getElementById('product-price').textContent = priceDisplay;
             
@@ -87,13 +89,16 @@ async function loadProductDetails(productId) {
             
             // Set up action buttons
             setupProductActions(product);
+            return product;
         } else {
             console.error('Failed to load product details:', response.message);
             document.getElementById('product-name').textContent = 'Không tìm thấy sản phẩm';
             document.querySelector('.product-main-info').innerHTML = '<p>Sản phẩm không tồn tại hoặc đã bị xóa.</p>';
+            return null;
         }
     } catch (error) {
         console.error('Error loading product details:', error);
+        return null;
     }
 }
 
@@ -268,31 +273,23 @@ async function loadProductReviews(productId, sortBy = 'newest') {
                 sortParams = { sort_by: 'rating', sort_order: 'ASC' };
                 break;
         }
-        
-        // Get reviews
-        const reviewsResponse = await fetchApi('/src/api/reviews.php?action=get_by_product', {
-            method: 'POST',
-            body: {
-                product_id: productId,
-                limit: 10,
-                offset: 0,
-                ...sortParams
-            }
+        // Use GET and query params for backend compatibility
+        const query = new URLSearchParams({
+            product_id: productId,
+            limit: 10,
+            offset: 0,
+            ...sortParams
+        }).toString();
+        const reviewsResponse = await fetchApi(`/src/api/reviews.php?action=get_by_product&${query}`, {
+            method: 'GET'
         });
-        
-        // Get review statistics
-        const statsResponse = await fetchApi('/src/api/reviews.php?action=get_stats', {
-            method: 'POST',
-            body: { product_id: productId }
+        const statsResponse = await fetchApi(`/src/api/reviews.php?action=get_stats&product_id=${productId}`, {
+            method: 'GET'
         });
-        
-        if (reviewsResponse.success) {
-            const reviewsList = document.getElementById('reviews-list');
-            if (!reviewsList) return;
-            
-            // Clear loading placeholder
-            reviewsList.innerHTML = '';
-            
+        const reviewsList = document.getElementById('reviews-list');
+        if (!reviewsList) return;
+        reviewsList.innerHTML = '';
+        if (reviewsResponse.success && Array.isArray(reviewsResponse.reviews)) {
             if (reviewsResponse.reviews.length === 0) {
                 reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
             } else {
@@ -369,13 +366,11 @@ async function loadProductReviews(productId, sortBy = 'newest') {
                     reviewsList.appendChild(reviewItem);
                 });
             }
-            
-            // Update review summary if stats are available
-            if (statsResponse.success && statsResponse.stats) {
-                updateReviewSummary(statsResponse.stats);
-            }
         } else {
-            console.error('Failed to load reviews:', reviewsResponse.message);
+            reviewsList.innerHTML = '<p>Không thể tải đánh giá.</p>';
+        }
+        if (statsResponse.success && statsResponse.stats) {
+            updateReviewSummary(statsResponse.stats);
         }
     } catch (error) {
         console.error('Error loading reviews:', error);
@@ -503,28 +498,25 @@ async function loadRelatedProducts(productId) {
 }
 
 // Load related discussions
-async function loadRelatedDiscussions(productId) {
+async function loadRelatedDiscussions(productName) {
     try {
-        const response = await fetchApi('/src/api/posts.php?action=search', {
-            method: 'POST',
-            body: {
-                query: productId, // This is a simplification - in a real app, you'd have a specific API for product-related posts
-                limit: 5
-            }
+        if (!productName) return;
+        // Use GET and query param for backend compatibility, search by product name
+        const query = new URLSearchParams({
+            query: productName,
+            limit: 5
+        }).toString();
+        const response = await fetchApi(`/src/api/posts.php?action=search&${query}`, {
+            method: 'GET'
         });
-        
-        if (response.success) {
-            const discussionList = document.getElementById('related-discussion-list');
-            if (!discussionList) return;
-            
-            // Clear any existing content
-            discussionList.innerHTML = '';
-            
+        const discussionList = document.getElementById('related-discussion-list');
+        if (!discussionList) return;
+        discussionList.innerHTML = '';
+        if (response.success && Array.isArray(response.posts)) {
             if (response.posts.length === 0) {
                 discussionList.innerHTML = '<p>Chưa có thảo luận nào liên quan đến sản phẩm này.</p>';
                 return;
             }
-            
             response.posts.forEach(post => {
                 const discussionItem = document.createElement('div');
                 discussionItem.className = 'discussion-item';
@@ -544,7 +536,7 @@ async function loadRelatedDiscussions(productId) {
                 discussionList.appendChild(discussionItem);
             });
         } else {
-            console.error('Failed to load related discussions:', response.message);
+            discussionList.innerHTML = '<p>Không thể tải thảo luận liên quan.</p>';
         }
     } catch (error) {
         console.error('Error loading related discussions:', error);
@@ -691,7 +683,7 @@ async function incrementViewCount(productId) {
     try {
         await fetchApi('/src/api/products.php?action=view', {
             method: 'POST',
-            body: { id: productId }
+            body: { product_id: productId }
         });
     } catch (error) {
         console.error('Error incrementing view count:', error);

@@ -37,49 +37,6 @@ $product = new Product($conn);
 // Get the request data
 $requestData = getRequestData();
 
-// Process based on the requested action
-switch ($action) {
-    case 'get_by_id':
-        handleGetProductById($product, $requestData);
-        break;
-        
-    case 'get_by_category':
-        handleGetProductsByCategory($product, $requestData);
-        break;
-        
-    case 'search':
-        handleSearchProducts($product, $requestData);
-        break;
-        
-    case 'get_featured':
-        handleGetFeaturedProducts($product, $requestData);
-        break;
-        
-    case 'get_related':
-        handleGetRelatedProducts($product, $requestData);
-        break;
-        
-    case 'create':
-        handleCreateProduct($product, $requestData);
-        break;
-        
-    case 'update':
-        handleUpdateProduct($product, $requestData);
-        break;
-        
-    case 'get_categories':
-        handleGetCategories($product);
-        break;
-        
-    case 'get_category':
-        handleGetCategoryById($product, $requestData);
-        break;
-        
-    default:
-        sendResponse(false, 'Invalid action specified', null, 400);
-        break;
-}
-
 /**
  * Handle getting a product by ID
  */
@@ -346,4 +303,72 @@ function handleGetCategoryById($product, $requestData) {
     } else {
         sendResponse(false, 'Category not found', null, 404);
     }
+}
+
+/**
+ * Handle incrementing product view count
+ */
+function handleIncrementProductView($product, $requestData) {
+    // Accept product_id from either POST body or GET
+    $productId = null;
+    if (isset($requestData['product_id']) && !empty($requestData['product_id'])) {
+        $productId = (int)$requestData['product_id'];
+    } elseif (isset($_GET['product_id']) && !empty($_GET['product_id'])) {
+        $productId = (int)$_GET['product_id'];
+    }
+    if (empty($productId)) {
+        sendResponse(false, 'Product ID is required (in POST body or URL parameter)', null, 400);
+        return;
+    }
+    try {
+        $db = new Database();
+        $conn = $db->getConnection();
+        $stmt = $conn->prepare("UPDATE products SET view_count = IFNULL(view_count,0) + 1 WHERE id = :id");
+        $stmt->bindParam(':id', $productId, PDO::PARAM_INT);
+        $stmt->execute();
+        sendResponse(true, 'Product view count incremented');
+    } catch (PDOException $e) {
+        error_log('Error incrementing product view count: ' . $e->getMessage());
+        sendResponse(false, 'Error incrementing product view count: ' . $e->getMessage(), null, 500);
+    }
+}
+
+// Get action from query parameters
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+
+// Process based on the requested action
+switch ($action) {
+    case 'view':
+        handleIncrementProductView($product, $requestData);
+        break;
+    case 'get_by_id':
+        handleGetProductById($product, $requestData);
+        break;
+    case 'get_by_category':
+        handleGetProductsByCategory($product, $requestData);
+        break;
+    case 'search':
+        handleSearchProducts($product, $requestData);
+        break;
+    case 'get_featured':
+        handleGetFeaturedProducts($product, $requestData);
+        break;
+    case 'get_related':
+        handleGetRelatedProducts($product, $requestData);
+        break;
+    case 'create':
+        handleCreateProduct($product, $requestData);
+        break;
+    case 'update':
+        handleUpdateProduct($product, $requestData);
+        break;
+    case 'get_categories':
+        handleGetCategories($product);
+        break;
+    case 'get_category':
+        handleGetCategoryById($product, $requestData);
+        break;
+    default:
+        sendResponse(false, 'Invalid action specified', null, 400);
+        break;
 }
