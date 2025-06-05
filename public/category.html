@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục - YouTalk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/category.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- <script defer src="js/main.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/avatar.js"></script>
+    <script defer src="js/category.js"></script> -->
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                 <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li class="dropdown">
+                        <a href="category.html">Danh mục</a>
+                        <ul class="dropdown-menu" id="categories-dropdown">
+                            <!-- category will be loaded dynamically -->
+                            <li><a href="category.html">Tất cả danh mục</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="category-hero" class="hero-section">
+            <div class="container">
+                <h1 id="category-title">Đang tải...</h1>
+                <p id="category-description">Đang tải thông tin danh mục...</p>
+            </div>
+        </section>
+
+        <section id="category-content">
+            <div class="container">
+                <!-- Category tabs/filters -->
+                <div class="category-tabs" id="category-tabs">
+                    <a href="#" class="tab active" data-subcategory="all">Tất cả</a>
+                    <!-- Subcategories will be loaded dynamically -->
+                </div>
+
+                <!-- Sorting and display options -->
+                <div class="category-toolbar">
+                    <div class="sort-options">
+                        <label for="sort-select">Sắp xếp theo:</label>
+                        <select id="sort-select">
+                            <option value="newest">Mới nhất</option>
+                            <option value="popular">Phổ biến nhất</option>
+                            <option value="rating_high">Đánh giá cao nhất</option>
+                            <option value="rating_low">Đánh giá thấp nhất</option>
+                            <option value="price_high">Giá cao đến thấp</option>
+                            <option value="price_low">Giá thấp đến cao</option>
+                        </select>
+                    </div>
+                    <div class="display-options">
+                        <label>Hiển thị:</label>
+                        <button class="display-btn grid-btn active" data-display="grid"><i class="fas fa-th"></i></button>
+                        <button class="display-btn list-btn" data-display="list"><i class="fas fa-list"></i></button>
+                    </div>
+                </div>
+
+                <!-- Products grid -->
+                <div id="products-grid" class="products-grid">
+                    <!-- Products will be loaded dynamically -->
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Đang tải sản phẩm...</p>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be generated dynamically -->
+                </div>
+
+                <!-- Related categories -->
+                <div class="related-categories" id="related-categories">
+                    <h2>Danh mục liên quan</h2>
+                    <div class="related-categories-grid">
+                        <!-- Related categories will be loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <!-- Social media links -->
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,461 @@
+/* Header Styles */
+#main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-background);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    height: var(--header-height);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.logo {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #4267B2; /* Changed to #4267B2 as requested */
+}
+
+.main-nav ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.main-nav li {
+    margin-left: 25px;
+    position: relative; /* For dropdown */
+}
+
+.main-nav a {
+    color: var(--color-text-light);
+    font-weight: bold;
+    padding: 5px 0;
+    transition: color 0.3s ease;
+    text-decoration: none;
+    display: block;
+}
+
+.main-nav a:hover,
+.main-nav li.active a /* Add active class via JS */
+{
+    color: var(--color-primary);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--color-background);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 10px 0;
+    min-width: 180px;
+    z-index: 1001;
+    margin-top: 10px;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li {
+    margin: 0;
+    padding: 0;
+    display: block;
+    width: 100%;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 8px 15px;
+    color: var(--color-text-light);
+    white-space: nowrap;
+    font-weight: normal;
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+}
+
+/* Add a small arrow indicator for dropdown */
+.dropdown > a:after {
+    content: "▼";
+    font-size: 0.7em;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+}
+
+.user-actions .auth-link {
+    margin-right: 15px;
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--color-text-light);
+}
+
+.cta-button-header {
+    background-color: #E6A70D; /* Yellow background */
+    color: #FFFFFF; /* White text */
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-decoration: none;
+    border: none; /* Ensure no default border */
+}
+
+.cta-button-header:hover {
+    background-color: #D09E23; /* Darker yellow on hover */
+    color: #FFFFFF;
+}
+
+/* User menu styles */
+.user-menu {
+    position: relative;
+    margin-right: 15px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+}
+
+.username {
+    font-weight: bold;
+    color: var(--color-text-light);
+}
+
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--color-background);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 10px 0;
+    min-width: 180px;
+    z-index: 1001;
+    margin-top: 10px;
+    list-style: none;
+}
+
+.user-dropdown.active {
+    display: block;
+}
+
+.user-dropdown li {
+    margin: 0;
+    padding: 0;
+}
+
+.user-dropdown a {
+    display: block;
+    padding: 8px 15px;
+    color: var(--color-text-light);
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.user-dropdown a:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+}
+
+.hamburger {
+    display: none; /* Hidden by default */
+    font-size: 1.5em;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Footer Styles */
+#main-footer {
+    background-color: var(--color-primary);
+    color: #f0f0f0; /* Lighter text on dark background */
+    padding: 40px 0 20px 0;
+    margin-top: 50px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.footer-column h3 {
+    color: var(--color-accent2);
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.footer-column p,
+.footer-column li {
+    margin-bottom: 10px;
+    font-size: 0.95em;
+    color: #FFFFFF; /* Slightly dimmer text */
+}
+
+.footer-column.navigation a,
+.footer-column.legal a {
+    color: #FFFFFF; /* Changed color as requested */
+    text-decoration: none;
+}
+
+.footer-column.navigation a:hover,
+.footer-column.legal a:hover {
+    color: var(--color-accent2); /* Keep hover effect */
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.social-links a {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--color-accent2);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    flex-wrap: wrap;
+}
+
+.footer-extras {
+    display: flex;
+    align-items: center;
+}
+
+.app-links,
+.language-switcher {
+    margin-left: 20px;
+}
+
+.language-switcher span {
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.language-switcher span:hover {
+    color: var(--color-primary);
+}
+
+/* Responsive Header/Footer */
+@media (max-width: 992px) {
+    .main-nav {
+        /* Adjust spacing or hide some items if needed */
+    }
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        display: none; /* Hide main nav */
+        position: absolute;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        background-color: var(--color-background);
+        flex-direction: column;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .main-nav.active {
+        display: flex; /* Show when hamburger clicked */
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .main-nav li {
+        margin: 0;
+        width: 100%;
+        text-align: center;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .main-nav li:last-child {
+        border-bottom: none;
+    }
+
+    .main-nav a {
+        display: block;
+        padding: 15px;
+    }
+
+    .dropdown:hover .dropdown-menu {
+        display: none; /* Disable hover dropdown on mobile */
+    }
+    .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        border-top: 1px solid var(--color-border);
+        display: none; /* Hidden by default */
+        width: 100%;
+        padding: 0;
+        margin-top: 0;
+    }
+    .dropdown.open .dropdown-menu { /* Add 'open' class via JS */
+        display: block;
+    }
+    .dropdown-menu a {
+        padding: 10px 15px;
+        background-color: #f9f9f9;
+    }
+
+    .hamburger {
+        display: block; /* Show hamburger */
+    }
+
+    .user-actions .cta-button-header {
+        display: none; /* Optionally hide button on small screens */
+    }
+    
+    .user-menu {
+        margin-right: 0;
+    }
+    
+    .user-dropdown {
+        right: 0;
+        left: auto;
+        width: 200px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr; /* Stack columns */
+        text-align: center;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-extras {
+        margin-top: 15px;
+    }
+
+    .app-links,
+    .language-switcher {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+
+/* === Added/Modified Styles for User Profile Header === */
+
+.user-profile-header {
+    display: flex;
+    align-items: center;
+    margin-right: 15px; /* Add some space before the 'Đăng bài ngay' button */
+}
+
+.user-avatar-link {
+    display: block; /* Ensure the link doesn't add extra space */
+    margin-right: 10px; /* Space between avatar and name */
+}
+
+.user-avatar-header {
+    width: 36px; /* Slightly larger avatar */
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block; /* Remove potential bottom space */
+    border: 1px solid var(--color-border); /* Optional: add a subtle border */
+}
+
+.user-avatar-fallback {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em; /* Adjust initial size */
+    font-weight: bold;
+    color: #ffffff; /* White text for initial */
+    text-transform: uppercase;
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Subtle border */
+}
+
+.user-info-header {
+    display: flex;
+    flex-direction: column; /* Stack name and logout button */
+    align-items: flex-start; /* Align items to the left */
+    line-height: 1.2; /* Adjust line height for closer spacing */
+}
+
+.username-header {
+    font-weight: bold;
+    color: var(--color-text-dark); /* Darker text for name */
+    text-decoration: none;
+    font-size: 0.95em;
+    margin-bottom: 2px; /* Small space between name and logout */
+}
+
+.username-header:hover {
+    color: var(--color-primary);
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.85em;
+    text-align: left;
+}
+
+.logout-button:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+/* Adjustments for mobile */
+@media (max-width: 768px) {
+    .user-profile-header {
+        margin-right: 10px; /* Reduce margin on mobile */
+    }
+    /* Optional: Hide logout button text and show icon? */
+}
+
+/* === End Added/Modified Styles === */
+

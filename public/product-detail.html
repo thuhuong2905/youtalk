@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Sản phẩm/Dịch vụ - YouTalk</title> <!-- Title should be dynamic -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/product-detail.css">
+    <script defer src="js/main.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/avatar.js"></script>
+    <script defer src="js/product-detail.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <!-- Header content (same as index.html, ideally loaded dynamically/template) -->
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                 <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li class="dropdown">
+                        <a href="#">Danh mục</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="category.html?id=1">Công nghệ</a></li>
+                            <li><a href="category.html?id=2">Thời trang</a></li>
+                            <li><a href="category.html?id=3">Du lịch</a></li>
+                            <li><a href="category.html?id=4">Ẩm thực</a></li>
+                            <li><a href="category.html?id=5">Giáo dục</a></li>
+                            <li><a href="category.html?id=6">Sức khỏe</a></li>
+                            <li><a href="category.html?id=7">Giải trí</a></li>
+                            <li><a href="category.html?id=8">Nội thất</a></li>
+                            <li><a href="category.html?id=9">Làm đẹp</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="product-detail-content">
+            <div class="container">
+                <!-- Breadcrumbs -->
+                <nav aria-label="breadcrumb" class="breadcrumbs">
+                    <ol>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="category.html?id=1" id="breadcrumb-category">Danh mục</a></li> <!-- Dynamic -->
+                        <li aria-current="page" id="breadcrumb-product-name">Tên Sản phẩm</li> <!-- Dynamic -->
+                    </ol>
+                </nav>
+
+                <div class="product-main-info">
+                    <div class="product-gallery">
+                        <!-- Image gallery/video placeholder -->
+                        <img src="#" alt="Product Image" id="main-product-image">
+                        <div class="thumbnail-list">
+                            <!-- Thumbnails will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="product-summary">
+                        <h1 id="product-name">Tên Sản phẩm/Dịch vụ</h1> <!-- Dynamic -->
+                        <div class="product-meta">
+                            <span id="product-brand">Thương hiệu/Nhà cung cấp</span> <!-- Dynamic -->
+                            <div class="rating-summary">
+                                <span class="stars" id="product-avg-rating">★★★★☆</span> <!-- Dynamic -->
+                                <span id="product-review-count">(0 đánh giá)</span> <!-- Dynamic -->
+                            </div>
+                        </div>
+                        <div id="product-price" class="price">Giá: Liên hệ</div> <!-- Dynamic -->
+                        <div id="product-tags" class="tags">
+                            <!-- Tags like "Chất lượng cao" loaded here -->
+                        </div>
+                        <div class="product-actions">
+                            <button id="share-btn" class="action-btn">Chia sẻ</button>
+                            <button id="contact-supplier-btn" class="action-btn">Liên hệ nhà cung cấp</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-details-tabs">
+                    <div class="tab-navigation">
+                        <button class="tab-link active" data-tab="description">Mô tả chi tiết</button>
+                        <button class="tab-link" data-tab="specs">Thông số kỹ thuật</button> <!-- Hide if not applicable -->
+                        <button class="tab-link" data-tab="reviews">Đánh giá (<span id="tab-review-count">0</span>)</button>
+                        <button class="tab-link" data-tab="discussions">Thảo luận liên quan</button>
+                    </div>
+
+                    <div id="tab-description" class="tab-content active">
+                        <h2>Mô tả</h2>
+                        <p id="product-description-content">Nội dung mô tả chi tiết sản phẩm/dịch vụ...</p> <!-- Dynamic -->
+                    </div>
+
+                    <div id="tab-specs" class="tab-content">
+                        <h2>Thông số kỹ thuật / Chi tiết dịch vụ</h2>
+                        <ul id="product-specs-list">
+                            <!-- Specs/details loaded here -->
+                        </ul>
+                    </div>
+
+                    <div id="tab-reviews" class="tab-content">
+                        <h2>Đánh giá từ cộng đồng</h2>
+                        <div class="reviews-summary">
+                            <!-- Overall rating summary -->
+                        </div>
+                        <div class="review-actions">
+                            <button id="write-review-btn" class="cta-button">Viết đánh giá của bạn</button>
+                            <select id="sort-reviews">
+                                <option value="newest">Mới nhất</option>
+                                <option value="helpful">Hữu ích nhất</option>
+                                <option value="rating_high">Đánh giá cao nhất</option>
+                                <option value="rating_low">Đánh giá thấp nhất</option>
+                            </select>
+                        </div>
+                        <div id="review-form-container" style="display: none;">
+                            <h3>Viết đánh giá</h3>
+                            <form id="review-form">
+                                <div class="form-group rating-input">
+                                    <label>Đánh giá của bạn:</label>
+                                    <div class="stars">
+                                        <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+                                    </div>
+                                    <input type="hidden" name="rating" id="rating-value" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="review-comment">Nhận xét:</label>
+                                    <textarea id="review-comment" name="comment" rows="4" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="review-media">Thêm ảnh/video:</label>
+                                    <input type="file" id="review-media" name="media[]" multiple accept="image/*,video/*">
+                                </div>
+                                <button type="submit" class="cta-button">Gửi đánh giá</button>
+                            </form>
+                        </div>
+                        <div id="reviews-list">
+                            <!-- Reviews will be loaded here -->
+                            <p>Chưa có đánh giá nào.</p>
+                        </div>
+                        <div id="pagination-reviews">
+                            <!-- Pagination for reviews -->
+                        </div>
+                    </div>
+
+                    <div id="tab-discussions" class="tab-content">
+                        <h2>Thảo luận liên quan</h2>
+                        <div id="related-discussion-list">
+                            <!-- Related discussions loaded here -->
+                            <p>Chưa có thảo luận nào liên quan.</p>
+                        </div>
+                        <a href="post-create.html" class="cta-button">Bắt đầu thảo luận mới</a>
+                    </div>
+                </div>
+
+                <section id="related-products">
+                    <h2>Sản phẩm/Dịch vụ tương tự</h2>
+                    <div class="product-list" id="related-product-list">
+                        <!-- Related product cards loaded here -->
+                    </div>
+                </section>
+
+            </div>
+        </section>
+    </main>
+
+    <footer id="main-footer">
+        <!-- Footer content (same as index.html, ideally loaded dynamically/template) -->
+         <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <!-- Social media links -->
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="app-links">
+                    <!-- App store links -->
+                </div>
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

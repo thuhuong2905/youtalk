@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diễn đàn - YouTalk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/forum.css">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script defer src="js/main.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/avatar.js"></script>
+    <script defer src="js/forum.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li class="dropdown">
+                        <a href="#">Danh mục</a>
+                        <ul class="dropdown-menu" id="header-categories">
+                            <!-- Categories will be loaded here by JS -->
+                            <li><a href="category.html?id=1">Công nghệ</a></li>
+                            <li><a href="category.html?id=2">Thời trang</a></li>
+                            <li><a href="category.html?id=3">Du lịch</a></li>
+                            <li><a href="category.html?id=4">Ẩm thực</a></li>
+                            <li><a href="category.html?id=5">Giáo dục</a></li>
+                            <li><a href="category.html?id=6">Sức khỏe</a></li>
+                            <li><a href="category.html?id=7">Giải trí</a></li>
+                            <li><a href="category.html?id=8">Nội thất</a></li>
+                            <li><a href="category.html?id=9">Làm đẹp</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <!-- User actions will be updated by JS -->
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="forum-hero">
+            <div class="container">
+                <h1>Diễn đàn YouTalk</h1>
+                <p>Tham gia thảo luận, đặt câu hỏi và chia sẻ kinh nghiệm với cộng đồng</p>
+            </div>
+        </section>
+
+        <section id="forum-filters">
+            <div class="container">
+                <div class="category-tabs" id="category-tabs">
+                    <a href="#" class="category-tab active" data-category="all">Tất cả</a>
+                    <a href="#" class="category-tab" data-category="1">Công nghệ</a>
+                    <a href="#" class="category-tab" data-category="2">Thời trang</a>
+                    <a href="#" class="category-tab" data-category="3">Du lịch</a>
+                    <a href="#" class="category-tab" data-category="4">Ẩm thực</a>
+                    <a href="#" class="category-tab" data-category="5">Giáo dục</a>
+                    <a href="#" class="category-tab" data-category="6">Sức khỏe</a>
+                </div>
+                
+                <div class="forum-toolbar">
+                    <div class="search-container">
+                        <input type="text" id="topic-search" placeholder="Tìm kiếm chủ đề...">
+                        <button id="search-button" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
+                    </div>
+                    
+                    <div class="sort-container">
+                        <span>Sắp xếp:</span>
+                        <select id="sort-select">
+                            <option value="newest">Mới nhất</option>
+                            <option value="popular">Phổ biến nhất</option>
+                            <option value="comments">Nhiều bình luận nhất</option>
+                            <option value="views">Nhiều lượt xem nhất</option>
+                        </select>
+                    </div>
+                    
+                    <a href="post-create.html?type=topic" class="create-topic-btn">Tạo chủ đề mới</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="forum-content">
+            <div class="container">
+                <div class="forum-layout">
+                    <div class="forum-main">
+                        <h2 class="section-title">Chủ đề thảo luận</h2>
+                        
+                        <div class="topics-list" id="topics-list">
+                            <!-- Topics will be loaded here by JS -->
+                            <!-- Example topic item -->
+                            <div class="topic-card">
+                                <div class="topic-content">
+                                    <h3><a href="topic.html?id=1">Có nên mua iPhone 16 không?</a></h3>
+                                    <div class="topic-meta">
+                                        <span class="topic-category">Công nghệ</span>
+                                        <span class="topic-views"><i class="fas fa-eye"></i> 1.2k</span>
+                                        <span class="topic-comments"><i class="fas fa-comment"></i> 45</span>
+                                        <span class="topic-date">2 ngày trước</span>
+                                    </div>
+                                    <p class="topic-excerpt">Tôi đang cân nhắc nâng cấp từ iPhone 14 lên iPhone 16. Theo các bạn thì có đáng không? Tôi chủ yếu sử dụng điện thoại để chụp ảnh, lướt web và làm việc cơ bản...</p>
+                                </div>
+                                <div class="topic-footer">
+                                    <div class="topic-author">
+                                        <div class="avatar">A</div>
+                                        <div class="author-name">Nguyễn Văn A</div>
+                                    </div>
+                                    <a href="topic.html?id=1" class="topic-link">Xem chi tiết</a>
+                                </div>
+                            </div>
+                            
+                            <div class="topic-card">
+                                <div class="topic-content">
+                                    <h3><a href="topic.html?id=2">Kinh nghiệm du lịch Đà Nẵng tự túc</a></h3>
+                                    <div class="topic-meta">
+                                        <span class="topic-category">Du lịch</span>
+                                        <span class="topic-views"><i class="fas fa-eye"></i> 876</span>
+                                        <span class="topic-comments"><i class="fas fa-comment"></i> 32</span>
+                                        <span class="topic-date">1 tuần trước</span>
+                                    </div>
+                                    <p class="topic-excerpt">Vừa rồi mình có chuyến đi Đà Nẵng 4 ngày 3 đêm với chi phí khoảng 5 triệu/người. Trong bài viết này mình sẽ chia sẻ lịch trình, chỗ ở, địa điểm ăn uống và các mẹo tiết kiệm chi phí...</p>
+                                </div>
+                                <div class="topic-footer">
+                                    <div class="topic-author">
+                                        <div class="avatar">B</div>
+                                        <div class="author-name">Trần Thị B</div>
+                                    </div>
+                                    <a href="topic.html?id=2" class="topic-link">Xem chi tiết</a>
+                                </div>
+                            </div>
+                            
+                            <div class="topic-card">
+                                <div class="topic-content">
+                                    <h3><a href="topic.html?id=3">Top 5 laptop gaming tốt nhất 2025</a></h3>
+                                    <div class="topic-meta">
+                                        <span class="topic-category">Công nghệ</span>
+                                        <span class="topic-views"><i class="fas fa-eye"></i> 1.5k</span>
+                                        <span class="topic-comments"><i class="fas fa-comment"></i> 67</span>
+                                        <span class="topic-date">2 tuần trước</span>
+                                    </div>
+                                    <p class="topic-excerpt">Sau một thời gian dài nghiên cứu và trải nghiệm, mình xin chia sẻ top 5 laptop gaming đáng mua nhất trong năm 2025, phân theo các phân khúc giá từ 20 đến 50 triệu đồng...</p>
+                                </div>
+                                <div class="topic-footer">
+                                    <div class="topic-author">
+                                        <div class="avatar">C</div>
+                                        <div class="author-name">Lê Văn C</div>
+                                    </div>
+                                    <a href="topic.html?id=3" class="topic-link">Xem chi tiết</a>
+                                </div>
+                            </div>
+                            
+                            <div class="topic-card">
+                                <div class="topic-content">
+                                    <h3><a href="topic.html?id=4">Review nhà hàng Phố Đông - Ẩm thực Á Đông fusion</a></h3>
+                                    <div class="topic-meta">
+                                        <span class="topic-category">Ẩm thực</span>
+                                        <span class="topic-views"><i class="fas fa-eye"></i> 645</span>
+                                        <span class="topic-comments"><i class="fas fa-comment"></i> 28</span>
+                                        <span class="topic-date">3 tuần trước</span>
+                                    </div>
+                                    <p class="topic-excerpt">Nhà hàng Phố Đông là một trong những địa điểm ẩm thực nổi tiếng tại Hà Nội với phong cách Á Đông fusion độc đáo. Mình đã có dịp ghé thăm và trải nghiệm, xin chia sẻ cảm nhận về không gian, dịch vụ và đặc biệt là các món ăn tại đây...</p>
+                                </div>
+                                <div class="topic-footer">
+                                    <div class="topic-author">
+                                        <div class="avatar">D</div>
+                                        <div class="author-name">Phạm Thị D</div>
+                                    </div>
+                                    <a href="topic.html?id=4" class="topic-link">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pagination" id="pagination">
+                            <!-- Pagination will be loaded here by JS -->
+                            <a href="#" class="active">1</a>
+                            <a href="#">2</a>
+                            <a href="#">3</a>
+                            <a href="#">4</a>
+                            <a href="#">5</a>
+                            <a href="#" class="next">Tiếp &raquo;</a>
+                        </div>
+                    </div>
+                    
+                    <div class="forum-sidebar">
+                        <div class="hot-topics-widget">
+                            <h3>Chủ đề nổi bật</h3>
+                            <ul class="hot-topics-list">
+                                <li class="hot-topic tech">
+                                    <a href="topic.html?id=1">#1 Có nên mua iPhone 16 không?</a>
+                                </li>
+                                <li class="hot-topic travel">
+                                    <a href="topic.html?id=2">#2 Kinh nghiệm du lịch Đà Nẵng tự túc</a>
+                                </li>
+                                <li class="hot-topic tech">
+                                    <a href="topic.html?id=3">#3 Top 5 laptop gaming tốt nhất 2025</a>
+                                </li>
+                                <li class="hot-topic education">
+                                    <a href="topic.html?id=5">#4 Chia sẻ kinh nghiệm học tiếng Anh hiệu quả</a>
+                                </li>
+                                <li class="hot-topic auto">
+                                    <a href="topic.html?id=6">#5 Tư vấn chọn mua xe ô tô lần đầu</a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="active-users-widget">
+                            <h3>Thành viên tích cực</h3>
+                            <ul class="active-users-list">
+                                <li class="active-user">
+                                    <div class="user-avatar">A</div>
+                                    <div class="user-info">
+                                        <div class="user-name">Nguyễn Văn A</div>
+                                        <div class="user-stats">124 bài đăng</div>
+                                    </div>
+                                </li>
+                                <li class="active-user">
+                                    <div class="user-avatar">B</div>
+                                    <div class="user-info">
+                                        <div class="user-name">Trần Thị B</div>
+                                        <div class="user-stats">98 bài đăng</div>
+                                    </div>
+                                </li>
+                                <li class="active-user">
+                                    <div class="user-avatar">C</div>
+                                    <div class="user-info">
+                                        <div class="user-name">Lê Văn C</div>
+                                        <div class="user-stats">87 bài đăng</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <!-- Social media links -->
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="app-links">
+                    <!-- App store links -->
+                </div>
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

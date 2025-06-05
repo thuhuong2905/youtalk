@@ -1,0 +1,645 @@
+/* Home Page Styles for YouTalk */
+
+/* Hero Section */
+#hero-section {
+    background-color: var(--color-accent3);
+    padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+#hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #F9E6D9; /* Soft beige background */
+    z-index: -1;
+}
+
+.hero-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-content {
+    width: 100%;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--color-primary);
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: var(--color-text);
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.primary-button {
+    background-color: var(--color-primary);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.primary-button:hover {
+    background-color: var(--color-secondary);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button {
+    background-color: transparent;
+    color: var(--color-primary);
+    padding: 12px 28px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    border: 1px solid var(--color-primary);
+    transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Featured Categories Section */
+#featured-categories {
+    padding: 60px 0;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Categories container with navigation */
+.categories-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.categories-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.categories-grid {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.3s ease;
+    width: 100%;
+}
+
+.category-card {
+    background-color: #f8f8f8;
+    border-radius: var(--border-radius);
+    padding: 25px 15px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 160px;
+    flex: 1;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.category-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.category-icon i {
+    font-size: 26px; /* Slightly larger icon */
+    color: var(--color-primary); /* Keep primary color, maybe make it darker if needed */
+    font-weight: 600; /* Make icon bolder if font supports it */
+}
+
+.category-card h3 {
+    color: var(--color-text-dark); /* Darker text color */
+    font-size: 1.1rem; /* Slightly larger font */
+    font-weight: 600; /* Bolder font */
+    margin-bottom: 5px;
+}
+
+.category-card p {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
+/* Category navigation buttons */
+.category-nav-button {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--box-shadow);
+    z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.category-nav-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.category-nav-button:hover {
+    background-color: var(--color-secondary);
+    transform: scale(1.1);
+}
+
+.category-nav-button.disabled {
+    background-color: var(--color-border);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Color variations for categories */
+.category-card.tech {
+    background-color: rgba(66, 103, 178, 0.1); /* Primary color with opacity */
+}
+
+.category-card.fashion {
+    background-color: rgba(157, 140, 176, 0.1); /* Secondary color with opacity */
+}
+
+.category-card.travel {
+    background-color: rgba(127, 179, 213, 0.1); /* Accent3 color with opacity */
+}
+
+.category-card.food {
+    background-color: rgba(249, 219, 224, 0.2); /* Accent1 color with opacity */
+}
+
+.category-card.education {
+    background-color: rgba(255, 209, 217, 0.2); /* Accent2 color with opacity */
+}
+
+.category-card.health {
+    background-color: rgba(127, 179, 213, 0.1); /* Accent3 color with opacity */
+}
+
+/* Featured Reviews Section */
+#featured-reviews {
+    padding: 60px 0;
+    background-color: var(--color-background-alt);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.view-all {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.view-all:hover {
+    color: var(--color-secondary);
+    transform: translateX(5px);
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.review-card {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    /* padding: 25px; */ /* Remove overall padding */
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
+    display: flex; /* Use flexbox for structure */
+    flex-direction: column; /* Stack top and bottom */
+}
+
+.review-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the top part of the review card */
+.review-card-top {
+    background-color: #F5EFE6; /* Light beige background like the image */
+    padding: 40px 25px; /* More padding for the top section */
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    text-align: center;
+    min-height: 150px; /* Ensure some height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-product-name-prominent {
+    font-size: 2rem; /* Large font size for product name */
+    font-weight: 700;
+    color: #003366; /* Dark blue color like the image */
+    margin: 0;
+}
+
+/* Style for the bottom part of the review card */
+.review-card-bottom {
+    padding: 25px; /* Padding for the content area */
+    background-color: #fff;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+.review-header {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* Style for the smaller product name in the bottom section */
+.review-product-name-detail {
+    font-size: 1.1rem; /* Smaller font size */
+    font-weight: 600;
+    color: var(--color-primary); /* Use primary color */
+    margin-bottom: 0;
+}
+
+.rating .stars {
+    color: #ffc107;
+    font-size: 1.1rem;
+}
+
+.review-content {
+    margin-bottom: 20px;
+}
+
+.review-content p {
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+.review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.reviewer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    background-color: var(--color-primary);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.review-date {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
+.review-link {
+    display: block;
+    text-align: right;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.review-link:hover {
+    color: var(--color-secondary);
+    transform: translateX(5px);
+}
+
+/* Hot Topics Section */
+#hot-topics {
+    padding: 60px 0;
+}
+
+.topics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.topic-card {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
+}
+
+.topic-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.topic-content h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.topic-content h3 a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.topic-content h3 a:hover {
+    color: var(--color-secondary);
+}
+
+.topic-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.topic-category {
+    background-color: var(--color-accent1);
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    color: var(--color-text);
+}
+
+.topic-views, .topic-comments, .topic-date {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.topic-excerpt {
+    color: var(--color-text);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.topic-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topic-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topic-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.topic-link:hover {
+    color: var(--color-secondary);
+    transform: translateX(5px);
+}
+
+/* CTA Section */
+#cta-section {
+    padding: 60px 0;
+    background-color: var(--color-accent3);
+    color: var(--color-primary);
+    text-align: center;
+}
+
+#cta-section h2 {
+    font-size: 2rem;
+    color: var(--color-primary);
+    margin-bottom: 15px;
+}
+
+#cta-section p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Style for "Đăng ký miễn phí" button */
+#cta-section .primary-button {
+    background-color: var(--color-primary); /* Yellow background */
+    color: #FFFFFF; /* White text */
+    padding: 12px 28px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    border: none; /* Ensure no default border */
+}
+
+#cta-section .primary-button:hover {
+    background-color: var(--color-secondary); /* Darker yellow on hover */
+    color: #FFFFFF;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for "Viết đánh giá" button */
+#cta-section .secondary-button {
+    background-color: transparent;
+    color: var(--color-primary); /* White text */
+    padding: 12px 28px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    border: 1px solid #03417F; /* White border */
+    transition: all 0.3s ease;
+}
+
+#cta-section .secondary-button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Slight white background on hover */
+    color: #FFFFFF;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .reviews-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.2rem;
+    }
+    
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero-buttons, .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .category-card {
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 576px) {
+    .topic-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .topic-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .category-card {
+        min-width: 120px;
+    }
+}
+
+
+
+/* New Category Color Palette Styles */
+.category-card.category-color-0 {
+    background-color: #FEF3C7;
+}
+.category-card.category-color-0 h3,
+.category-card.category-color-0 .category-icon i {
+    color: #92400E;
+}
+
+.category-card.category-color-1 {
+    background-color: #DBEAFE;
+}
+.category-card.category-color-1 h3,
+.category-card.category-color-1 .category-icon i {
+    color: #1E40AF;
+}
+
+.category-card.category-color-2 {
+    background-color: #FCE7F3;
+}
+.category-card.category-color-2 h3,
+.category-card.category-color-2 .category-icon i {
+    color: #9D174D;
+}
+
+.category-card.category-color-3 {
+    background-color: #D1FAE5; /* Adjusted Green BG */
+}
+.category-card.category-color-3 h3,
+.category-card.category-color-3 .category-icon i {
+    color: #065F46;
+}
+
+.category-card.category-color-4 {
+    background-color: #EDE4D8;
+}
+.category-card.category-color-4 h3,
+.category-card.category-color-4 .category-icon i {
+    color: #5C4033;
+}
+
+.category-card.category-color-5 {
+    background-color: #F5ECE1;
+}
+.category-card.category-color-5 h3,
+.category-card.category-color-5 .category-icon i {
+    color: #8A4A3C;
+}
+
+/* Ensure icon background remains white */
+.category-card .category-icon {
+    background-color: #fff;
+}
+
+.avatar-container {
+    width: 40px;
+    height: 40px;
+}

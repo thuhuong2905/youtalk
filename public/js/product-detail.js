@@ -1,0 +1,710 @@
+// JavaScript for product detail page functionality
+// Handles loading product details, reviews, and related products
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('YouTalk Product Detail JS Loaded');
+    
+    // Get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    
+    if (productId) {
+        // Load product details
+        loadProductDetails(productId);
+        
+        // Load product reviews
+        loadProductReviews(productId);
+        
+        // Load related products
+        loadRelatedProducts(productId);
+        
+        // Load related discussions
+        loadRelatedDiscussions(productId);
+        
+        // Set up tab switching
+        setupTabs();
+        
+        // Set up review form
+        setupReviewForm(productId);
+        
+        // Increment view count
+        incrementViewCount(productId);
+    } else {
+        // No product ID provided, show error or redirect
+        document.getElementById('product-name').textContent = 'Sản phẩm không hợp lệ';
+        document.querySelector('.product-main-info').innerHTML = '<p>Vui lòng chọn một sản phẩm hợp lệ.</p>';
+    }
+});
+
+// Load product details
+async function loadProductDetails(productId) {
+    try {
+        const response = await fetchApi('/src/api/products.php?action=get_by_id', {
+            method: 'POST',
+            body: { id: productId }
+        });
+        
+        if (response.success) {
+            const product = response;
+            
+            // Update page title
+            document.title = `${product.name} - YouTalk`;
+            
+            // Update product name
+            document.getElementById('product-name').textContent = product.name;
+            document.getElementById('breadcrumb-product-name').textContent = product.name;
+            
+            // Update category in breadcrumb
+            if (product.category_id && product.category_name) {
+                const categoryLink = document.getElementById('breadcrumb-category');
+                categoryLink.textContent = product.category_name;
+                categoryLink.href = `category.html?id=${product.category_id}`;
+            }
+            
+            // Update brand/supplier
+            document.getElementById('product-brand').textContent = product.brand || 'Không có thông tin';
+            
+            // Update price
+            const priceDisplay = product.price 
+                ? `${product.price.toLocaleString('vi-VN')} đ` 
+                : 'Liên hệ để biết giá';
+            document.getElementById('product-price').textContent = priceDisplay;
+            
+            // Update rating
+            updateProductRating(product.avg_rating || 0, product.review_count || 0);
+            
+            // Update description
+            document.getElementById('product-description-content').innerHTML = product.description || 'Không có mô tả chi tiết.';
+            
+            // Update specs/details
+            updateProductSpecs(product.specs);
+            
+            // Update images
+            updateProductImages(product.images);
+            
+            // Update tags
+            updateProductTags(product.tags);
+            
+            // Set up action buttons
+            setupProductActions(product);
+        } else {
+            console.error('Failed to load product details:', response.message);
+            document.getElementById('product-name').textContent = 'Không tìm thấy sản phẩm';
+            document.querySelector('.product-main-info').innerHTML = '<p>Sản phẩm không tồn tại hoặc đã bị xóa.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading product details:', error);
+    }
+}
+
+// Update product rating display
+function updateProductRating(avgRating, reviewCount) {
+    const ratingElement = document.getElementById('product-avg-rating');
+    const countElement = document.getElementById('product-review-count');
+    const tabCountElement = document.getElementById('tab-review-count');
+    
+    if (ratingElement) {
+        // Round to nearest half star
+        const roundedRating = Math.round(avgRating * 2) / 2;
+        
+        // Create star display (e.g., ★★★★☆)
+        const fullStars = Math.floor(roundedRating);
+        const halfStar = roundedRating % 1 !== 0;
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        
+        let starsHtml = '★'.repeat(fullStars);
+        if (halfStar) starsHtml += '½';
+        starsHtml += '☆'.repeat(emptyStars);
+        
+        ratingElement.innerHTML = starsHtml;
+    }
+    
+    if (countElement) {
+        countElement.textContent = `(${reviewCount} đánh giá)`;
+    }
+    
+    if (tabCountElement) {
+        tabCountElement.textContent = reviewCount;
+    }
+}
+
+// Update product specs/details
+function updateProductSpecs(specs) {
+    const specsList = document.getElementById('product-specs-list');
+    if (!specsList) return;
+    
+    if (!specs || Object.keys(specs).length === 0) {
+        specsList.innerHTML = '<li>Không có thông số kỹ thuật.</li>';
+        return;
+    }
+    
+    specsList.innerHTML = '';
+    
+    // If specs is an array of objects with name/value pairs
+    if (Array.isArray(specs)) {
+        specs.forEach(spec => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${spec.name}:</strong> ${spec.value}`;
+            specsList.appendChild(li);
+        });
+    } 
+    // If specs is an object with key/value pairs
+    else {
+        for (const [key, value] of Object.entries(specs)) {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${key}:</strong> ${value}`;
+            specsList.appendChild(li);
+        }
+    }
+}
+
+// Update product images
+function updateProductImages(images) {
+    const mainImage = document.getElementById('main-product-image');
+    const thumbnailList = document.querySelector('.thumbnail-list');
+    
+    if (!mainImage || !thumbnailList) return;
+    
+    if (!images || images.length === 0) {
+        mainImage.src = 'images/products/default.png';
+        mainImage.alt = 'No image available';
+        return;
+    }
+    
+    // Set main image to first image
+    mainImage.src = images[0];
+    mainImage.alt = 'Product Image';
+    
+    // Create thumbnails
+    thumbnailList.innerHTML = '';
+    images.forEach((image, index) => {
+        const thumbnail = document.createElement('img');
+        thumbnail.src = image;
+        thumbnail.alt = `Thumbnail ${index + 1}`;
+        thumbnail.className = index === 0 ? 'active' : '';
+        
+        thumbnail.addEventListener('click', () => {
+            // Update main image
+            mainImage.src = image;
+            
+            // Update active thumbnail
+            thumbnailList.querySelectorAll('img').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            thumbnail.classList.add('active');
+        });
+        
+        thumbnailList.appendChild(thumbnail);
+    });
+}
+
+// Update product tags
+function updateProductTags(tags) {
+    const tagsContainer = document.getElementById('product-tags');
+    if (!tagsContainer) return;
+    
+    if (!tags || tags.length === 0) {
+        tagsContainer.style.display = 'none';
+        return;
+    }
+    
+    tagsContainer.innerHTML = '';
+    tagsContainer.style.display = 'block';
+    
+    tags.forEach(tag => {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'tag';
+        tagElement.textContent = tag;
+        tagsContainer.appendChild(tagElement);
+    });
+}
+
+// Set up product action buttons
+function setupProductActions(product) {    
+    // Share button
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            // Simple share implementation
+            if (navigator.share) {
+                navigator.share({
+                    title: product.name,
+                    text: `Xem sản phẩm ${product.name} trên YouTalk`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                prompt('Sao chép liên kết này để chia sẻ:', window.location.href);
+            }
+        });
+    }
+    
+    // Contact supplier button
+    const contactBtn = document.getElementById('contact-supplier-btn');
+    if (contactBtn) {
+        contactBtn.addEventListener('click', () => {
+            // This could open a contact form or redirect to a contact page
+            alert('Tính năng liên hệ nhà cung cấp đang được phát triển.');
+        });
+    }
+}
+
+// Load product reviews
+async function loadProductReviews(productId, sortBy = 'newest') {
+    try {
+        // Map sort option to API parameters
+        let sortParams = {};
+        switch (sortBy) {
+            case 'newest':
+                sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
+                break;
+            case 'helpful':
+                sortParams = { sort_by: 'helpful_count', sort_order: 'DESC' };
+                break;
+            case 'rating_high':
+                sortParams = { sort_by: 'rating', sort_order: 'DESC' };
+                break;
+            case 'rating_low':
+                sortParams = { sort_by: 'rating', sort_order: 'ASC' };
+                break;
+        }
+        
+        // Get reviews
+        const reviewsResponse = await fetchApi('/src/api/reviews.php?action=get_by_product', {
+            method: 'POST',
+            body: {
+                product_id: productId,
+                limit: 10,
+                offset: 0,
+                ...sortParams
+            }
+        });
+        
+        // Get review statistics
+        const statsResponse = await fetchApi('/src/api/reviews.php?action=get_stats', {
+            method: 'POST',
+            body: { product_id: productId }
+        });
+        
+        if (reviewsResponse.success) {
+            const reviewsList = document.getElementById('reviews-list');
+            if (!reviewsList) return;
+            
+            // Clear loading placeholder
+            reviewsList.innerHTML = '';
+            
+            if (reviewsResponse.reviews.length === 0) {
+                reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
+            } else {
+                reviewsResponse.reviews.forEach(review => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'review-item';
+                    
+                    // Format date
+                    const reviewDate = new Date(review.created_at);
+                    const formattedDate = reviewDate.toLocaleDateString('vi-VN');
+                    
+                    // Create star display
+                    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                    
+                    reviewItem.innerHTML = `
+                        <div class="review-header">
+                            <div class="author-info">
+                                <img src="${review.profile_picture || 'images/default-avatar.png'}" alt="${getDisplayName(review)}">
+                                <span>${getDisplayName(review)}</span>
+                            </div>
+                            <div class="rating">${stars}</div>
+                            <div class="date">${formattedDate}</div>
+                        </div>
+                        <div class="review-body">
+                            <p>${review.comment}</p>
+                        </div>
+                    `;
+                    
+                    // Add media if available
+                    if (review.media && review.media.length > 0) {
+                        const mediaContainer = document.createElement('div');
+                        mediaContainer.className = 'review-media';
+                        
+                        review.media.forEach(mediaUrl => {
+                            // Determine if it's an image or video based on extension
+                            const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaUrl);
+                            
+                            if (isVideo) {
+                                const video = document.createElement('video');
+                                video.controls = true;
+                                video.src = mediaUrl;
+                                mediaContainer.appendChild(video);
+                            } else {
+                                const img = document.createElement('img');
+                                img.src = mediaUrl;
+                                img.alt = 'Review media';
+                                mediaContainer.appendChild(img);
+                            }
+                        });
+                        
+                        reviewItem.querySelector('.review-body').appendChild(mediaContainer);
+                    }
+                    
+                    // Add helpful button
+                    const reviewFooter = document.createElement('div');
+                    reviewFooter.className = 'review-footer';
+                    reviewFooter.innerHTML = `
+                        <div class="helpful-vote">
+                            <span>Đánh giá này có hữu ích? </span>
+                            <button class="helpful-btn">Có (${review.helpful_count || 0})</button>
+                        </div>
+                    `;
+                    
+                    // Add event listener for helpful button
+                    reviewFooter.querySelector('.helpful-btn').addEventListener('click', async () => {
+                        // This would call an API endpoint to mark review as helpful
+                        // For now, just increment the count locally
+                        const helpfulBtn = reviewFooter.querySelector('.helpful-btn');
+                        const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
+                        helpfulBtn.textContent = `Có (${currentCount + 1})`;
+                    });
+                    
+                    reviewItem.appendChild(reviewFooter);
+                    reviewsList.appendChild(reviewItem);
+                });
+            }
+            
+            // Update review summary if stats are available
+            if (statsResponse.success && statsResponse.stats) {
+                updateReviewSummary(statsResponse.stats);
+            }
+        } else {
+            console.error('Failed to load reviews:', reviewsResponse.message);
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+    }
+}
+
+// Update review summary
+function updateReviewSummary(stats) {
+    const summaryContainer = document.querySelector('.reviews-summary');
+    if (!summaryContainer) return;
+    
+    // Calculate percentages for star distribution
+    const totalReviews = stats.total_reviews || 0;
+    const fiveStarPercent = totalReviews > 0 ? (stats.five_star / totalReviews * 100) : 0;
+    const fourStarPercent = totalReviews > 0 ? (stats.four_star / totalReviews * 100) : 0;
+    const threeStarPercent = totalReviews > 0 ? (stats.three_star / totalReviews * 100) : 0;
+    const twoStarPercent = totalReviews > 0 ? (stats.two_star / totalReviews * 100) : 0;
+    const oneStarPercent = totalReviews > 0 ? (stats.one_star / totalReviews * 100) : 0;
+    
+    summaryContainer.innerHTML = `
+        <div class="overall-rating">
+            <div class="big-rating">${stats.avg_rating || 0}</div>
+            <div class="rating-stars">
+                ${updateProductRating(stats.avg_rating || 0, totalReviews)}
+            </div>
+            <div class="total-reviews">${totalReviews} đánh giá</div>
+        </div>
+        <div class="rating-distribution">
+            <div class="rating-bar">
+                <span class="star-label">5 ★</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: ${fiveStarPercent}%"></div>
+                </div>
+                <span class="count">${stats.five_star || 0}</span>
+            </div>
+            <div class="rating-bar">
+                <span class="star-label">4 ★</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: ${fourStarPercent}%"></div>
+                </div>
+                <span class="count">${stats.four_star || 0}</span>
+            </div>
+            <div class="rating-bar">
+                <span class="star-label">3 ★</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: ${threeStarPercent}%"></div>
+                </div>
+                <span class="count">${stats.three_star || 0}</span>
+            </div>
+            <div class="rating-bar">
+                <span class="star-label">2 ★</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: ${twoStarPercent}%"></div>
+                </div>
+                <span class="count">${stats.two_star || 0}</span>
+            </div>
+            <div class="rating-bar">
+                <span class="star-label">1 ★</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: ${oneStarPercent}%"></div>
+                </div>
+                <span class="count">${stats.one_star || 0}</span>
+            </div>
+        </div>
+    `;
+}
+
+// Load related products
+async function loadRelatedProducts(productId) {
+    try {
+        const response = await fetchApi('/src/api/products.php?action=get_related', {
+            method: 'POST',
+            body: {
+                product_id: productId,
+                limit: 4
+            }
+        });
+        
+        if (response.success) {
+            const productList = document.getElementById('related-product-list');
+            if (!productList) return;
+            
+            // Clear any existing content
+            productList.innerHTML = '';
+            
+            if (response.products.length === 0) {
+                productList.innerHTML = '<p>Không có sản phẩm liên quan.</p>';
+                return;
+            }
+            
+            response.products.forEach(product => {
+                // Get first image or use default
+                const imageUrl = product.images && product.images.length > 0 
+                    ? product.images[0] 
+                    : 'images/products/default.png';
+                
+                // Format price or show "Contact for price"
+                const priceDisplay = product.price 
+                    ? `${product.price.toLocaleString('vi-VN')} đ` 
+                    : 'Liên hệ để biết giá';
+                
+                // Calculate star rating display
+                const rating = product.avg_rating || 0;
+                const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
+                
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <img src="${imageUrl}" alt="${product.name}">
+                    <div class="product-card-content">
+                        <h3>${product.name}</h3>
+                        <div class="rating">${stars} (${product.review_count || 0})</div>
+                        <div class="price">${priceDisplay}</div>
+                        <a href="product-detail.html?id=${product.id}" class="cta-button">Xem chi tiết</a>
+                    </div>
+                `;
+                productList.appendChild(productCard);
+            });
+        } else {
+            console.error('Failed to load related products:', response.message);
+        }
+    } catch (error) {
+        console.error('Error loading related products:', error);
+    }
+}
+
+// Load related discussions
+async function loadRelatedDiscussions(productId) {
+    try {
+        const response = await fetchApi('/src/api/posts.php?action=search', {
+            method: 'POST',
+            body: {
+                query: productId, // This is a simplification - in a real app, you'd have a specific API for product-related posts
+                limit: 5
+            }
+        });
+        
+        if (response.success) {
+            const discussionList = document.getElementById('related-discussion-list');
+            if (!discussionList) return;
+            
+            // Clear any existing content
+            discussionList.innerHTML = '';
+            
+            if (response.posts.length === 0) {
+                discussionList.innerHTML = '<p>Chưa có thảo luận nào liên quan đến sản phẩm này.</p>';
+                return;
+            }
+            
+            response.posts.forEach(post => {
+                const discussionItem = document.createElement('div');
+                discussionItem.className = 'discussion-item';
+                
+                // Format date
+                const postDate = new Date(post.created_at);
+                const formattedDate = postDate.toLocaleDateString('vi-VN');
+                
+                discussionItem.innerHTML = `
+                    <h3><a href="post-detail.html?id=${post.id}">${post.title}</a></h3>
+                    <div class="meta">
+                        <span class="author">Bởi: ${getDisplayName(post)}</span>
+                        <span class="date">${formattedDate}</span>
+                        <span class="comments">${post.comment_count || 0} bình luận</span>
+                    </div>
+                `;
+                discussionList.appendChild(discussionItem);
+            });
+        } else {
+            console.error('Failed to load related discussions:', response.message);
+        }
+    } catch (error) {
+        console.error('Error loading related discussions:', error);
+    }
+}
+
+// Set up tab switching
+function setupTabs() {
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabLinks.forEach(tabLink => {
+        tabLink.addEventListener('click', () => {
+            // Remove active class from all tabs and contents
+            tabLinks.forEach(link => link.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            tabLink.classList.add('active');
+            const tabId = tabLink.getAttribute('data-tab');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        });
+    });
+    
+    // Set up review sort dropdown
+    const sortReviews = document.getElementById('sort-reviews');
+    if (sortReviews) {
+        sortReviews.addEventListener('change', () => {
+            const productId = new URLSearchParams(window.location.search).get('id');
+            if (productId) {
+                loadProductReviews(productId, sortReviews.value);
+            }
+        });
+    }
+    
+    // Set up write review button
+    const writeReviewBtn = document.getElementById('write-review-btn');
+    const reviewFormContainer = document.getElementById('review-form-container');
+    
+    if (writeReviewBtn && reviewFormContainer) {
+        writeReviewBtn.addEventListener('click', async () => {
+            // Check if user is logged in
+            const authStatus = await checkAuthStatus();
+            if (!authStatus.authenticated) {
+                const productId = new URLSearchParams(window.location.search).get('id');
+                window.location.href = `login-register.html?redirect=product-detail.html?id=${productId}`;
+                return;
+            }
+            
+            // Show review form
+            reviewFormContainer.style.display = 'block';
+            writeReviewBtn.style.display = 'none';
+            
+            // Scroll to form
+            reviewFormContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+}
+
+// Set up review form
+function setupReviewForm(productId) {
+    const reviewForm = document.getElementById('review-form');
+    if (!reviewForm) return;
+    
+    // Set up star rating selection
+    const stars = reviewForm.querySelectorAll('.rating-input .stars span');
+    const ratingInput = document.getElementById('rating-value');
+    
+    stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+            // Update selected stars
+            stars.forEach((s, i) => {
+                if (i <= index) {
+                    s.classList.add('selected');
+                } else {
+                    s.classList.remove('selected');
+                }
+            });
+            
+            // Update hidden input value
+            ratingInput.value = index + 1;
+        });
+    });
+    
+    // Handle form submission
+    reviewForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        // Get form values
+        const rating = parseInt(ratingInput.value);
+        const comment = document.getElementById('review-comment').value;
+        
+        // Validate inputs
+        if (!rating || rating < 1 || rating > 5) {
+            alert('Vui lòng chọn số sao đánh giá.');
+            return;
+        }
+        
+        if (!comment.trim()) {
+            alert('Vui lòng nhập nội dung đánh giá.');
+            return;
+        }
+        
+        try {
+            // Check if user is logged in
+            const authStatus = await checkAuthStatus();
+            if (!authStatus.authenticated) {
+                window.location.href = `login-register.html?redirect=product-detail.html?id=${productId}`;
+                return;
+            }
+            
+            // Submit review
+            const response = await fetchApi('/src/api/reviews.php?action=create', {
+                method: 'POST',
+                body: {
+                    product_id: productId,
+                    rating,
+                    comment
+                }
+            });
+            
+            if (response.success) {
+                // Hide form and show success message
+                reviewForm.reset();
+                reviewFormContainer.style.display = 'none';
+                writeReviewBtn.style.display = 'block';
+                
+                // Reload reviews to show the new one
+                loadProductReviews(productId);
+                
+                alert('Cảm ơn bạn đã đánh giá sản phẩm!');
+            } else {
+                alert(response.message || 'Đã xảy ra lỗi khi gửi đánh giá. Vui lòng thử lại sau.');
+            }
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            alert('Đã xảy ra lỗi khi gửi đánh giá. Vui lòng thử lại sau.');
+        }
+    });
+}
+
+// Increment view count
+async function incrementViewCount(productId) {
+    try {
+        await fetchApi('/src/api/products.php?action=view', {
+            method: 'POST',
+            body: { id: productId }
+        });
+    } catch (error) {
+        console.error('Error incrementing view count:', error);
+    }
+}
+
+// Check authentication status
+async function checkAuthStatus() {
+    try {
+        const response = await fetchApi('/src/api/auth.php?action=status');
+        return response;
+    } catch (error) {
+        console.error('Error checking auth status:', error);
+        return { authenticated: false };
+    }
+}
