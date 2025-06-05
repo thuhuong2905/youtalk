@@ -59,7 +59,8 @@
                     </ol>
                 </nav>
 
-                <div class="product-main-info">
+                <!-- Product Main Info with border box -->
+                <div class="product-main-info card-box">
                     <div class="product-gallery">
                         <!-- Image gallery/video placeholder -->
                         <img src="#" alt="Product Image" id="main-product-image">
@@ -95,67 +96,64 @@
                         <button class="tab-link" data-tab="discussions">Thảo luận liên quan</button>
                     </div>
 
-                    <div id="tab-description" class="tab-content active">
+                    <!-- Tab Description -->
+                    <div id="tab-description" class="tab-content active card-box">
                         <h2>Mô tả</h2>
-                        <p id="product-description-content">Nội dung mô tả chi tiết sản phẩm/dịch vụ...</p> <!-- Dynamic -->
+                        <p id="product-description-content">Nội dung mô tả chi tiết sản phẩm/dịch vụ...</p>
                     </div>
 
-                    <div id="tab-specs" class="tab-content">
+                    <!-- Tab Specs -->
+                    <div id="tab-specs" class="tab-content card-box">
                         <h2>Thông số kỹ thuật / Chi tiết dịch vụ</h2>
                         <ul id="product-specs-list">
-                            <!-- Specs/details loaded here -->
                         </ul>
                     </div>
 
-                    <div id="tab-reviews" class="tab-content">
+                    <!-- Tab Reviews -->
+                    <div id="tab-reviews" class="tab-content card-box">
                         <h2>Đánh giá từ cộng đồng</h2>
                         <div class="reviews-summary">
-                            <!-- Overall rating summary -->
                         </div>
                         <div class="review-actions">
-                            <button id="write-review-btn" class="cta-button">Viết đánh giá của bạn</button>
-                            <select id="sort-reviews">
-                                <option value="newest">Mới nhất</option>
-                                <option value="helpful">Hữu ích nhất</option>
-                                <option value="rating_high">Đánh giá cao nhất</option>
-                                <option value="rating_low">Đánh giá thấp nhất</option>
-                            </select>
+                            <!-- Đã xóa nút viết đánh giá và select lọc đánh giá -->
                         </div>
+                        <!-- Review Form (giống form bình luận) -->
                         <div id="review-form-container" style="display: none;">
-                            <h3>Viết đánh giá</h3>
                             <form id="review-form">
-                                <div class="form-group rating-input">
-                                    <label>Đánh giá của bạn:</label>
-                                    <div class="stars">
-                                        <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+                                <div class="form-group reviewer-info">
+                                    <div class="reviewer-avatar" id="reviewer-avatar"></div>
+                                    <span id="reviewer-name">Bạn</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Đánh giá sản phẩm</label>
+                                    <div class="rating-input modern-rating">
+                                        <span class="stars" id="review-rating-stars">
+                                            <span data-value="1" class="star">★</span>
+                                            <span data-value="2" class="star">★</span>
+                                            <span data-value="3" class="star">★</span>
+                                            <span data-value="4" class="star">★</span>
+                                            <span data-value="5" class="star">★</span>
+                                        </span>
+                                        <input type="hidden" id="review-rating" name="rating" value="0" required>
                                     </div>
-                                    <input type="hidden" name="rating" id="rating-value" value="0">
                                 </div>
                                 <div class="form-group">
-                                    <label for="review-comment">Nhận xét:</label>
-                                    <textarea id="review-comment" name="comment" rows="4" required></textarea>
+                                    <label for="review-content">Nội dung đánh giá</label>
+                                    <textarea id="review-content" name="content" rows="4" required placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label for="review-media">Thêm ảnh/video:</label>
-                                    <input type="file" id="review-media" name="media[]" multiple accept="image/*,video/*">
-                                </div>
-                                <button type="submit" class="cta-button">Gửi đánh giá</button>
+                                <button type="submit" class="action-btn primary">Gửi đánh giá</button>
                             </form>
                         </div>
                         <div id="reviews-list">
-                            <!-- Reviews will be loaded here -->
-                            <p>Chưa có đánh giá nào.</p>
                         </div>
                         <div id="pagination-reviews">
-                            <!-- Pagination for reviews -->
                         </div>
                     </div>
 
-                    <div id="tab-discussions" class="tab-content">
+                    <!-- Tab Discussions -->
+                    <div id="tab-discussions" class="tab-content card-box">
                         <h2>Thảo luận liên quan</h2>
                         <div id="related-discussion-list">
-                            <!-- Related discussions loaded here -->
-                            <p>Chưa có thảo luận nào liên quan.</p>
                         </div>
                     </div>
                 </div>
