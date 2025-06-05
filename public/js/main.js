@@ -302,8 +302,28 @@ async function handleLogout() {
 function getDisplayName(user) {
     if (!user) return "";
     if (user.full_name && user.full_name.trim()) return user.full_name;
-    if (user.username && user.username.trim()) return user.username;
-    return "Người dùng";
+    return "Ẩn danh";
+}
+
+/**
+ * Trả về HTML cho avatar user: ưu tiên profile_picture, fallback là chữ cái đầu.
+ * @param {object} user - Thông tin user (có thể null)
+ * @param {string} sizeClass - class css cho kích thước (vd: 'user-avatar-header')
+ * @param {string} altText - alt cho ảnh (nếu có)
+ * @returns {string} - HTML string
+ */
+function getUserAvatarHtml(user, sizeClass = '', altText = '') {
+    const fullName = (user && user.full_name && user.full_name.trim()) ? user.full_name : 'Ẩn danh';
+    const firstInitial = getInitials(fullName);
+    const colors = ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085", "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#ecf0f1", "#95a5a6", "#f39c12", "#d35400", "#c0392b", "#03417F", "#7f8c8d"];
+    const colorIndex = firstInitial.charCodeAt(0) % colors.length;
+    const bgColor = colors[colorIndex];
+    if (user && user.profile_picture && user.profile_picture.trim() !== '') {
+        const escapedAlt = altText || fullName.replace(/"/g, '&quot;');
+        return `<img src="${encodeURI(user.profile_picture)}" alt="${escapedAlt}" class="user-avatar ${sizeClass}" onerror="displayFallbackAvatar(this, '${firstInitial}', '${bgColor}')">`;
+    } else {
+        return `<div class="user-avatar-fallback ${sizeClass}" style="background-color: ${bgColor};">${firstInitial}</div>`;
+    }
 }
 
 // Make sure helper functions like checkLoginStatus and fetchApi are defined globally or imported

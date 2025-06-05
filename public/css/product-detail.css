@@ -302,7 +302,7 @@
 .review-item .helpful-vote button {
     background: none;
     border: none;
-    color: var(--color-accent2);
+    color: var(--color-primary);
     cursor: pointer;
 }
 

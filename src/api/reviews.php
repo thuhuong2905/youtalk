@@ -70,7 +70,8 @@ $validActions = [
     'create',
     'update', 
     'delete',
-    'get_stats'
+    'get_stats',
+    'mark_helpful'
 ];
 
 // Validate action
@@ -104,6 +105,9 @@ switch ($action) {
         break;
     case 'get_stats':
         handleGetReviewStats($review, $requestData);
+        break;
+    case 'mark_helpful':
+        handleMarkReviewHelpful($review, $requestData);
         break;
     default:
         // This should never be reached now due to validation above
@@ -179,7 +183,7 @@ function handleGetReviewsByProduct($review, $requestData) {
         $totalCount = $countStmt->fetchColumn();
 
         // Get reviews with user info
-        $query = "SELECT r.*, u.username 
+        $query = "SELECT r.*, u.full_name, u.profile_picture 
                   FROM reviews r 
                   JOIN users u ON r.user_id = u.id 
                   WHERE r.product_id = :product_id AND r.status = 'active' AND u.status = 'active'
@@ -219,7 +223,7 @@ function handleGetReviewById($review, $requestData) {
     $reviewId = (int)$_GET['id'];
 
     try {
-        $query = "SELECT r.*, u.username, p.name as product_name 
+        $query = "SELECT r.*, u.full_name, u.profile_picture, p.name as product_name 
                   FROM reviews r 
                   JOIN users u ON r.user_id = u.id 
                   JOIN products p ON r.product_id = p.id
@@ -538,4 +542,25 @@ function handleGetReviewStats($review, $requestData) {
     }
 }
 
+/**
+ * Handle marking a review as helpful (increment helpful_count)
+ */
+function handleMarkReviewHelpful($review, $requestData) {
+    // Accept review_id from POST or GET
+    $reviewId = isset($requestData['review_id']) ? (int)$requestData['review_id'] : (isset($_GET['review_id']) ? (int)$_GET['review_id'] : 0);
+    if (!$reviewId) {
+        sendResponse(false, 'review_id is required', null, 400);
+        return;
+    }
+    try {
+        $success = $review->markReviewHelpful($reviewId);
+        if ($success) {
+            sendResponse(true, 'Marked as helpful');
+        } else {
+            sendResponse(false, 'Failed to update helpful count', null, 500);
+        }
+    } catch (Exception $e) {
+        sendResponse(false, 'Error: ' . $e->getMessage(), null, 500);
+    }
+}
 ?>

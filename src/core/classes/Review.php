@@ -291,10 +291,7 @@ class Review {
             ];
         }
     }
-}
-?>
-
-
+    
     /**
      * Count reviews by user ID
      * 
@@ -315,6 +312,17 @@ class Review {
             error_log('Error counting reviews by user ID: ' . $e->getMessage());
             return 0; // Return 0 on error
         }
+    }
+
+    /**
+     * Mark a review as helpful (increment helpful_count)
+     * @param int $reviewId
+     * @return bool
+     */
+    public function markReviewHelpful($reviewId) {
+        $stmt = $this->conn->prepare("UPDATE reviews SET helpful_count = helpful_count + 1 WHERE id = :id");
+        $stmt->bindParam(':id', $reviewId, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 }
 ?>

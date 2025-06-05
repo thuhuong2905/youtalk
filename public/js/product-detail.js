@@ -73,9 +73,6 @@ async function loadProductDetails(productId) {
                 : 'Liên hệ để biết giá';
             document.getElementById('product-price').textContent = priceDisplay;
             
-            // Update rating
-            updateProductRating(product.avg_rating || 0, product.review_count || 0);
-            
             // Update description
             document.getElementById('product-description-content').innerHTML = product.description || 'Không có mô tả chi tiết.';
             
@@ -103,34 +100,28 @@ async function loadProductDetails(productId) {
     }
 }
 
-// Update product rating display
+// Helper: render stars for both summary and main info
+function renderStars(avgRating) {
+    const roundedRating = Math.round(avgRating * 2) / 2;
+    const fullStars = Math.floor(roundedRating);
+    const halfStar = roundedRating % 1 !== 0;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    let starsHtml = '★'.repeat(fullStars);
+    if (halfStar) starsHtml += '½';
+    starsHtml += '☆'.repeat(emptyStars);
+    return starsHtml;
+}
+
+// Update product rating display (main info)
 function updateProductRating(avgRating, reviewCount) {
     const ratingElement = document.getElementById('product-avg-rating');
     const countElement = document.getElementById('product-review-count');
-    const tabCountElement = document.getElementById('tab-review-count');
-    
     if (ratingElement) {
-        // Round to nearest half star
-        const roundedRating = Math.round(avgRating * 2) / 2;
-        
-        // Create star display (e.g., ★★★★☆)
-        const fullStars = Math.floor(roundedRating);
-        const halfStar = roundedRating % 1 !== 0;
-        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-        
-        let starsHtml = '★'.repeat(fullStars);
-        if (halfStar) starsHtml += '½';
-        starsHtml += '☆'.repeat(emptyStars);
-        
-        ratingElement.innerHTML = starsHtml;
+        ratingElement.innerHTML = `<span class="stars">${renderStars(avgRating)}</span>` + (avgRating > 0 ? ` <span class="rating-number">${avgRating.toFixed(1)}</span>` : '');
     }
-    
     if (countElement) {
+        // Luôn ưu tiên lấy số đánh giá từ API stats (reviewCount truyền vào)
         countElement.textContent = `(${reviewCount} đánh giá)`;
-    }
-    
-    if (tabCountElement) {
-        tabCountElement.textContent = reviewCount;
     }
 }
 
@@ -287,6 +278,18 @@ async function loadProductReviews(productId, sortBy = 'newest') {
         const statsResponse = await fetchApi(`/src/api/reviews.php?action=get_stats&product_id=${productId}`, {
             method: 'GET'
         });
+        // Sau khi lấy stats, luôn cập nhật số sao và số đánh giá từ API stats
+        if (statsResponse && statsResponse.success) {
+            let stats = null;
+            if (statsResponse.data && statsResponse.data.stats) {
+                stats = statsResponse.data.stats;
+            } else if (statsResponse.stats) {
+                stats = statsResponse.stats;
+            }
+            if (stats) {
+                updateProductRating(stats.average_rating, stats.total_reviews);
+            }
+        }
         const reviewsList = document.getElementById('reviews-list');
         if (!reviewsList) return;
         reviewsList.innerHTML = '';
@@ -312,7 +315,7 @@ async function loadProductReviews(productId, sortBy = 'newest') {
                 reviewItem.innerHTML = `
                     <div class="review-header">
                         <div class="author-info">
-                            <img src="${review.profile_picture || 'images/default-avatar.png'}" alt="${getDisplayName(review)}">
+                            ${getUserAvatarHtml(review, 'user-avatar-review')}
                             <span>${getDisplayName(review)}</span>
                         </div>
                         <div class="rating">${stars}</div>
@@ -360,11 +363,28 @@ async function loadProductReviews(productId, sortBy = 'newest') {
                 
                 // Add event listener for helpful button
                 reviewFooter.querySelector('.helpful-btn').addEventListener('click', async () => {
-                    // This would call an API endpoint to mark review as helpful
-                    // For now, just increment the count locally
                     const helpfulBtn = reviewFooter.querySelector('.helpful-btn');
-                    const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
-                    helpfulBtn.textContent = `Có (${currentCount + 1})`;
+                    // Kiểm tra localStorage để ngăn user bấm nhiều lần
+                    const helpfulKey = `helpful_review_${review.id}`;
+                    if (localStorage.getItem(helpfulKey)) {
+                        alert('Bạn đã đánh giá hữu ích cho nhận xét này!');
+                        return;
+                    }
+                    try {
+                        const res = await fetchApi('/src/api/reviews.php?action=mark_helpful', {
+                            method: 'POST',
+                            body: { review_id: review.id }
+                        });
+                        if (res.success) {
+                            const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
+                            helpfulBtn.textContent = `Có (${currentCount + 1})`;
+                            localStorage.setItem(helpfulKey, '1');
+                        } else {
+                            alert('Không thể ghi nhận đánh giá hữu ích.');
+                        }
+                    } catch (e) {
+                        alert('Có lỗi khi ghi nhận đánh giá hữu ích.');
+                    }
                 });
                 
                 reviewItem.appendChild(reviewFooter);
@@ -374,74 +394,11 @@ async function loadProductReviews(productId, sortBy = 'newest') {
             reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
         } else {
             reviewsList.innerHTML = '<p>Không thể tải đánh giá.</p>';
-        }
-        if (statsResponse.success && statsResponse.stats) {
-            updateReviewSummary(statsResponse.stats);
+        
         }
     } catch (error) {
         console.error('Error loading reviews:', error);
     }
-}
-
-// Update review summary
-function updateReviewSummary(stats) {
-    const summaryContainer = document.querySelector('.reviews-summary');
-    if (!summaryContainer) return;
-    
-    // Calculate percentages for star distribution
-    const totalReviews = stats.total_reviews || 0;
-    const fiveStarPercent = totalReviews > 0 ? (stats.five_star / totalReviews * 100) : 0;
-    const fourStarPercent = totalReviews > 0 ? (stats.four_star / totalReviews * 100) : 0;
-    const threeStarPercent = totalReviews > 0 ? (stats.three_star / totalReviews * 100) : 0;
-    const twoStarPercent = totalReviews > 0 ? (stats.two_star / totalReviews * 100) : 0;
-    const oneStarPercent = totalReviews > 0 ? (stats.one_star / totalReviews * 100) : 0;
-    
-    summaryContainer.innerHTML = `
-        <div class="overall-rating">
-            <div class="big-rating">${stats.avg_rating || 0}</div>
-            <div class="rating-stars">
-                ${updateProductRating(stats.avg_rating || 0, totalReviews)}
-            </div>
-            <div class="total-reviews">${totalReviews} đánh giá</div>
-        </div>
-        <div class="rating-distribution">
-            <div class="rating-bar">
-                <span class="star-label">5 ★</span>
-                <div class="bar-container">
-                    <div class="bar" style="width: ${fiveStarPercent}%"></div>
-                </div>
-                <span class="count">${stats.five_star || 0}</span>
-            </div>
-            <div class="rating-bar">
-                <span class="star-label">4 ★</span>
-                <div class="bar-container">
-                    <div class="bar" style="width: ${fourStarPercent}%"></div>
-                </div>
-                <span class="count">${stats.four_star || 0}</span>
-            </div>
-            <div class="rating-bar">
-                <span class="star-label">3 ★</span>
-                <div class="bar-container">
-                    <div class="bar" style="width: ${threeStarPercent}%"></div>
-                </div>
-                <span class="count">${stats.three_star || 0}</span>
-            </div>
-            <div class="rating-bar">
-                <span class="star-label">2 ★</span>
-                <div class="bar-container">
-                    <div class="bar" style="width: ${twoStarPercent}%"></div>
-                </div>
-                <span class="count">${stats.two_star || 0}</span>
-            </div>
-            <div class="rating-bar">
-                <span class="star-label">1 ★</span>
-                <div class="bar-container">
-                    <div class="bar" style="width: ${oneStarPercent}%"></div>
-                </div>
-                <span class="count">${stats.one_star || 0}</span>
-            </div>
-        </div>
-    `;
 }
 
 // Load related discussions
@@ -525,11 +482,7 @@ function setupReviewForm(productId) {
                 // Hiển thị avatar và tên
                 const avatarDiv = document.getElementById('reviewer-avatar');
                 if (avatarDiv) {
-                    if (user.avatar_url) {
-                        avatarDiv.innerHTML = `<img src="${user.avatar_url}" alt="avatar">`;
-                    } else {
-                        avatarDiv.textContent = user.full_name ? user.full_name[0] : 'U';
-                    }
+                    avatarDiv.innerHTML = getUserAvatarHtml(user, 'reviewer-avatar');
                 }
                 document.getElementById('reviewer-name').textContent = user.full_name || 'Bạn';
             } else {
