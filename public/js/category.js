@@ -1,33 +1,34 @@
-// JavaScript for category page functionality
-// Handles loading products by category and filtering
+// JavaScript cho chức năng trang danh mục
+// Xử lý tải sản phẩm theo danh mục và lọc
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('YouTalk Category JS Loaded');
     
-    // Get category ID from URL
+    // Lấy category ID từ URL
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryId = urlParams.get('slug');
+    const categoryId = urlParams.get('id');
     
     if (categoryId) {
-        // Load category details
+        // Tải thông tin danh mục
         loadCategoryDetails(categoryId);
         
-        // Load products for this category
+        // Tải sản phẩm cho danh mục này
         loadCategoryProducts(categoryId);
         
-        // Load discussions for this category
+        // Tải thảo luận cho danh mục này
         loadCategoryDiscussions(categoryId);
     } else {
-        // No category ID provided, show error or redirect
+        // Không có category ID, hiển thị lỗi
         document.getElementById('category-title').textContent = 'Danh mục không hợp lệ';
-        document.getElementById('product-list-category').innerHTML = '<p>Vui lòng chọn một danh mục hợp lệ.</p>';
+        const productList = document.getElementById('products-grid');
+        if (productList) productList.innerHTML = '<p>Vui lòng chọn một danh mục hợp lệ.</p>';
     }
     
-    // Set up event listeners for filters and sorting
+    // Thiết lập sự kiện cho filter và sort
     setupFilterHandlers(categoryId);
 });
 
-// Load category details
+// Tải thông tin danh mục
 async function loadCategoryDetails(categoryId) {
     try {
         const response = await fetchApi('/src/api/products.php?action=get_category', {
@@ -36,47 +37,49 @@ async function loadCategoryDetails(categoryId) {
         });
         
         if (response && response.success) {
-            // Update page title
+            // Cập nhật tiêu đề trang
             const categoryName = response.category?.name || response.data?.category?.name || response.name || 'Danh mục';
             document.getElementById('category-title').textContent = categoryName;
             document.title = `${categoryName} - YouTalk`;
             
-            // Update breadcrumb if exists
+            // Cập nhật breadcrumb nếu có
             const breadcrumbCategory = document.getElementById('breadcrumb-category');
             if (breadcrumbCategory) {
                 breadcrumbCategory.textContent = categoryName;
             }
+            // Cập nhật mô tả nếu có
+            const categoryDesc = response.category?.description || response.data?.category?.description || '';
+            document.getElementById('category-description').textContent = categoryDesc;
         } else {
-            console.error('Failed to load category details:', response?.message || 'Unknown error');
+            console.error('Không tải được thông tin danh mục:', response?.message || 'Unknown error');
+            document.getElementById('category-title').textContent = 'Không tìm thấy danh mục';
         }
     } catch (error) {
-        console.error('Error loading category details:', error);
+        console.error('Lỗi khi tải thông tin danh mục:', error);
+        document.getElementById('category-title').textContent = 'Lỗi tải danh mục';
     }
 }
 
-// Load products for a category
+// Tải sản phẩm theo danh mục
 async function loadCategoryProducts(categoryId, filters = {}) {
     try {
-        // Get sort options
+        // Lấy options sắp xếp
         const sortSelect = document.getElementById('sort-options');
         const sortBy = sortSelect ? sortSelect.value : 'newest';
         
-        // Map sort option to API parameters
+        // Map option sắp xếp sang API
         let sortParams = {};
         switch (sortBy) {
-            case 'newest':
-                sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
-                break;
-            case 'popular':
-                sortParams = { sort_by: 'view_count', sort_order: 'DESC' };
-                break;
-            case 'rating_high':
-                sortParams = { sort_by: 'avg_rating', sort_order: 'DESC' };
-                break;
-            // Add more sort options as needed
+            case 'newest': sortParams = { sort_by: 'created_at', sort_order: 'DESC' }; break;
+            case 'popular': sortParams = { sort_by: 'view_count', sort_order: 'DESC' }; break;
+            case 'rating_high': sortParams = { sort_by: 'avg_rating', sort_order: 'DESC' }; break;
+            case 'rating_low': sortParams = { sort_by: 'avg_rating', sort_order: 'ASC' }; break;
+            case 'price_high': sortParams = { sort_by: 'price', sort_order: 'DESC' }; break;
+            case 'price_low': sortParams = { sort_by: 'price', sort_order: 'ASC' }; break;
+            default: sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
         }
         
-        // Combine filters and sort parameters
+        // Kết hợp filter và sort
         const requestData = {
             category_id: categoryId,
             limit: 12,
@@ -90,14 +93,13 @@ async function loadCategoryProducts(categoryId, filters = {}) {
             body: requestData
         });
         
+        const productList = document.getElementById('products-grid');
+        if (!productList) return;
+        
+        // Xóa loading
+        productList.innerHTML = '';
+        
         if (response && response.success) {
-            const productList = document.getElementById('product-list-category');
-            if (!productList) return;
-            
-            // Clear loading placeholder
-            productList.innerHTML = '';
-            
-            // Safely extract products data with fallback
             const products = response.products || response.data?.products || [];
             
             if (!Array.isArray(products) || products.length === 0) {
@@ -106,17 +108,17 @@ async function loadCategoryProducts(categoryId, filters = {}) {
             }
             
             products.forEach(product => {
-                // Get first image or use default
+                // Lấy ảnh đầu tiên hoặc ảnh mặc định
                 const imageUrl = product.images && Array.isArray(product.images) && product.images.length > 0 
                     ? product.images[0] 
-                    : 'images/products/default.png'; // Changed from food.png to default.png
+                    : 'images/products/default.png';
                 
-                // Format price or show "Contact for price"
+                // Hiển thị giá hoặc "Liên hệ"
                 const priceDisplay = product.price 
                     ? `${product.price.toLocaleString('vi-VN')} đ` 
                     : 'Liên hệ để biết giá';
                 
-                // Calculate star rating display
+                // Tính sao đánh giá
                 const rating = product.avg_rating || 0;
                 const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
                 
@@ -134,27 +136,22 @@ async function loadCategoryProducts(categoryId, filters = {}) {
                 productList.appendChild(productCard);
             });
             
-            // Update pagination if data exists
+            // Cập nhật phân trang nếu có
             if (response.pagination || response.data?.pagination) {
                 updatePagination(response.pagination || response.data?.pagination);
             }
         } else {
-            console.error('Failed to load category products:', response?.message || 'Unknown error');
-            const productList = document.getElementById('product-list-category');
-            if (productList) {
-                productList.innerHTML = '<p>Không thể tải sản phẩm. Vui lòng thử lại sau.</p>';
-            }
+            productList.innerHTML = '<p>Không thể tải sản phẩm. Vui lòng thử lại sau.</p>';
         }
     } catch (error) {
-        console.error('Error loading category products:', error);
-        const productList = document.getElementById('product-list-category');
+        const productList = document.getElementById('products-grid');
         if (productList) {
             productList.innerHTML = '<p>Không thể tải sản phẩm. Vui lòng thử lại sau.</p>';
         }
     }
 }
 
-// Load discussions for a category
+// Tải thảo luận theo danh mục
 async function loadCategoryDiscussions(categoryId) {
     try {
         const response = await fetchApi('/src/api/posts.php?action=get_by_category', {
@@ -167,14 +164,13 @@ async function loadCategoryDiscussions(categoryId) {
             }
         });
         
+        const discussionList = document.getElementById('category-discussion-list');
+        if (!discussionList) return;
+        
+        // Xóa loading
+        discussionList.innerHTML = '';
+        
         if (response && response.success) {
-            const discussionList = document.getElementById('category-discussion-list');
-            if (!discussionList) return;
-            
-            // Clear loading placeholder
-            discussionList.innerHTML = '';
-            
-            // Safely extract posts data with fallback
             const posts = response.posts || response.data?.posts || [];
             
             if (!Array.isArray(posts) || posts.length === 0) {
@@ -185,11 +181,8 @@ async function loadCategoryDiscussions(categoryId) {
             posts.forEach(post => {
                 const discussionItem = document.createElement('div');
                 discussionItem.className = 'discussion-item';
-                
-                // Format date
                 const postDate = new Date(post.created_at);
                 const formattedDate = postDate.toLocaleDateString('vi-VN');
-                
                 discussionItem.innerHTML = `
                     <h3><a href="post-detail.html?id=${post.id}">${post.title}</a></h3>
                     <div class="meta">
@@ -201,14 +194,9 @@ async function loadCategoryDiscussions(categoryId) {
                 discussionList.appendChild(discussionItem);
             });
         } else {
-            console.error('Failed to load category discussions:', response?.message || 'Unknown error');
-            const discussionList = document.getElementById('category-discussion-list');
-            if (discussionList) {
-                discussionList.innerHTML = '<p>Không thể tải thảo luận. Vui lòng thử lại sau.</p>';
-            }
+            discussionList.innerHTML = '<p>Không thể tải thảo luận. Vui lòng thử lại sau.</p>';
         }
     } catch (error) {
-        console.error('Error loading category discussions:', error);
         const discussionList = document.getElementById('category-discussion-list');
         if (discussionList) {
             discussionList.innerHTML = '<p>Không thể tải thảo luận. Vui lòng thử lại sau.</p>';
@@ -216,93 +204,49 @@ async function loadCategoryDiscussions(categoryId) {
     }
 }
 
-// Set up event handlers for filters and sorting
+// Thiết lập sự kiện filter, sort
 function setupFilterHandlers(categoryId) {
-    // Sort dropdown change handler
+    // Sort
     const sortSelect = document.getElementById('sort-options');
     if (sortSelect) {
         sortSelect.addEventListener('change', () => {
             loadCategoryProducts(categoryId, getFilterValues());
         });
     }
-    
-    // Search input handler
-    const searchInput = document.getElementById('category-search');
-    if (searchInput) {
-        let searchTimeout;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const searchValue = searchInput.value.trim();
-                if (searchValue) {
-                    loadCategoryProducts(categoryId, { 
-                        ...getFilterValues(),
-                        search: searchValue 
-                    });
-                } else {
-                    loadCategoryProducts(categoryId, getFilterValues());
-                }
-            }, 500); // Debounce search input
-        });
-    }
-    
-    // Apply filters button
-    const applyFiltersBtn = document.getElementById('apply-filters-btn');
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', () => {
-            loadCategoryProducts(categoryId, getFilterValues());
-        });
-    }
+    // (Có thể thêm filter khác như giá, rating...)
 }
 
-// Get values from filter inputs
+// Lấy giá trị filter
 function getFilterValues() {
     const filters = {};
-    
-    // Example: Get rating filter values
-    const ratingInputs = document.querySelectorAll('input[name="rating"]:checked');
-    if (ratingInputs.length > 0) {
-        filters.rating = Array.from(ratingInputs).map(input => input.value);
-    }
-    
-    // Example: Get price range filter values
-    const minPrice = document.querySelector('input[name="min_price"]');
-    const maxPrice = document.querySelector('input[name="max_price"]');
-    if (minPrice && minPrice.value) {
-        filters.min_price = minPrice.value;
-    }
-    if (maxPrice && maxPrice.value) {
-        filters.max_price = maxPrice.value;
-    }
-    
-    // Add more filters as needed
-    
+    // Có thể bổ sung filter giá, rating, brand...
     return filters;
 }
 
-// Update pagination controls
+// Cập nhật phân trang
 function updatePagination(pagination) {
     const paginationContainer = document.getElementById('pagination-category');
     if (!paginationContainer) return;
-    
-    // Simple pagination implementation
-    // In a real app, you would calculate total pages and show proper pagination controls
     paginationContainer.innerHTML = '';
-    
-    // Check if pagination data exists and has expected properties
     if (pagination && typeof pagination === 'object') {
         const total = pagination.total || 0;
         const limit = pagination.limit || 12;
-        
         if (total > limit) {
             const loadMoreBtn = document.createElement('button');
             loadMoreBtn.className = 'cta-button';
             loadMoreBtn.textContent = 'Tải thêm sản phẩm';
             loadMoreBtn.addEventListener('click', () => {
-                // Load next page of products
-                // Implementation would depend on your pagination strategy
+                // Load more logic (paging)
             });
             paginationContainer.appendChild(loadMoreBtn);
         }
     }
+}
+
+// Helper: Lấy tên hiển thị
+function getDisplayName(obj) {
+    if (obj.full_name) return obj.full_name;
+    if (obj.username) return obj.username;
+    if (obj.author_name) return obj.author_name;
+    return 'Ẩn danh';
 }

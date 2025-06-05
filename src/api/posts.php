@@ -77,7 +77,28 @@ switch ($action) {
         handleListPostTypes();
         break;
     case 'get_comments':
-        handleGetComments($post, $_GET);
+        // Lấy bình luận cho một bài viết (dùng cho post-detail)
+        $post_id = isset($_GET['post_id']) ? intval($_GET['post_id']) : null;
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        global $conn;
+        $stmtCount = $conn->prepare("SELECT COUNT(*) as total FROM comments WHERE post_id = :post_id AND status = 'active'");
+        $stmtCount->bindParam(':post_id', $post_id, PDO::PARAM_INT);
+        $stmtCount->execute();
+        $total = (int)$stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
+        $stmt = $conn->prepare("SELECT c.*, u.full_name, u.profile_picture FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = :post_id AND c.status = 'active' ORDER BY c.created_at ASC LIMIT :limit OFFSET :offset");
+        $stmt->bindParam(':post_id', $post_id, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $total_pages = ceil($total / $limit);
+        sendResponse(true, 'Lấy bình luận thành công', [
+            'comments' => $comments,
+            'total' => $total,
+            'total_pages' => $total_pages
+        ]);
         break;
     case 'get_related':
         handleGetRelatedPosts($post, $_GET);
@@ -177,29 +198,26 @@ function handleGetHotTopics($post, $params) {
     $limit = isset($params['limit']) ? (int)$params['limit'] : 3; // Lấy giới hạn từ tham số truy vấn
 
     try {
-        // Đầu tiên, cố gắng lấy các bài viết hàng đầu dựa trên view_count và comment_count
-        $queryHot = "SELECT 
-                        p.id, p.title, p.content, p.user_id, p.category_id, p.view_count, p.created_at,
-                        u.username,
-                        c.name as category_name,
-                        (SELECT COUNT(*) FROM comments cm WHERE cm.post_id = p.id AND cm.status = 'active') as comment_count
-                      FROM posts p
-                      JOIN users u ON p.user_id = u.id
-                      LEFT JOIN categories c ON p.category_id = c.id
-                      WHERE p.status = 'active' AND u.status = 'active' AND (c.status = 'active' OR c.status IS NULL)
-                      ORDER BY p.view_count DESC, comment_count DESC, p.created_at DESC
-                      LIMIT :limit";
-
-        $stmtHot = $post->conn->prepare($queryHot);
-        $stmtHot->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmtHot->execute();
-        $posts = $stmtHot->fetchAll(PDO::FETCH_ASSOC);
+        global $conn;
+        // Lấy các chủ đề nổi bật dựa trên view_count và số bình luận (tính bằng subquery), join users để lấy full_name
+        $queryHot = "SELECT p.*, u.full_name, (
+                SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id AND c.status = 'active'
+            ) AS comment_count
+            FROM posts p
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'active' AND u.status = 'active'
+            ORDER BY p.view_count DESC, comment_count DESC, p.created_at DESC
+            LIMIT :limit";
+        $stmt = $conn->prepare($queryHot);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Nếu không tìm thấy bài viết nổi bật, chuyển sang lấy bài viết gần đây
         if (empty($posts)) {
              $queryRecent = "SELECT 
                             p.id, p.title, p.content, p.user_id, p.category_id, p.view_count, p.created_at,
-                            u.username,
+                            u.full_name,
                             c.name as category_name,
                             (SELECT COUNT(*) FROM comments cm WHERE cm.post_id = p.id AND cm.status = 'active') as comment_count
                           FROM posts p
@@ -705,7 +723,7 @@ function handleGetComments($post, $params) {
     $stmtCount->bindParam(':post_id', $post_id, PDO::PARAM_INT);
     $stmtCount->execute();
     $total = (int)$stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
-    $stmt = $conn->prepare("SELECT c.*, u.username, u.profile_picture FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = :post_id AND c.status = 'active' ORDER BY c.created_at ASC LIMIT :limit OFFSET :offset");
+    $stmt = $conn->prepare("SELECT c.*, u.full_name, u.profile_picture FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = :post_id AND c.status = 'active' ORDER BY c.created_at ASC LIMIT :limit OFFSET :offset");
     $stmt->bindParam(':post_id', $post_id, PDO::PARAM_INT);
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);

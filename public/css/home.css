@@ -321,7 +321,7 @@
 
 .rating .stars {
     color: #ffc107;
-    font-size: 1.1rem;
+    font-size: 0.95rem; /* Giảm kích thước sao để không bị xuống dòng */
 }
 
 .review-content {

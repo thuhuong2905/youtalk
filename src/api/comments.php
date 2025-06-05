@@ -34,22 +34,19 @@ switch ($action) {
         }
         
         try {
-            // TODO: Implement logic using Comment class or direct query
-            // Example direct query (needs refinement and Comment class is better)
             $stmt = $db->prepare("
-                SELECT c.*, p.title as post_title 
+                SELECT c.*, p.title as post_title, u.full_name, u.profile_picture
                 FROM comments c 
                 JOIN posts p ON c.post_id = p.id
-                WHERE c.user_id = :user_id AND c.status = 'active' AND p.status = 'active'
+                JOIN users u ON c.user_id = u.id
+                WHERE c.user_id = :user_id AND c.status = 'active' AND p.status = 'active' AND u.status = 'active'
                 ORDER BY c.created_at DESC
-                LIMIT 50 -- Add pagination later if needed
+                LIMIT 50
             ");
             $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
             $stmt->execute();
             $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            sendResponse(200, ['comments' => $comments]); // Adjust structure as needed by frontend
-
+            sendResponse(200, ['comments' => $comments]);
         } catch (PDOException $e) {
             error_log("Error in comments.php (get_user_comments): " . $e->getMessage());
             sendResponse(500, ['message' => 'Internal Server Error fetching user comments']);

@@ -121,26 +121,16 @@ function handleGetFeaturedReviews($review, $requestData) {
         // Query to get top unique product reviews with 5 stars, ordered by helpful_count
         $query = "WITH RankedReviews AS (
                     SELECT 
-                        r.id, r.product_id, r.user_id, r.rating, r.comment, r.created_at, r.helpful_count,
-                        p.name as product_name, 
-                        u.username,
+                        r.*, 
+                        p.name AS product_name, 
+                        u.full_name,
                         ROW_NUMBER() OVER(PARTITION BY r.product_id ORDER BY r.helpful_count DESC, r.created_at DESC) as rn
                     FROM reviews r
                     JOIN products p ON r.product_id = p.id
                     JOIN users u ON r.user_id = u.id
-                    WHERE r.status = 'active'
-                      AND p.status = 'active'
-                      AND u.status = 'active'
-                      AND r.rating = 5
+                    WHERE r.status = 'active' AND u.status = 'active' AND p.status = 'active'
                 )
-                SELECT 
-                    id, product_id, user_id, rating, comment, created_at, helpful_count,
-                    product_name, 
-                    username
-                FROM RankedReviews
-                WHERE rn = 1
-                ORDER BY helpful_count DESC, created_at DESC
-                LIMIT :limit";
+                SELECT * FROM RankedReviews WHERE rn = 1 ORDER BY helpful_count DESC, created_at DESC LIMIT :limit";
 
         $stmt = $review->conn->prepare($query);
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);

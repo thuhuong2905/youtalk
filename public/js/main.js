@@ -214,7 +214,7 @@ async function updateHeaderLoginStatus() {
 
         if (userData) {
             // User is logged in
-            const fullName = userData.full_name || userData.username || 'Người dùng'; // Use full_name, fallback to username, then generic
+            const fullName = userData.full_name || 'Người dùng'; // Chỉ dùng full_name, không fallback sang username
             const profilePicture = userData.profile_picture;
             const firstInitial = getInitials(fullName); // Use getInitials function
             
@@ -301,7 +301,9 @@ async function handleLogout() {
  */
 function getDisplayName(user) {
     if (!user) return "";
-    return user.full_name && user.full_name.trim() ? user.full_name : user.username || "";
+    if (user.full_name && user.full_name.trim()) return user.full_name;
+    if (user.username && user.username.trim()) return user.username;
+    return "Người dùng";
 }
 
 // Make sure helper functions like checkLoginStatus and fetchApi are defined globally or imported

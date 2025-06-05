@@ -29,7 +29,8 @@
     border-bottom: 1px solid #eee;
 }
 
-.category-tabs {
+/* Sửa đổi: tab loại bài đăng */
+.post-type-tabs {
     display: flex;
     gap: 10px;
     overflow-x: auto;
@@ -38,11 +39,11 @@
     scrollbar-width: none; /* Firefox */
 }
 
-.category-tabs::-webkit-scrollbar {
+.post-type-tabs::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
 }
 
-.category-tab {
+.post-type-tab {
     padding: 8px 20px;
     border-radius: 20px;
     background-color: #f0f0f0;
@@ -52,11 +53,11 @@
     transition: background-color 0.3s, color 0.3s;
 }
 
-.category-tab:hover {
+.post-type-tab:hover {
     background-color: #e0e0e0;
 }
 
-.category-tab.active {
+.post-type-tab.active {
     background-color: var(--color-primary);
     color: #fff;
 }

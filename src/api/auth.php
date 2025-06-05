@@ -145,7 +145,9 @@ switch ($action) {
             $_SESSION['username'] = $result['username'];
             $_SESSION['email'] = $result['email'];
             $_SESSION['role'] = $result['role'];
-            
+            if (isset($result['full_name'])) {
+                $_SESSION['full_name'] = $result['full_name'];
+            }
             session_regenerate_id(true);
 
             // Optionally handle 'remember_me'
@@ -156,11 +158,11 @@ switch ($action) {
                 session_set_cookie_params($lifetime);
                 session_regenerate_id(true); // Regenerate ID to prevent fixation
             }
-            
             sendResponse(true, 'Login successful', [
                 'user_id' => $result['user_id'],
                 'username' => $result['username'],
                 'email' => $result['email'],
+                'full_name' => $result['full_name'] ?? null,
                 'role' => $result['role'],
                 'profile_picture' => $result['profile_picture'] ?? null // Handle potential null value
             ]);
@@ -285,11 +287,9 @@ switch ($action) {
             if (isset($userData['email'])) {
                 $_SESSION['email'] = $userData['email'];
             }
-             if (isset($userData['full_name'])) {
-                // Assuming you might want to store full_name in session too
-                // $_SESSION['full_name'] = $userData['full_name']; 
+            if (isset($userData['full_name'])) {
+                $_SESSION['full_name'] = $userData['full_name'];
             }
-            
             sendResponse(true, 'Profile updated successfully');
         } else {
             sendResponse(false, $result['message'], null, 500);

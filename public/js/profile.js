@@ -89,7 +89,7 @@ async function loadUserProfile() {
             }
             if (profileData && profileData.user && profileData.counts) {
                 // Lưu tên user toàn cục để cập nhật các tab
-                window.profileUserFullName = profileData.user.full_name || profileData.user.username;
+                window.profileUserFullName = profileData.user.full_name || 'Ẩn danh';
                 // Cập nhật tên động cho các tab
                 const dynamicUsernames = document.querySelectorAll('.dynamic-username');
                 dynamicUsernames.forEach(element => {
@@ -130,7 +130,7 @@ async function loadUserProfile() {
  * Displays the user profile information on the page.
  */
 function displayUserProfile(userData, counts, isOwnProfile = false) {
-    console.log("Displaying user profile for:", userData.username);
+    console.log("Displaying user profile for:", userData.full_name || 'Ẩn danh');
 
     // Update profile elements
     const elements = {
@@ -149,11 +149,11 @@ function displayUserProfile(userData, counts, isOwnProfile = false) {
     };
 
     // Update page title
-    document.title = `Hồ sơ của ${userData.full_name || userData.username} - YouTalk`;
+    document.title = `Hồ sơ của ${userData.full_name || 'Ẩn danh'} - YouTalk`;
 
     // Update text content
     if (elements.profileFullName) {
-        elements.profileFullName.textContent = userData.full_name || userData.username;
+        elements.profileFullName.textContent = userData.full_name || 'Ẩn danh';
     }
     
     if (elements.profileBio) {
@@ -187,12 +187,12 @@ function displayUserProfile(userData, counts, isOwnProfile = false) {
     // Update profile picture using renderAvatar
     // Determine size from CSS or set a default (e.g., '100px' based on profile.css)
     const profilePicSize = elements.profilePictureContainer?.style.width || '150px'; // Adjust size as needed
-    renderAvatar(elements.profilePictureContainer, userData.profile_picture, userData.full_name || userData.username, profilePicSize);
+    renderAvatar(elements.profilePictureContainer, userData.profile_picture, userData.full_name || 'Ẩn danh', profilePicSize);
 
     // Update dynamic usernames in tab headers
     const dynamicUsernames = document.querySelectorAll('.dynamic-username');
     dynamicUsernames.forEach(element => {
-        element.textContent = userData.full_name || userData.username;
+        element.textContent = userData.full_name || 'Ẩn danh';
     });
 
     // Show/hide appropriate buttons
@@ -744,7 +744,7 @@ function renderUsersList(users, container) {
         avatarContainer.className = 'user-avatar';
         
         // Render avatar
-        renderAvatar(avatarContainer, user.profile_picture, user.full_name || user.username, '60px');
+        renderAvatar(avatarContainer, user.profile_picture, user.full_name || 'Ẩn danh', '60px');
         
         userElement.appendChild(avatarContainer);
         
@@ -753,7 +753,7 @@ function renderUsersList(users, container) {
         userInfo.className = 'user-info';
         
         userInfo.innerHTML = `
-            <a href="profile.html?id=${user.id}" class="username"">${user.full_name || user.username}</a>
+            <a href="profile.html?id=${user.id}" class="username"">${user.full_name || 'Ẩn danh'}</a>
         `;
         
         userElement.appendChild(userInfo);

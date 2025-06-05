@@ -1,25 +1,24 @@
 /**
- * forum.js - JavaScript for the forum page functionality
- * Handles loading discussions, filtering, searching, sorting, and pagination
+ * forum.js - JavaScript cho chức năng trang diễn đàn
+ * Xử lý tải các chủ đề thảo luận, lọc, tìm kiếm, sắp xếp và phân trang
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize forum page
     initForumPage();
 });
 
 /**
- * Initialize the forum page functionality
+ * Khởi tạo chức năng trang diễn đàn
  */
 async function initForumPage() {
-    // Get URL parameters
+    // Lấy các tham số URL
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryId = urlParams.get('category') || 'all';
+    const postType = urlParams.get('post_type') || 'all';
     const page = parseInt(urlParams.get('page')) || 1;
     const searchQuery = urlParams.get('search') || '';
     const sortBy = urlParams.get('sort') || 'newest';
     
-    // Set initial filter states
+    // Thiết lập trạng thái bộ lọc ban đầu
     if (searchQuery) {
         document.getElementById('topic-search').value = searchQuery;
     }
@@ -29,40 +28,40 @@ async function initForumPage() {
         sortSelect.value = sortBy;
     }
     
-    // Highlight active category
-    highlightActiveCategory(categoryId);
+    // Đánh dấu tab loại bài đăng đang chọn
+    highlightActivePostType(postType);
     
-    // Load topics from API
-    await loadTopics(categoryId, page, searchQuery, sortBy);
+    // Tải chủ đề từ API
+    await loadTopics(postType, page, searchQuery, sortBy);
     
-    // Load hot topics for sidebar
+    // Tải chủ đề nổi bật cho sidebar
     await loadHotTopics();
     
-    // Load active users for sidebar
+    // Tải thành viên tích cực cho sidebar
     await loadActiveUsers();
     
-    // Set up event listeners
+    // Thiết lập các sự kiện tương tác
     setupEventListeners();
 }
 
 /**
- * Highlight the active category tab
- * @param {string} categoryId - The active category ID
+ * Đánh dấu tab loại bài đăng đang chọn
+ * @param {string} postType - Loại bài đăng đang chọn
  */
-function highlightActiveCategory(categoryId) {
-    // Remove active class from all category tabs
-    const categoryTabs = document.querySelectorAll('.category-tab');
-    categoryTabs.forEach(tab => {
+function highlightActivePostType(postType) {
+    // Xóa class active khỏi tất cả các tab loại bài đăng
+    const postTypeTabs = document.querySelectorAll('.post-type-tab');
+    postTypeTabs.forEach(tab => {
         tab.classList.remove('active');
     });
     
-    // Add active class to the selected category tab
-    const activeTab = document.querySelector(`.category-tab[data-category="${categoryId}"]`);
+    // Thêm class active cho tab loại bài đăng được chọn
+    const activeTab = document.querySelector(`.post-type-tab[data-post-type="${postType}"]`);
     if (activeTab) {
         activeTab.classList.add('active');
     } else {
-        // If no category is selected or invalid category, highlight "All"
-        const allTab = document.querySelector('.category-tab[data-category="all"]');
+        // Nếu không có loại nào được chọn hoặc loại không hợp lệ, đánh dấu "all"
+        const allTab = document.querySelector('.post-type-tab[data-post-type="all"]');
         if (allTab) {
             allTab.classList.add('active');
         }
@@ -70,35 +69,35 @@ function highlightActiveCategory(categoryId) {
 }
 
 /**
- * Load topics based on filters
- * @param {string} categoryId - The category ID to filter by
- * @param {number} page - The page number
- * @param {string} searchQuery - The search query
- * @param {string} sortBy - The sort option
+ * Tải chủ đề theo bộ lọc
+ * @param {string} postType - Lọc theo loại bài đăng
+ * @param {number} page - Số trang
+ * @param {string} searchQuery - Từ khóa tìm kiếm
+ * @param {string} sortBy - Kiểu sắp xếp
  */
-async function loadTopics(categoryId, page, searchQuery, sortBy) {
+async function loadTopics(postType, page, searchQuery, sortBy) {
     try {
-        // Show loading state
+        // Hiển thị trạng thái đang tải
         const topicsList = document.getElementById('topics-list');
         if (!topicsList) return;
         
         topicsList.innerHTML = '<div class="loading">Đang tải chủ đề...</div>';
         
-        // Prepare query parameters
+        // Chuẩn bị tham số truy vấn
         const params = {
             page: page,
             sort: sortBy
         };
         
-        if (categoryId && categoryId !== 'all') {
-            params.category = categoryId;
+        if (postType && postType !== 'all') {
+            params.post_type = postType;
         }
         
         if (searchQuery) {
             params.search = searchQuery;
         }
         
-        // Fetch topics from API
+        // Lấy danh sách chủ đề từ API
         const data = await window.api.loadTopics(params);
         
         if (!data.topics || data.topics.length === 0) {
@@ -106,14 +105,14 @@ async function loadTopics(categoryId, page, searchQuery, sortBy) {
             return;
         }
         
-        // Render topics
+        // Hiển thị danh sách chủ đề
         renderTopics(data.topics, topicsList);
         
-        // Render pagination
-        renderPagination(data.pagination);
+        // Hiển thị phân trang
+        renderPagination(data.pagination, postType, searchQuery, sortBy);
         
     } catch (error) {
-        console.error('Error loading topics:', error);
+        console.error('Lỗi khi tải chủ đề:', error);
         const topicsList = document.getElementById('topics-list');
         if (topicsList) {
             topicsList.innerHTML = '<div class="error">Đã xảy ra lỗi khi tải chủ đề. Vui lòng thử lại sau.</div>';
@@ -122,9 +121,9 @@ async function loadTopics(categoryId, page, searchQuery, sortBy) {
 }
 
 /**
- * Render topics to the page
- * @param {Array} topics - Array of topic objects
- * @param {HTMLElement} container - Container element
+ * Hiển thị danh sách chủ đề lên trang
+ * @param {Array} topics - Mảng các chủ đề
+ * @param {HTMLElement} container - Thẻ chứa
  */
 function renderTopics(topics, container) {
     container.innerHTML = '';
@@ -136,7 +135,7 @@ function renderTopics(topics, container) {
                 <div class="topic-content">
                     <h3><a href="topic.html?id=${topic.id}">${topic.title}</a></h3>
                     <div class="topic-meta">
-                        <span class="topic-category">${topic.category_name}</span>
+                        <span class="topic-category">${getPostTypeLabel(topic.post_type)}</span>
                         <span class="topic-views"><i class="fas fa-eye"></i> ${formatCount(topic.view_count)}</span>
                         <span class="topic-comments"><i class="fas fa-comment"></i> ${topic.comment_count}</span>
                         <span class="topic-date"><i class="fas fa-clock"></i> ${formatTimeAgo(topic.created_at)}</span>
@@ -152,18 +151,23 @@ function renderTopics(topics, container) {
                 </div>
             `;
             
-            // Add avatar using Avatar class
+            // Gán avatar sử dụng class Avatar
             const avatarContainer = topicCard.querySelector(`#avatar-${topic.id}`);
             if (avatarContainer) {
                 avatarContainer.innerHTML = Avatar.createFallbackHTML(getDisplayName(topic), '40px');
-            }});
+            }
+        container.appendChild(topicCard);
+    });
 }
 
 /**
- * Render pagination controls
- * @param {Object} pagination - Pagination data
+ * Hiển thị phân trang
+ * @param {Object} pagination - Dữ liệu phân trang
+ * @param {string} postType
+ * @param {string} searchQuery
+ * @param {string} sortBy
  */
-function renderPagination(pagination) {
+function renderPagination(pagination, postType, searchQuery, sortBy) {
     const paginationContainer = document.getElementById('pagination');
     if (!paginationContainer) return;
     
@@ -173,67 +177,57 @@ function renderPagination(pagination) {
     }
     
     const { current_page, total_pages } = pagination;
-    
-    // Get current URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    // Create pagination HTML
+    let baseQuery = new URLSearchParams();
+    if (postType && postType !== 'all') baseQuery.set('post_type', postType);
+    if (searchQuery) baseQuery.set('search', searchQuery);
+    if (sortBy) baseQuery.set('sort', sortBy);
+
     let paginationHTML = '';
-    
-    // Previous button
+
+    // Nút trước
     if (current_page > 1) {
-        urlParams.set('page', current_page - 1);
-        paginationHTML += `<a href="?${urlParams.toString()}" class="prev">«</a>`;
+        baseQuery.set('page', current_page - 1);
+        paginationHTML += `<a href="?${baseQuery.toString()}" class="prev">«</a>`;
     }
-    
-    // Page numbers
+
+    // Trang đầu
     const maxVisiblePages = 5;
     let startPage = Math.max(1, current_page - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(total_pages, startPage + maxVisiblePages - 1);
-    
     if (endPage - startPage + 1 < maxVisiblePages) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
-    // First page
     if (startPage > 1) {
-        urlParams.set('page', 1);
-        paginationHTML += `<a href="?${urlParams.toString()}">1</a>`;
+        baseQuery.set('page', 1);
+        paginationHTML += `<a href="?${baseQuery.toString()}">1</a>`;
         if (startPage > 2) {
             paginationHTML += `<span class="ellipsis">...</span>`;
         }
     }
-    
-    // Page numbers
     for (let i = startPage; i <= endPage; i++) {
-        urlParams.set('page', i);
+        baseQuery.set('page', i);
         if (i === current_page) {
-            paginationHTML += `<a href="?${urlParams.toString()}" class="active">${i}</a>`;
+            paginationHTML += `<a href="?${baseQuery.toString()}" class="active">${i}</a>`;
         } else {
-            paginationHTML += `<a href="?${urlParams.toString()}">${i}</a>`;
+            paginationHTML += `<a href="?${baseQuery.toString()}">${i}</a>`;
         }
     }
-    
-    // Last page
     if (endPage < total_pages) {
         if (endPage < total_pages - 1) {
             paginationHTML += `<span class="ellipsis">...</span>`;
         }
-        urlParams.set('page', total_pages);
-        paginationHTML += `<a href="?${urlParams.toString()}">${total_pages}</a>`;
+        baseQuery.set('page', total_pages);
+        paginationHTML += `<a href="?${baseQuery.toString()}">${total_pages}</a>`;
     }
-    
-    // Next button
     if (current_page < total_pages) {
-        urlParams.set('page', current_page + 1);
-        paginationHTML += `<a href="?${urlParams.toString()}" class="next">»</a>`;
+        baseQuery.set('page', current_page + 1);
+        paginationHTML += `<a href="?${baseQuery.toString()}" class="next">»</a>`;
     }
-    
     paginationContainer.innerHTML = paginationHTML;
 }
 
 /**
- * Load hot topics for sidebar
+ * Tải chủ đề nổi bật cho sidebar
  */
 async function loadHotTopics() {
     try {
@@ -250,9 +244,9 @@ async function loadHotTopics() {
         hotTopicsList.innerHTML = '';
         
         data.topics.forEach((topic, index) => {
-            const categoryClass = getCategoryClass(topic.category_name);
-            const hotTopic = document.createElement('div');
-            hotTopic.className = `hot-topic ${categoryClass}`;
+            const postTypeClass = getPostTypeClass(topic.post_type);
+            const hotTopic = document.createElement('li');
+            hotTopic.className = `hot-topic ${postTypeClass}`;
             
             hotTopic.innerHTML = `
                 <a href="topic.html?id=${topic.id}">#${index + 1} ${truncateText(topic.title, 40)}</a>
@@ -262,7 +256,7 @@ async function loadHotTopics() {
         });
         
     } catch (error) {
-        console.error('Error loading hot topics:', error);
+        console.error('Lỗi khi tải chủ đề nổi bật:', error);
         const hotTopicsList = document.querySelector('.hot-topics-list');
         if (hotTopicsList) {
             hotTopicsList.innerHTML = '<p class="error">Không thể tải chủ đề nóng. Vui lòng thử lại sau.</p>';
@@ -271,7 +265,7 @@ async function loadHotTopics() {
 }
 
 /**
- * Load active users for sidebar
+ * Tải thành viên tích cực cho sidebar
  */
 async function loadActiveUsers() {
     try {
@@ -288,7 +282,7 @@ async function loadActiveUsers() {
         activeUsersList.innerHTML = '';
         
         users.forEach(user => {
-            const activeUser = document.createElement('div');
+            const activeUser = document.createElement('li');
             activeUser.className = 'active-user';
             activeUser.innerHTML = `
                 <div class="avatar-container" id="user-avatar-${user.id || Math.random().toString(36).substring(7)}"></div>
@@ -298,7 +292,7 @@ async function loadActiveUsers() {
                 </div>
             `;
 
-            // Add avatar using Avatar class
+            // Gán avatar sử dụng class Avatar
             const avatarContainer = activeUser.querySelector(`.avatar-container`);
             if (avatarContainer) {
                 avatarContainer.innerHTML = Avatar.createFallbackHTML(getDisplayName(user), '40px');
@@ -307,7 +301,7 @@ async function loadActiveUsers() {
         });
 
     } catch (error) {
-        console.error('Error loading active users:', error);
+        console.error('Lỗi khi tải thành viên tích cực:', error);
         const activeUsersList = document.querySelector('.active-users-list');
         if (activeUsersList) {
             activeUsersList.innerHTML = '<p class="error">Không thể tải thành viên tích cực. Vui lòng thử lại sau.</p>';
@@ -316,34 +310,34 @@ async function loadActiveUsers() {
 }
 
 /**
- * Set up event listeners for forum page interactions
+ * Thiết lập các sự kiện cho các thao tác trên trang diễn đàn
  */
 function setupEventListeners() {
-    // Category tabs
-    const categoryTabs = document.querySelectorAll('.category-tab');
-    categoryTabs.forEach(tab => {
+    // Tab loại bài đăng
+    const postTypeTabs = document.querySelectorAll('.post-type-tab');
+    postTypeTabs.forEach(tab => {
         tab.addEventListener('click', function(e) {
             e.preventDefault();
-            const categoryId = this.getAttribute('data-category');
+            const postType = this.getAttribute('data-post-type');
             
-            // Update URL parameters
+            // Cập nhật tham số URL
             const urlParams = new URLSearchParams(window.location.search);
             
-            if (categoryId === 'all') {
-                urlParams.delete('category');
+            if (postType === 'all') {
+                urlParams.delete('post_type');
             } else {
-                urlParams.set('category', categoryId);
+                urlParams.set('post_type', postType);
             }
             
-            // Reset to page 1
+            // Về trang 1
             urlParams.delete('page');
             
-            // Navigate to new URL
+            // Di chuyển đến URL mới
             window.location.href = `?${urlParams.toString()}`;
         });
     });
     
-    // Search form
+    // Tìm kiếm
     const searchInput = document.getElementById('topic-search');
     const searchButton = document.getElementById('search-button');
     
@@ -351,20 +345,20 @@ function setupEventListeners() {
         function performSearch() {
             const searchQuery = searchInput.value.trim();
             
-            // Get current URL parameters
+            // Lấy tham số URL hiện tại
             const urlParams = new URLSearchParams(window.location.search);
             
-            // Update search parameter
+            // Cập nhật tham số tìm kiếm
             if (searchQuery) {
                 urlParams.set('search', searchQuery);
             } else {
                 urlParams.delete('search');
             }
             
-            // Reset to page 1
+            // Về trang 1
             urlParams.delete('page');
             
-            // Navigate to new URL
+            // Di chuyển đến URL mới
             window.location.href = `?${urlParams.toString()}`;
         }
         
@@ -381,63 +375,70 @@ function setupEventListeners() {
         });
     }
     
-    // Sort options
+    // Sắp xếp
     const sortSelect = document.getElementById('sort-select');
     if (sortSelect) {
         sortSelect.addEventListener('change', function() {
             const sortBy = sortSelect.value;
             
-            // Get current URL parameters
+            // Lấy tham số URL hiện tại
             const urlParams = new URLSearchParams(window.location.search);
             
-            // Update sort parameter
+            // Cập nhật tham số sắp xếp
             urlParams.set('sort', sortBy);
             
-            // Reset to page 1
+            // Về trang 1
             urlParams.delete('page');
             
-            // Navigate to new URL
+            // Di chuyển đến URL mới
             window.location.href = `?${urlParams.toString()}`;
         });
     }
 }
 
 /**
- * Helper function to get CSS class for category
- * @param {string} categoryName - The category name
- * @returns {string} - The CSS class
+ * Hàm trợ giúp: Chuyển post_type thành tên tiếng Việt
+ * @param {string} postType
  */
-function getCategoryClass(categoryName) {
-    if (!categoryName) return '';
-    
-    const name = categoryName.toLowerCase();
-    if (name.includes('công nghệ')) return 'tech';
-    if (name.includes('thời trang')) return 'fashion';
-    if (name.includes('du lịch')) return 'travel';
-    if (name.includes('ẩm thực')) return 'food';
-    if (name.includes('giáo dục')) return 'education';
-    if (name.includes('sức khỏe')) return 'health';
-    return '';
+function getPostTypeLabel(postType) {
+    switch (postType) {
+        case 'discussion': return 'Thảo luận';
+        case 'question': return 'Câu hỏi';
+        case 'review': return 'Đánh giá';
+        case 'news': return 'Tin tức';
+        default: return 'Khác';
+    }
 }
 
 /**
- * Helper function to truncate text
- * @param {string} text - The text to truncate
- * @param {number} maxLength - Maximum length
- * @returns {string} - Truncated text
+ * Hàm trợ giúp: CSS class cho từng loại post_type
+ * @param {string} postType
+ */
+function getPostTypeClass(postType) {
+    switch (postType) {
+        case 'discussion': return 'tech';
+        case 'question': return 'education';
+        case 'review': return 'food';
+        case 'news': return 'news';
+        default: return '';
+    }
+}
+
+/**
+ * Hàm trợ giúp rút gọn văn bản
+ * @param {string} text - Văn bản cần rút gọn
+ * @param {number} maxLength - Độ dài tối đa
+ * @returns {string} - Văn bản đã rút gọn
  */
 function truncateText(text, maxLength) {
     if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
 }
-
-// Removed getInitials function - now using Avatar class from avatar.js
-
 /**
- * Helper function to format count
- * @param {number} count - The count
- * @returns {string} - Formatted count
+ * Hàm trợ giúp định dạng số lượng
+ * @param {number} count - Số lượng
+ * @returns {string} - Số đã định dạng
  */
 function formatCount(count) {
     if (!count) return '0';
@@ -448,9 +449,9 @@ function formatCount(count) {
 }
 
 /**
- * Helper function to format time ago
- * @param {string} dateString - The date string
- * @returns {string} - Time ago text
+ * Hàm trợ giúp thời gian trước đó
+ * @param {string} dateString - Chuỗi ngày
+ * @returns {string} - Thời gian trước đó
  */
 function formatTimeAgo(dateString) {
     if (!dateString) return '';
@@ -478,4 +479,13 @@ function formatTimeAgo(dateString) {
     
     const years = Math.floor(days / 365);
     return `${years} năm trước`;
+}
+
+/**
+ * Hàm trợ giúp: Lấy tên hiển thị cho user/topic
+ */
+function getDisplayName(obj) {
+    if (obj.full_name) return obj.full_name;
+    if (obj.author_name) return obj.author_name;
+    return 'Ẩn danh';
 }
