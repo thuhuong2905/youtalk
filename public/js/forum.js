@@ -278,7 +278,7 @@ async function loadHotTopics() {
 }
 
 /**
- * Tải thành viên tích cực cho sidebar
+ * ✅ FIXED: Tải thành viên tích cực cho sidebar - Sửa lỗi hiển thị
  */
 async function loadActiveUsers() {
     try {
@@ -292,6 +292,7 @@ async function loadActiveUsers() {
         
         // Extract users from normalized response
         const users = response?.data?.users || [];
+        console.log('Extracted users:', users);
         
         if (users.length === 0) {
             activeUsersList.innerHTML = '<div class="no-data">Chưa có thành viên tích cực.</div>';
@@ -310,32 +311,37 @@ async function loadActiveUsers() {
 }
 
 /**
- * Render danh sách thành viên tích cực
+ * ✅ FIXED: Render danh sách thành viên tích cực - Sửa lỗi ID và field mapping
  */
 function renderActiveUsers(users, container) {
     container.innerHTML = '';
     users.forEach((user, index) => {
         const activeUser = document.createElement('li');
         activeUser.className = 'active-user';
-        const avatarId = `user-avatar-${user.id || Math.random().toString(36).substring(7)}`;
+        
+        // ✅ FIXED: Tạo ID duy nhất và an toàn
+        const userId = user.id || user.user_id || Math.random().toString(36).substring(7);
+        const avatarId = `user-avatar-${userId}`;
+        
+        // ✅ FIXED: Đảm bảo các field tồn tại với fallback values
+        const fullName = user.full_name || user.name || 'Ẩn danh';
+        const activityScore = user.activity_score || 0;
+        const postCount = user.post_count || 0;
+        const commentCount = user.comment_count || 0;
+        const reviewCount = user.review_count || 0;
+        const followerCount = user.follower_count || 0;
         
         // Thêm tooltip hiển thị thông tin chi tiết về hoạt động
-        const activityDetails = `
-            ${user.post_count} bài viết
-            ${user.comment_count} bình luận
-            ${user.review_count} đánh giá
-            ${user.follower_count} người theo dõi
-            Điểm hoạt động: ${user.activity_score}
-        `.replace(/\s+/g, ' ').trim();
+        const activityDetails = `${postCount} bài viết, ${commentCount} bình luận, ${reviewCount} đánh giá, ${followerCount} người theo dõi, Điểm hoạt động: ${activityScore}`;
         
         activeUser.innerHTML = `
-            <a href="profile.html?id=${user.id}" class="active-user-link" title="${activityDetails}">
+            <a href="profile.html?user_id=${userId}" class="active-user-link" title="${activityDetails}">
                 <div class="avatar-container" id="${avatarId}"></div>
                 <div class="user-info">
-                    <div class="user-name">${user.full_name}</div>
+                    <div class="user-name">${fullName}</div>
                     <div class="user-stats">
-                        <span class="activity-score">${user.activity_score} điểm</span>
-                        <span class="post-count">${user.post_count} bài viết</span>
+                        <span class="activity-score">${activityScore} điểm</span>
+                        <span class="post-count">${postCount} bài viết</span>
                     </div>
                 </div>
                 <div class="rank-badge">#${index + 1}</div>
@@ -344,11 +350,19 @@ function renderActiveUsers(users, container) {
 
         container.appendChild(activeUser);
         
-        // Tạo avatar sau khi thêm vào DOM
-        const avatarContainer = activeUser.querySelector(`#${avatarId}`);
-        if (avatarContainer && window.Avatar) {
-            avatarContainer.innerHTML = window.Avatar.createFallbackHTML(user.full_name, '40px');
-        }
+        // ✅ FIXED: Tạo avatar sau khi thêm vào DOM với error handling
+        setTimeout(() => {
+            const avatarContainer = activeUser.querySelector(`#${avatarId}`);
+            if (avatarContainer && window.Avatar) {
+                try {
+                    avatarContainer.innerHTML = window.Avatar.createFallbackHTML(fullName, '40px');
+                } catch (error) {
+                    console.warn('Error creating avatar for user:', fullName, error);
+                    // Fallback avatar nếu Avatar class không khả dụng
+                    avatarContainer.innerHTML = `<div style="width: 40px; height: 40px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${fullName.charAt(0).toUpperCase()}</div>`;
+                }
+            }
+        }, 0);
     });
 }
 

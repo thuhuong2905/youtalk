@@ -153,9 +153,11 @@ const api = {
         });
     },
     
-    // User Posts API
+    // User Posts API - ✅ FIXED: Sửa endpoint và cải thiện normalize logic
     loadUserPosts: async function(userId) {
         const response = await fetchApi(`posts.php?action=list_by_user&user_id=${userId}`);
+        console.log('Raw loadUserPosts response:', response); // Debug log
+        
         // Normalize response structure
         if (response.success) {
             const normalizedData = {
@@ -179,7 +181,16 @@ const api = {
             else if (Array.isArray(response.message)) {
                 normalizedData.data.posts = response.message;
             }
+            // Case 5: Data directly in response.posts
+            else if (response.posts) {
+                normalizedData.data.posts = response.posts;
+            }
+            // Case 6: Empty array as fallback
+            else {
+                normalizedData.data.posts = [];
+            }
             
+            console.log('Normalized loadUserPosts response:', normalizedData); // Debug log
             return normalizedData;
         }
         return response;

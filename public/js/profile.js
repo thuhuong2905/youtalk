@@ -235,7 +235,7 @@ function populateSettingsForm(userData) {
     if (emailInput) emailInput.value = userData.email || '';
     if (bioInput) bioInput.value = userData.bio || '';
 
-    // Add form submit handler
+    // ✅ FIXED: Add form submit handler for settings form (single instance)
     const settingsForm = document.getElementById("profile-settings-form");
     if (settingsForm) {
         // Remove existing event listener if any
@@ -245,7 +245,7 @@ function populateSettingsForm(userData) {
 }
 
 /**
- * Handle settings form submission
+ * ✅ FIXED: Handle settings form submission (extracted to prevent duplication)
  */
 async function handleSettingsFormSubmit(event) {
     event.preventDefault();
@@ -255,14 +255,16 @@ async function handleSettingsFormSubmit(event) {
     const bio = formData.get('bio');
     const errorDiv = document.getElementById('profile-error');
     const successDiv = document.getElementById('profile-success');
-    errorDiv.textContent = '';
-    successDiv.textContent = '';
+    
+    if (errorDiv) errorDiv.textContent = '';
+    if (successDiv) successDiv.textContent = '';
+    
     if (!full_name || !email) {
-        errorDiv.textContent = 'Vui lòng nhập đầy đủ thông tin bắt buộc.';
+        if (errorDiv) errorDiv.textContent = 'Vui lòng nhập đầy đủ thông tin bắt buộc.';
         return;
     }
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-        errorDiv.textContent = 'Email không hợp lệ.';
+        if (errorDiv) errorDiv.textContent = 'Email không hợp lệ.';
         return;
     }
     try {
@@ -273,7 +275,7 @@ async function handleSettingsFormSubmit(event) {
         });
         const data = await res.json();
         if (data.success) {
-            successDiv.textContent = 'Cập nhật thông tin thành công!';
+            if (successDiv) successDiv.textContent = 'Cập nhật thông tin thành công!';
             setTimeout(() => {
                 location.reload();
             }, 1500); // Reload sau 1.5 giây để người dùng có thể đọc thông báo
@@ -287,134 +289,11 @@ async function handleSettingsFormSubmit(event) {
             if (typeof msg === 'object') {
                 msg = JSON.stringify(msg);
             }
-            errorDiv.textContent = msg || 'Có lỗi xảy ra.';
+            if (errorDiv) errorDiv.textContent = msg || 'Có lỗi xảy ra.';
         }
     } catch (error) {
-        errorDiv.textContent = 'Không thể kết nối máy chủ.';
+        if (errorDiv) errorDiv.textContent = 'Không thể kết nối máy chủ.';
     }
-}
-
-// Lưu thay đổi thông tin cá nhân
-const profileForm = document.getElementById('profile-settings-form');
-if (profileForm) {
-  profileForm.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    // Username là mặc định, không cho phép chỉnh sửa
-    // const username = document.getElementById('username').value.trim(); // Không gửi username
-    const full_name = document.getElementById('full_name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const bio = document.getElementById('bio').value.trim();
-    const errorDiv = document.getElementById('profile-error');
-    const successDiv = document.getElementById('profile-success');
-    errorDiv.textContent = '';
-    successDiv.textContent = '';
-    // Validate đơn giản
-    if (!full_name || !email) {
-      errorDiv.textContent = 'Vui lòng nhập đầy đủ thông tin bắt buộc.';
-      return;
-    }
-    // Validate email format
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      errorDiv.textContent = 'Email không hợp lệ.';
-      return;
-    }
-    // Gửi API lưu thay đổi
-    try {
-      const res = await fetch('/src/api/users.php?action=update_profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name, email, bio })
-      });
-      const data = await res.json();
-      if (data.success) {
-        successDiv.textContent = 'Cập nhật thông tin thành công!';
-        setTimeout(() => {
-            location.reload();
-        }, 1500); // Reload sau 1.5 giây để người dùng có thể đọc thông báo
-
-      } else {
-        let msg = data.message;
-        if (typeof msg === 'object') {
-          msg = JSON.stringify(msg);
-        }
-        errorDiv.textContent = msg || 'Có lỗi xảy ra.';
-      }
-    } catch (error) {
-      errorDiv.textContent = 'Không thể kết nối máy chủ.';
-    }
-});
-}
-
-// Ẩn/hiện mật khẩu cho form đổi mật khẩu
-function setupPasswordToggle() {
-  document.querySelectorAll('.toggle-password').forEach(function (icon) {
-    icon.addEventListener('click', function () {
-      const targetId = icon.getAttribute('data-target');
-      const input = document.getElementById(targetId);
-      if (input) {
-        if (input.type === 'password') {
-          input.type = 'text';
-          icon.textContent = '🙈';
-        } else {
-          input.type = 'password';
-          icon.textContent = '👁️';
-        }
-      }
-    });
-  });
-}
-
-setupPasswordToggle();
-
-// Đổi mật khẩu với kiểm tra và thông báo bằng JS
-const changePasswordForm = document.getElementById('change-password-form');
-if (changePasswordForm) {
-  changePasswordForm.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const currentPassword = document.getElementById('current_password').value;
-    const newPassword = document.getElementById('new_password').value;
-    const confirmPassword = document.getElementById('confirm_password').value;
-    const errorDiv = document.getElementById('password-error');
-    const successDiv = document.getElementById('password-success');
-    errorDiv.textContent = '';
-    successDiv.textContent = '';
-    // Kiểm tra nhập đủ
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      errorDiv.textContent = 'Vui lòng nhập đầy đủ các trường.';
-      return;
-    }
-    // Kiểm tra độ mạnh mật khẩu mới
-    if (newPassword.length < 8) {
-      errorDiv.textContent = 'Mật khẩu mới phải có ít nhất 8 ký tự.';
-      return;
-    }
-    if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-      errorDiv.textContent = 'Mật khẩu mới phải có chữ hoa, chữ thường và số.';
-      return;
-    }
-    // Kiểm tra xác nhận
-    if (newPassword !== confirmPassword) {
-      errorDiv.textContent = 'Xác nhận mật khẩu không khớp.';
-      return;
-    }
-    // Gửi API đổi mật khẩu
-    try {
-      const res = await fetch('/src/api/change_password.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword, confirm_password: confirmPassword })
-      });
-      const data = await res.json();
-      if (data.success) {
-        successDiv.textContent = 'Đổi mật khẩu thành công!';
-        changePasswordForm.reset();
-      } else {
-        errorDiv.textContent = data.message || 'Có lỗi xảy ra.';
-      }
-    } catch (err) {
-      errorDiv.textContent = 'Không thể kết nối máy chủ.';
-    }
-});
 }
 
 /**
@@ -507,7 +386,7 @@ function switchToTab(tabType) {
 }
 
 /**
- * Load content for profile tabs
+ * ✅ FIXED: Load content for profile tabs - Sửa lỗi posts không hiển thị
  */
 async function loadProfileTabContent(tabType, userId) {
     const contentContainer = document.querySelector(`#tab-${tabType}`);
@@ -531,9 +410,16 @@ async function loadProfileTabContent(tabType, userId) {
             case "posts":
                 try {
                     const response = await window.api.loadUserPosts(userId);
-                    if (response?.success && response?.data?.posts) {
-                        renderPostsList(response.data.posts, listContainer);
+                    console.log('Profile tab posts response:', response); // Debug log
+                    
+                    if (response?.success && response?.data?.posts && Array.isArray(response.data.posts)) {
+                        if (response.data.posts.length > 0) {
+                            renderPostsList(response.data.posts, listContainer);
+                        } else {
+                            listContainer.innerHTML = `<p>${getEmptyStateMessage("posts")}</p>`;
+                        }
                     } else {
+                        console.warn('Invalid posts response structure:', response);
                         listContainer.innerHTML = `<p>${getEmptyStateMessage("posts")}</p>`;
                     }
                     return;
@@ -761,7 +647,7 @@ function renderUsersList(users, container) {
         userInfo.className = 'user-info';
         
         userInfo.innerHTML = `
-            <a href="profile.html?id=${user.id}" class="username"">${user.full_name || 'Ẩn danh'}</a>
+            <a href="profile.html?user_id=${user.id}" class="username">${user.full_name || 'Ẩn danh'}</a>
         `;
         
         userElement.appendChild(userInfo);
@@ -774,11 +660,12 @@ function renderUsersList(users, container) {
  */
 function generateStars(rating) {
     const numRating = parseFloat(rating);
-    if (isNaN(numRating) || numRating < 0) rating = 0;
-    if (numRating > 5) rating = 5;
+    let finalRating = numRating;
+    if (isNaN(numRating) || numRating < 0) finalRating = 0;
+    if (numRating > 5) finalRating = 5;
 
-    const fullStars = Math.floor(numRating);
-    const halfStar = numRating % 1 >= 0.5 ? 1 : 0;
+    const fullStars = Math.floor(finalRating);
+    const halfStar = finalRating % 1 >= 0.5 ? 1 : 0;
     const emptyStars = 5 - fullStars - halfStar;
 
     let starsHTML = "";
@@ -891,37 +778,52 @@ function initializeAvatarUpload() {
 }
 
 /**
- * Initialize password change functionality
+ * ✅ FIXED: Initialize password change functionality - Loại bỏ duplicate code
  */
 function initializePasswordChange() {
     const changePasswordForm = document.getElementById('change-password-form');
     
     if (changePasswordForm) {
+        // ✅ Remove any existing event listeners to prevent duplicates
+        changePasswordForm.onsubmit = null;
+        
         changePasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const errorDiv = document.getElementById('password-error');
+            const successDiv = document.getElementById('password-success');
+            
+            // Clear previous messages
+            if (errorDiv) errorDiv.textContent = '';
+            if (successDiv) successDiv.textContent = '';
             
             // Basic validation
             if (!currentPassword || !newPassword || !confirmPassword) {
-                alert('Vui lòng điền đầy đủ thông tin.');
+                if (errorDiv) errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin.';
                 return;
             }
             
             if (newPassword !== confirmPassword) {
-                alert('Mật khẩu mới và xác nhận mật khẩu không khớp.');
+                if (errorDiv) errorDiv.textContent = 'Mật khẩu mới và xác nhận mật khẩu không khớp.';
                 return;
             }
             
             if (newPassword.length < 8) {
-                alert('Mật khẩu mới phải có ít nhất 8 ký tự.');
+                if (errorDiv) errorDiv.textContent = 'Mật khẩu mới phải có ít nhất 8 ký tự.';
+                return;
+            }
+            
+            // Enhanced password validation
+            if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+                if (errorDiv) errorDiv.textContent = 'Mật khẩu mới phải có chữ hoa, chữ thường và số.';
                 return;
             }
             
             try {
-                const response = await fetchApi('/src/api/change_password.php', {
+                const response = await fetch('/src/api/change_password.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -933,21 +835,49 @@ function initializePasswordChange() {
                     })
                 });
                 
-                if (response && response.success === 200) {
-                    alert('Đổi mật khẩu thành công!');
+                const result = await response.json();
+                
+                if (result && result.success) {
+                    if (successDiv) successDiv.textContent = 'Đổi mật khẩu thành công!';
                     // Clear form
                     changePasswordForm.reset();
                 } else {
-                    alert('Lỗi: ' + (response.message || 'Không thể đổi mật khẩu.'));
+                    if (errorDiv) errorDiv.textContent = result.message || 'Không thể đổi mật khẩu.';
                 }
             } catch (error) {
                 console.error('Error changing password:', error);
-                alert('Đã xảy ra lỗi khi đổi mật khẩu.');
-          }
+                if (errorDiv) errorDiv.textContent = 'Đã xảy ra lỗi khi đổi mật khẩu.';
+            }
         });
     }
+
+    // ✅ FIXED: Setup password toggle functionality (single instance)
+    setupPasswordToggle();
 }
 
+/**
+ * ✅ FIXED: Setup password toggle functionality (extracted to prevent duplication)
+ */
+function setupPasswordToggle() {
+    document.querySelectorAll('.toggle-password').forEach(function (icon) {
+        // Remove existing listeners to prevent duplicates
+        icon.onclick = null;
+        
+        icon.addEventListener('click', function () {
+            const targetId = icon.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (input) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.textContent = '🙈';
+                } else {
+                    input.type = 'password';
+                    icon.textContent = '👁️';
+                }
+            }
+        });
+    });
+}
 
 /**
  * Initialize account management functionality
@@ -965,7 +895,7 @@ function initializeAccountManagement() {
     // Open modal with appropriate action when buttons are clicked
     if (deactivateButton) {
         deactivateButton.addEventListener('click', () => {
-            if (accountActionModal) {
+            if (accountActionModal && accountActionTitle && accountActionMessage && accountActionType) {
                 accountActionTitle.textContent = 'Xác nhận vô hiệu hóa tài khoản';
                 accountActionMessage.textContent = 'Bạn có chắc chắn muốn vô hiệu hóa tài khoản? Tài khoản của bạn sẽ bị ẩn và không thể truy cập cho đến khi bạn đăng nhập lại.';
                 accountActionType.value = 'deactivate_account';
@@ -976,7 +906,7 @@ function initializeAccountManagement() {
     
     if (deleteButton) {
         deleteButton.addEventListener('click', () => {
-            if (accountActionModal) {
+            if (accountActionModal && accountActionTitle && accountActionMessage && accountActionType) {
                 accountActionTitle.textContent = 'Xác nhận xóa tài khoản';
                 accountActionMessage.textContent = 'Bạn có chắc chắn muốn xóa tài khoản? Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn và không thể khôi phục.';
                 accountActionType.value = 'delete_account';
@@ -992,7 +922,8 @@ function initializeAccountManagement() {
                 if (accountActionModal) {
                     accountActionModal.style.display = 'none';
                     // Clear password field
-                    document.getElementById('confirm-password-action').value = '';
+                    const passwordField = document.getElementById('confirm-password-action');
+                    if (passwordField) passwordField.value = '';
                 }
             });
         });
@@ -1048,12 +979,14 @@ function initializeFollowSystem() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const profileUserId = urlParams.get('user_id') || urlParams.get('id');
+    
     window.checkLoginStatus().then(currentUser => {
-        if (!currentUser || !profileUserId || currentUser.id == profileUserId) {
+        if (!currentUser || !profileUserId || currentUser.user_id == profileUserId) {
             followButton.style.display = 'none';
             unfollowButton.style.display = 'none';
             return;
         }
+        
         // Kiểm tra trạng thái theo dõi
         fetch(`/src/api/followers.php?action=check_follow_status&target_user_id=${profileUserId}`)
             .then(res => res.json())
@@ -1065,6 +998,7 @@ function initializeFollowSystem() {
                 } else if (data && data.message && typeof data.message.is_following !== 'undefined') {
                     isFollowing = data.message.is_following === true;
                 }
+                
                 if (isFollowing) {
                     followButton.style.display = 'none';
                     unfollowButton.style.display = '';
@@ -1083,6 +1017,7 @@ function initializeFollowSystem() {
     followButton.onclick = function () {
         const urlParams = new URLSearchParams(window.location.search);
         const profileUserId = urlParams.get('user_id') || urlParams.get('id');
+        
         fetch(`/src/api/followers.php?action=follow`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1094,8 +1029,8 @@ function initializeFollowSystem() {
                 if (data.success === 201 || data.success === true) {
                     followButton.style.display = 'none';
                     unfollowButton.style.display = '';
-                    // Không cần reloadFollowerCount vì sẽ reload trang
-                    window.location.reload(); // Reload lại trang ngay sau khi theo dõi
+                    // Reload lại trang để cập nhật số liệu
+                    window.location.reload();
                 } else {
                     alert(typeof data.message === 'string' ? data.message : JSON.stringify(data.message) || 'Có lỗi xảy ra.');
                 }
@@ -1108,8 +1043,10 @@ function initializeFollowSystem() {
     // Sự kiện hủy theo dõi
     unfollowButton.onclick = function () {
         if (!confirm('Bạn có chắc chắn muốn hủy theo dõi người này?')) return;
+        
         const urlParams = new URLSearchParams(window.location.search);
         const profileUserId = urlParams.get('user_id') || urlParams.get('id');
+        
         fetch(`/src/api/followers.php?action=unfollow&following_user_id=${profileUserId}`, {
             method: 'DELETE',
             credentials: 'include'
@@ -1119,8 +1056,8 @@ function initializeFollowSystem() {
                 if (data.success === 200 || data.success === true) {
                     followButton.style.display = '';
                     unfollowButton.style.display = 'none';
-                    // Không cần reloadFollowerCount vì sẽ reload trang
-                    window.location.reload(); // Reload lại trang ngay sau khi hủy theo dõi
+                    // Reload lại trang để cập nhật số liệu
+                    window.location.reload();
                 } else {
                     alert(typeof data.message === 'string' ? data.message : JSON.stringify(data.message) || 'Có lỗi xảy ra.');
                 }
@@ -1129,22 +1066,4 @@ function initializeFollowSystem() {
                 alert('Có lỗi xảy ra khi gửi yêu cầu hủy theo dõi.');
             });
     };
-}
-
-/**
- * Reload follower count after follow/unfollow
- */
-function reloadFollowerCount() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const profileUserId = urlParams.get('user_id') || urlParams.get('id');
-    fetch(`/src/api/followers.php?action=get_followers&user_id=${profileUserId}`)
-        .then(res => res.json())
-        .then(data => {
-            const count = data.followers ? data.followers.length : 0;
-            const followerCountEl = document.getElementById('profile-follower-count');
-            if (followerCountEl) {
-                followerCountEl.textContent = count;
-            }
-        })
-        .catch(err => console.error('Error reloading follower count:', err));
 }
