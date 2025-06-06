@@ -674,11 +674,8 @@ function renderReviewsList(reviews, container) {
         const date = new Date(review.created_at);
         const formattedDate = date.toLocaleDateString('vi-VN');
         
-        // Generate star rating HTML
-        const rating = parseInt(review.rating) || 0;
-        const stars = Array(5).fill('').map((_, i) => 
-            i < rating ? '★' : '☆'
-        ).join('');
+        // Generate star rating HTML using Font Awesome
+        const stars = generateStars(review.rating);
         
         reviewElement.innerHTML = `
             <div class="review-header">
@@ -720,7 +717,7 @@ function renderCommentsList(comments, container) {
         }
         
         commentElement.innerHTML = `
-            <div class="comment-content">Nội dung bài đăng: ${comment.content}</div>
+            <div class="comment-content">Nội dung bình luận: ${comment.content}</div>
             <div class="comment-meta">
                 <span>Ngày đăng: <i class="icon-calendar"></i> ${formattedDate}</span>
                 <span><i class="icon-link"></i> bình luận trong <a href="${targetUrl}">${targetTitle}</a></span>
@@ -744,7 +741,7 @@ function renderUsersList(users, container) {
         avatarContainer.className = 'user-avatar';
         
         // Render avatar
-        renderAvatar(avatarContainer, user.profile_picture, user.full_name || 'Ẩn danh', '60px');
+        renderAvatar(avatarContainer, user.profile_picture, user.full_name || 'Ẩn danh', '70px');
         
         userElement.appendChild(avatarContainer);
         
@@ -759,6 +756,26 @@ function renderUsersList(users, container) {
         userElement.appendChild(userInfo);
         container.appendChild(userElement);
     });
+}
+
+/**
+ * Helper function to generate star rating HTML
+ */
+function generateStars(rating) {
+    const numRating = parseFloat(rating);
+    if (isNaN(numRating) || numRating < 0) rating = 0;
+    if (numRating > 5) rating = 5;
+
+    const fullStars = Math.floor(numRating);
+    const halfStar = numRating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
+
+    let starsHTML = "";
+    for (let i = 0; i < fullStars; i++) starsHTML += '<i class="fas fa-star"></i>';
+    if (halfStar) starsHTML += '<i class="fas fa-star-half-alt"></i>';
+    for (let i = 0; i < emptyStars; i++) starsHTML += '<i class="far fa-star"></i>';
+
+    return starsHTML;
 }
 
 /**

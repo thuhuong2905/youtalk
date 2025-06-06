@@ -143,7 +143,7 @@ class Post {
             $whereClause = implode(' AND ', $whereConditions);
             
             $query = "
-                SELECT p.*, u.username, u.profile_picture, c.name as category_name,
+                SELECT p.*, u.full_name, u.username, u.profile_picture, c.name as category_name,
                     (SELECT COUNT(*) FROM comments cm WHERE cm.post_id = p.id AND cm.status = 'active') as comment_count
                 FROM posts p
                 LEFT JOIN users u ON p.user_id = u.id

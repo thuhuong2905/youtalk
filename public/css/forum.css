@@ -9,14 +9,16 @@
 }
 
 #forum-hero h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
     margin-bottom: 15px;
     color: var(--color-primary);
+    letter-spacing: var(--tracking-tight);
 }
 
 #forum-hero p {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
     opacity: 0.9;
     max-width: 700px;
     margin: 0 auto;
@@ -48,6 +50,8 @@
     border-radius: 20px;
     background-color: #f0f0f0;
     color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     text-decoration: none;
     white-space: nowrap;
     transition: background-color 0.3s, color 0.3s;

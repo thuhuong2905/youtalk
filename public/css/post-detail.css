@@ -1,18 +1,43 @@
 /* Post Detail Page Specific Styles */
 
+:root {
+    --primary-color: var(--color-primary);
+    --secondary-color: #f3f4f6;
+    --text-color: #1f2937;
+    --text-light: #6b7280;
+    --border-color: #e5e7eb;
+    --hover-color: var(--color-secondary);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --animation-duration: 0.3s;
+}
+
+/* Use typography system from style.css */
+
 .post-detail-container {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
     margin: 2rem 0;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Post Content Section */
 .post-content {
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
     padding: 2rem;
+    transition: transform var(--animation-duration);
+}
+
+.post-content:hover {
+    transform: translateY(-2px);
 }
 
 .post-header {
@@ -23,41 +48,56 @@
     display: flex;
     align-items: center;
     margin-bottom: 1rem;
-    font-size: 0.9rem;
-    color: #666;
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    font-family: var(--font-primary);
 }
 
 .post-meta .category {
-    background-color: var(--color-primary);
+    background-color: var(--primary-color);
     color: white;
-    padding: 0.3rem 0.8rem;
+    padding: 0.4rem 1rem;
     border-radius: 20px;
     margin-right: 1rem;
-    font-weight: 500;
+    font-weight: var(--font-medium);
+    transition: all var(--animation-duration);
+}
+
+.post-meta .category:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-1px);
 }
 
 .post-meta .date {
     display: flex;
     align-items: center;
+    background: var(--secondary-color);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    color: var(--text-light);
+    font-family: var(--font-mono);
 }
 
 .post-meta .date::before {
     content: '\f017';
     font-family: 'Font Awesome 5 Free';
-    margin-right: 0.5rem;
+    margin-right: 0.2rem; /* Giảm margin của icon */
 }
 
 .post-title {
-    font-size: 2.2rem;
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-color);
+    line-height: var(--leading-tight);
     margin-bottom: 1.5rem;
-    color: #333;
-    line-height: 1.3;
 }
 
 .post-author {
     display: flex;
     align-items: center;
     margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .author-avatar {
@@ -66,47 +106,72 @@
     border-radius: 50%;
     object-fit: cover;
     margin-right: 1rem;
+    border: 2px solid var(--border-color);
+    transition: transform var(--animation-duration);
+}
+
+.author-avatar:hover {
+    transform: scale(1.1);
 }
 
 .author-info {
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
 }
 
 .author-name {
-    font-weight: 600;
-    color: #333;
+    font-weight: var(--font-semibold);
+    color: var(--text-color);
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
 }
 
 .author-role {
-    font-size: 0.85rem;
-    color: #666;
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    background: var(--secondary-color);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 0.2rem;
 }
 
 .post-body {
-    font-size: 1.1rem;
-    line-height: 1.7;
-    color: #444;
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    font-family: var(--font-primary);
+    color: var(--text-color);
     margin-bottom: 2rem;
 }
 
 .post-body img {
     max-width: 100%;
     height: auto;
-    border-radius: 8px;
+    border-radius: 12px;
     margin: 1.5rem 0;
+    transition: transform var(--animation-duration);
+    box-shadow: var(--shadow-sm);
+}
+
+.post-body img:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-md);
 }
 
 .post-body h2 {
-    font-size: 1.8rem;
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
     margin: 2rem 0 1rem;
-    color: #333;
+    color: var(--text-color);
 }
 
 .post-body h3 {
-    font-size: 1.5rem;
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
     margin: 1.8rem 0 1rem;
-    color: #333;
+    color: var(--text-color);
 }
 
 .post-body p {
@@ -119,89 +184,117 @@
 }
 
 .post-body li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
 }
 
 .post-body blockquote {
-    border-left: 4px solid var(--color-primary);
-    padding-left: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+    padding: 1rem 1.5rem;
     margin: 1.5rem 0;
     font-style: italic;
-    color: #555;
+    color: var(--text-light);
+    background: var(--secondary-color);
+    border-radius: 0 8px 8px 0;
 }
 
 .post-body a {
-    color: var(--color-primary);
+    color: var(--primary-color);
     text-decoration: none;
+    transition: all var(--animation-duration);
 }
 
 .post-body a:hover {
-    text-decoration: underline;
+    color: var(--hover-color);
 }
 
 .post-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
+    gap: 0.8rem;
+    margin: 2rem 0;
 }
 
 .tag {
-    background-color: #f0f0f0;
-    color: #555;
-    padding: 0.4rem 0.8rem;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all var(--animation-duration);
 }
 
 .tag:hover {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
 }
 
 .post-stats {
     display: flex;
     justify-content: space-between;
     padding: 1.5rem 0;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 2rem;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    margin: 2rem 0;
 }
 
 .stat-item {
     display: flex;
     align-items: center;
-    color: #666;
-    font-size: 0.95rem;
+    color: var(--text-light);
+    font-size: var(--text-sm);
+    transition: all var(--animation-duration);
+    gap: 0.2rem; /* Giảm khoảng cách giữa icon và text */
+    font-family: var(--font-primary);
+}
+
+.stat-item:hover {
+    color: var(--text-color);
 }
 
 .stat-item i {
-    margin-right: 0.5rem;
-    color: var(--color-primary);
+    margin-right: 0.2rem; /* Giảm margin của icon */
+    font-size: 0.95em; /* Giảm size icon một chút */
+    color: var(--primary-color);
 }
 
 .share-buttons {
     display: flex;
-    gap: 0.8rem;
-    margin-left: 0.8rem;
+    gap: 1rem;
 }
 
 .share-buttons a {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     color: white;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all var(--animation-duration);
+    font-size: var(--text-base);
+    line-height: 0;
+    padding: 0;
+    position: relative;
+}
+
+.share-buttons a i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.share-buttons a:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .facebook-share {
-    background-color: #3b5998;
+    background-color: #1877f2;
 }
 
 .twitter-share {
@@ -209,34 +302,40 @@
 }
 
 .linkedin-share {
-    background-color: #0077b5;
+    background-color: #0a66c2;
+}
+
+.instagram-share {
+    background-color: #e4405f;
 }
 
 .copy-link {
     background-color: #333;
 }
 
-.share-buttons a:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+.author-bio {
+    background-color: var(--secondary-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+    transition: transform var(--animation-duration);
 }
 
-.author-bio {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-top: 2rem;
+.author-bio:hover {
+    transform: translateY(-2px);
 }
 
 .author-bio h3 {
     margin-bottom: 1rem;
-    font-size: 1.3rem;
-    color: #333;
+    font-size: var(--text-xl);
+    color: var(--text-color);
+    font-weight: var(--font-semibold);
 }
 
 .author-bio-content {
     display: flex;
     align-items: flex-start;
+    gap: 1.5rem;
 }
 
 .author-bio-info {
@@ -244,75 +343,92 @@
 }
 
 .author-bio-info h4 {
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-    color: #333;
+    margin-bottom: 0.8rem;
+    font-size: var(--text-lg);
+    color: var(--text-color);
+    font-weight: var(--font-semibold);
 }
 
 .author-bio-info p {
-    color: #666;
+    color: var(--text-light);
     margin-bottom: 1rem;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .author-stats {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 0.9rem;
-    color: #777;
+    gap: 0.8rem; /* Giảm khoảng cách giữa các stats */
+    font-size: var(--text-sm);
+    color: var(--text-light);
 }
 
 .author-stats span {
     display: flex;
     align-items: center;
+    transition: all var(--animation-duration);
+}
+
+.author-stats span:hover {
+    color: var(--text-color);
 }
 
 .author-stats i {
-    margin-right: 0.4rem;
-    color: var(--color-primary);
+    margin-right: 0.2rem; /* Giảm margin của icon */
+    color: var(--primary-color);
 }
 
 /* Comments Section */
 .comments-section {
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
     padding: 2rem;
+    transition: transform var(--animation-duration);
+}
+
+.comments-section:hover {
+    transform: translateY(-2px);
 }
 
 .comments-section h2 {
     margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    color: #333;
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-color);
 }
 
 .comment-form-container {
     margin-bottom: 2rem;
+    background: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: 12px;
 }
 
 .comment-form-container h3 {
     margin-bottom: 1rem;
-    font-size: 1.2rem;
-    color: #333;
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-color);
 }
 
 .login-prompt {
-    background-color: #f9f9f9;
+    background-color: var(--secondary-color);
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-bottom: 2rem;
     text-align: center;
 }
 
 .login-prompt a {
-    color: var(--color-primary);
+    color: var(--primary-color);
     font-weight: 600;
     text-decoration: none;
+    transition: all var(--animation-duration);
 }
 
 .login-prompt a:hover {
-    text-decoration: underline;
+    color: var(--hover-color);
 }
 
 .comments-list {
@@ -320,8 +436,14 @@
 }
 
 .comment-item {
-    padding: 1.5rem 0;
-    border-bottom: 1px solid #eee;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: all var(--animation-duration);
+    border-radius: 8px;
+}
+
+.comment-item:hover {
+    background-color: var(--secondary-color);
 }
 
 .comment-item:last-child {
@@ -340,6 +462,12 @@
     border-radius: 50%;
     object-fit: cover;
     margin-right: 1rem;
+    border: 2px solid var(--border-color);
+    transition: transform var(--animation-duration);
+}
+
+.comment-avatar:hover {
+    transform: scale(1.1);
 }
 
 .comment-author-info {
@@ -348,18 +476,61 @@
 }
 
 .comment-author-name {
-    font-weight: 600;
-    color: #333;
+    font-weight: var(--font-semibold);
+    color: var(--text-color);
 }
 
 .comment-date {
-    font-size: 0.85rem;
-    color: #777;
+    font-size: var(--text-xs);
+    color: var(--text-light);
+    font-family: var(--font-mono);
 }
 
 .comment-content {
-    line-height: 1.6;
-    color: #444;
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    font-family: var(--font-primary);
+    color: var(--text-color);
+}
+
+.comment-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-light);
+}
+
+.comment-time i {
+    font-size: 0.9em;
+}
+
+.comment-stats {
+    display: flex;
+    gap: 0.6rem; /* Giảm khoảng cách giữa các stats */
+    margin-top: 0.8rem;
+}
+
+.comment-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem; /* Giảm khoảng cách giữa icon và text */
+    color: var(--text-light);
+    font-size: var(--text-sm);
+    padding: 0.2rem 0;
+}
+
+.comment-stat .number {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+}
+
+.number-display {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono, monospace);
+    letter-spacing: 0.05em;
 }
 
 .load-more-container {
@@ -369,62 +540,136 @@
 
 .load-more-button {
     background-color: transparent;
-    border: 1px solid var(--color-primary);
-    color: var(--color-primary);
-    padding: 0.6rem 1.5rem;
-    border-radius: 4px;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.8rem 2rem;
+    border-radius: 25px;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    font-weight: var(--font-medium);
+    font-size: var(--text-base);
+    transition: all var(--animation-duration);
 }
 
 .load-more-button:hover {
-    background-color: var(--color-primary-light);
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
-/* Related Posts Section */
-.related-posts {
-    background-color: #fff;
+.comment-form-container textarea, 
+#comment-content {
+    min-height: 100px;
+    width: 100%;
+    font-size: var(--text-base);
+    padding: 1rem;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    transition: all var(--animation-duration);
+    resize: vertical;
+    font-family: var(--font-primary);
 }
 
-.related-posts h2 {
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    color: #333;
+.comment-form-container textarea:focus, 
+#comment-content:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.related-post-item {
-    padding: 1.2rem 0;
-    border-bottom: 1px solid #eee;
+/* Number Display Styles */
+.number-display,
+.stat-number,
+.count-number {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-wide);
+    margin-left: 0.2rem; /* Giảm margin trái */
 }
 
-.related-post-item:last-child {
-    border-bottom: none;
-}
-
-.related-post-item h3 {
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-}
-
-.related-post-item h3 a {
-    color: #333;
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.related-post-item h3 a:hover {
-    color: var(--color-primary);
-}
-
-.related-post-meta {
+.author-stats span,
+.post-stats .stat-item,
+.comment-stats .stat-item {
     display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    color: #777;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-icon,
+.count-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    line-height: 1;
+    color: var(--primary-color);
+}
+
+/* Adjusting spacing for stat items */
+.stat-item,
+.count-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+}
+
+.stat-item i,
+.count-item i {
+    width: 1.2em;
+    text-align: center;
+}
+
+/* Author Bio Stats */
+.author-bio .stats-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.author-bio .stat-item {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+}
+
+/* Spacing between numbers and text */
+[class*="count"],
+[class*="number"],
+.stat-number,
+.meta-number {
+    margin-left: 0.4rem;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}
+
+.comment-count::before,
+.view-count::before,
+.like-count::before {
+    margin-right: 0.4rem;
+}
+
+/* Fix spacing in dates and times */
+.date-time span + span {
+    margin-left: 0.4rem;
+}
+
+/* Fix spacing in stats and counters */
+.stat-item i + span,
+.counter-item i + span {
+    margin-left: 0.4rem;
+}
+
+/* Fix spacing in author stats */
+.author-stats i + span {
+    margin-left: 0.4rem;
+}
+
+/* Fix spacing in metadata items */
+.post-meta > * + * {
+    margin-left: 1rem;
 }
 
 /* Loading and Error States */
@@ -434,47 +679,97 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    color: #777;
+    color: var(--text-light);
 }
 
 .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid var(--color-primary);
+    border: 3px solid var(--secondary-color);
+    border-top: 3px solid var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.error-container {
-    text-align: center;
-    padding: 3rem;
+/* Related Posts Section */
+.related-posts {
     background-color: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    transition: transform var(--animation-duration);
+}
+
+.related-posts:hover {
+    transform: translateY(-2px);
+}
+
+.related-posts h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.related-post-item {
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: all var(--animation-duration);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.related-post-item:last-child {
+    border-bottom: none;
+}
+
+.related-post-item:hover {
+    background-color: var(--secondary-color);
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.error-container h2 {
-    color: #e74c3c;
-    margin-bottom: 1rem;
+.related-post-item h3 {
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+    font-family: var(--font-primary);
 }
 
-.error-container p {
-    margin-bottom: 2rem;
-    color: #555;
+.related-post-item h3 a {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all var(--animation-duration);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.no-comments, .no-related-posts, .error-message {
-    color: #777;
-    font-style: italic;
-    text-align: center;
-    padding: 1rem 0;
+.related-post-item h3 a:hover {
+    color: var(--primary-color);
+}
+
+.related-post-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem; /* Giảm khoảng cách giữa các meta items */
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    padding-top: 0.5rem;
+    font-family: var(--font-primary);
+}
+
+.related-post-meta > span {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem; /* Giảm khoảng cách giữa icon và text */
+}
+
+.related-post-meta i {
+    font-size: 0.95em;
+    color: var(--primary-color);
 }
 
 /* Responsive Design */
@@ -504,33 +799,55 @@
         font-size: 1.8rem;
     }
     
+    .post-meta,
     .post-stats {
         flex-direction: column;
         gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .share-buttons {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: center;
     }
     
     .author-bio-content {
         flex-direction: column;
     }
     
-    .author-avatar, .author-bio-avatar {
+    .author-avatar, 
+    .author-bio-avatar {
         margin-bottom: 1rem;
     }
     
     .author-stats {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
+    }
+    
+    .comment-form-container {
+        padding: 1rem;
     }
 }
 
-.comment-form-container textarea, #comment-content {
-    min-height: 48px;
-    height: 48px;
-    resize: none;
-    width: 100%;
-    font-size: 1rem;
-    padding: 0.5rem;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
+@media (max-width: 576px) {
+    .post-content,
+    .comments-section {
+        padding: 1.5rem;
+    }
+    
+    .post-body {
+        font-size: 1rem;
+    }
+    
+    .comment-author {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .comment-avatar {
+        margin-bottom: 0.5rem;
+        margin-right: 0;
+    }
 }

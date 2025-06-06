@@ -11,10 +11,12 @@
 }
 
 .form-title {
-    font-size: 24px;
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
     color: var(--color-primary);
     margin-bottom: 20px;
     text-align: center;
+    letter-spacing: var(--tracking-tight);
 }
 
 .form-group {
@@ -24,8 +26,9 @@
 .form-label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 500;
+    font-weight: var(--font-medium);
     color: #333;
+    font-size: var(--text-sm);
 }
 
 .form-input,
@@ -35,7 +38,9 @@
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: var(--text-base);
+    font-family: var(--font-primary);
+    line-height: var(--leading-normal);
     transition: border-color 0.3s;
 }
 
@@ -94,11 +99,17 @@
     background-color: var(--color-primary-dark, #004080);
 }
 
+.form-helper {
+    font-size: var(--text-xs);
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
 .form-error {
-    color: #e53935;
-    font-size: 14px;
-    margin-top: 5px;
-    display: none;
+    font-size: var(--text-sm);
+    color: #dc2626;
+    margin-top: 4px;
+    font-weight: var(--font-medium);
 }
 
 .form-error.active {

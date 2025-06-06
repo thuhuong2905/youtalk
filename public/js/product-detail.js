@@ -100,11 +100,11 @@ async function loadProductDetails(productId) {
     }
 }
 
-// Helper: render stars for both summary and main info
-function renderStars(avgRating) {
-    const numRating = parseFloat(avgRating);
-    if (isNaN(numRating) || numRating < 0) avgRating = 0;
-    if (numRating > 5) avgRating = 5;
+// Helper: generate stars for ratings
+function generateStars(rating) {
+    const numRating = parseFloat(rating);
+    if (isNaN(numRating) || numRating < 0) rating = 0;
+    if (numRating > 5) rating = 5;
     const fullStars = Math.floor(numRating);
     const halfStar = numRating % 1 >= 0.5 ? 1 : 0;
     const emptyStars = 5 - fullStars - halfStar;
@@ -120,7 +120,7 @@ function updateProductRating(avgRating, reviewCount) {
     const ratingElement = document.getElementById('product-avg-rating');
     const countElement = document.getElementById('product-review-count');
     if (ratingElement) {
-        ratingElement.innerHTML = renderStars(avgRating) + (avgRating > 0 ? ` <span class="rating-number">${avgRating.toFixed(1)}</span>` : '');
+        ratingElement.innerHTML = generateStars(avgRating) + (avgRating > 0 ? ` <span class="rating-number">${avgRating.toFixed(1)}</span>` : '');
     }
     if (countElement) {
         countElement.textContent = `(${reviewCount} đánh giá)`;
@@ -310,7 +310,7 @@ async function loadProductReviews(productId, sortBy = 'newest') {
                 const reviewDate = new Date(review.created_at);
                 const formattedDate = reviewDate.toLocaleDateString('vi-VN');
                 // Create star display (Font Awesome)
-                const stars = renderStars(review.rating);
+                const stars = generateStars(review.rating);
                 reviewItem.innerHTML = `
                     <div class="review-header">
                         <div class="author-info">

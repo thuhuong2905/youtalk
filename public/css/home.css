@@ -33,14 +33,17 @@
 }
 
 .hero-content h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
     margin-bottom: 20px;
     color: var(--color-primary);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
 }
 
 .hero-content p {
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
+    line-height: var(--leading-relaxed);
     margin-bottom: 30px;
     color: var(--color-text);
 }
@@ -94,10 +97,12 @@
 }
 
 .section-title {
-    font-size: 1.8rem;
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
     color: var(--color-primary);
-    margin-bottom: 30px;
     text-align: center;
+    margin-bottom: 40px;
+    letter-spacing: var(--tracking-tight);
 }
 
 /* Categories container with navigation */
@@ -159,10 +164,16 @@
 }
 
 .category-card h3 {
-    color: var(--color-text-dark); /* Darker text color */
-    font-size: 1.1rem; /* Slightly larger font */
-    font-weight: 600; /* Bolder font */
-    margin-bottom: 5px;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    margin-top: 15px;
+    color: var(--color-text);
+}
+
+.category-count {
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    font-family: var(--font-mono);
 }
 
 .category-card p {
