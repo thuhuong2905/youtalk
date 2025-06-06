@@ -395,3 +395,4 @@ INSERT INTO followers (follower_user_id, following_user_id, created_at) VALUES
 (48, 40, '2023-05-08 16:15:00'), -- Thùy Duyên follows Hoa Mai (e-learning interest)
 (49, 41, '2023-05-10 10:50:00'), -- Minh Quang follows Thành Long (sports interest)
 (50, 42, '2023-05-12 13:30:00'); -- Thu Hương follows Mỹ Hoa (nail art interest)
+

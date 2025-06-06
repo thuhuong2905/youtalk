@@ -59,6 +59,18 @@ switch ($action) {
     case 'search':
         handleSearchPosts($post, $_GET);
         break;
+    case 'get_comments':
+        handleGetComments($post, $_GET);
+        break;
+    case 'get_related':
+        handleGetRelatedPosts($post, $_GET);
+        break;
+    case 'list_post_types':
+        handleListPostTypes($post, $_GET);
+        break;
+    case 'list_by_user':
+        handleListPostsByUser($post, $_GET);
+        break;
     default:
         sendResponse(false, 'Action không hợp lệ hoặc không được hỗ trợ', null, 404);
 }

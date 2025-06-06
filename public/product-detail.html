@@ -116,9 +116,14 @@
                         <div class="reviews-summary">
                         </div>
                         <div class="review-actions">
-                            <!-- Đã xóa nút viết đánh giá và select lọc đánh giá -->
+                            <!-- Toggle buttons for reviews and comments -->
+                            <div class="review-toggle">
+                                <button class="toggle-btn active" data-type="reviews">Đánh giá có rating</button>
+                                <button class="toggle-btn" data-type="comments">Bình luận</button>
+                            </div>
                         </div>
-                        <!-- Review Form (giống form bình luận) -->
+                        
+                        <!-- Review Form (có rating) -->
                         <div id="review-form-container" style="display: none;">
                             <form id="review-form">
                                 <div class="form-group reviewer-info">
@@ -143,9 +148,29 @@
                                 <button type="submit" class="action-btn primary">Gửi đánh giá</button>
                             </form>
                         </div>
+
+                        <!-- Comment Form (không cần rating) -->
+                        <div id="comment-form-container" style="display: none;">
+                            <form id="product-comment-form">
+                                <div class="form-group commenter-info">
+                                    <div class="commenter-avatar" id="commenter-avatar"></div>
+                                    <span id="commenter-name">Bạn</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="comment-content">Chia sẻ ý kiến của bạn</label>
+                                    <textarea id="comment-content" name="content" rows="4" required placeholder="Viết bình luận về sản phẩm này..."></textarea>
+                                </div>
+                                <button type="submit" class="action-btn primary">Gửi bình luận</button>
+                            </form>
+                        </div>
+
                         <div id="reviews-list">
                         </div>
+                        <div id="comments-list" style="display: none;">
+                        </div>
                         <div id="pagination-reviews">
+                        </div>
+                        <div id="pagination-comments" style="display: none;">
                         </div>
                     </div>
 

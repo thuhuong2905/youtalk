@@ -75,6 +75,14 @@ switch ($action) {
         handleIncrementProductView($product, $requestData);
         break;
         
+    case 'get_details':
+        handleGetProductDetails($product, $requestData);
+        break;
+        
+    case 'get_related':
+        handleGetRelatedProducts($product, $requestData);
+        break;
+        
     default:
         sendResponse(false, 'Invalid action specified', null, 400);
         break;
@@ -339,5 +347,124 @@ function handleIncrementProductView($product, $requestData) {
         sendResponse(true, 'View count incremented');
     } else {
         sendResponse(false, 'Failed to increment view count', null, 500);
+    }
+}
+
+/**
+ * Handle getting detailed product information with ratings
+ */
+function handleGetProductDetails($product, $requestData) {
+    if (!isset($requestData['id']) || empty($requestData['id'])) {
+        sendResponse(false, 'Product ID is required', null, 400);
+        return;
+    }
+    
+    $productId = (int)$requestData['id'];
+    
+    // Get basic product data
+    $productData = $product->getProductById($productId);
+    
+    if (!$productData) {
+        sendResponse(false, 'Product not found', null, 404);
+        return;
+    }
+    
+    // Process JSON fields
+    if (isset($productData['images']) && !empty($productData['images'])) {
+        $productData['images'] = json_decode($productData['images'], true);
+    }
+    if (isset($productData['specs']) && !empty($productData['specs'])) {
+        $productData['specs'] = json_decode($productData['specs'], true);
+    }
+    if (isset($productData['tags']) && !empty($productData['tags'])) {
+        $productData['tags'] = json_decode($productData['tags'], true);
+    }
+    
+    // Get review statistics
+    try {
+        $stmt = $product->conn->prepare("
+            SELECT 
+                COUNT(*) as review_count,
+                AVG(rating) as avg_rating
+            FROM reviews 
+            WHERE product_id = :product_id AND status = 'active'
+        ");
+        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->execute();
+        $reviewStats = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $productData['review_count'] = (int)$reviewStats['review_count'];
+        $productData['avg_rating'] = $reviewStats['avg_rating'] ? round((float)$reviewStats['avg_rating'], 1) : 0;
+        
+    } catch (PDOException $e) {
+        // If reviews table doesn't exist or there's an error, set defaults
+        $productData['review_count'] = 0;
+        $productData['avg_rating'] = 0;
+    }
+    
+    sendResponse(true, 'Product details retrieved successfully', [
+        'product' => $productData
+    ]);
+}
+
+/**
+ * Handle getting related products
+ */
+function handleGetRelatedProducts($product, $requestData) {
+    if (!isset($requestData['id']) || empty($requestData['id'])) {
+        sendResponse(false, 'Product ID is required', null, 400);
+        return;
+    }
+    
+    $productId = (int)$requestData['id'];
+    $limit = isset($requestData['limit']) ? (int)$requestData['limit'] : 4;
+    
+    // Get the current product's category
+    $currentProduct = $product->getProductById($productId);
+    if (!$currentProduct) {
+        sendResponse(false, 'Product not found', null, 404);
+        return;
+    }
+    
+    $categoryId = $currentProduct['category_id'];
+    
+    try {
+        // Get related products from the same category, excluding the current product
+        $stmt = $product->conn->prepare("
+            SELECT 
+                p.id, p.name, p.price, p.images, p.view_count,
+                c.name as category_name
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.category_id = :category_id 
+            AND p.id != :product_id 
+            AND p.status = 'active'
+            ORDER BY p.view_count DESC, p.created_at DESC
+            LIMIT :limit
+        ");
+        
+        $stmt->bindParam(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $relatedProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Process images for each product
+        foreach ($relatedProducts as &$relatedProduct) {
+            if (isset($relatedProduct['images']) && !empty($relatedProduct['images'])) {
+                $relatedProduct['images'] = json_decode($relatedProduct['images'], true);
+            } else {
+                $relatedProduct['images'] = [];
+            }
+        }
+        
+        sendResponse(true, 'Related products retrieved successfully', [
+            'products' => $relatedProducts
+        ]);
+        
+    } catch (PDOException $e) {
+        error_log("Error getting related products: " . $e->getMessage());
+        sendResponse(false, 'Failed to get related products', null, 500);
     }
 }

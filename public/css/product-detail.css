@@ -351,215 +351,172 @@
     gap: 15px;
 }
 
-#review-form-container {
+/* Review/Comment Toggle */
+.review-toggle {
+    display: flex;
     background: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
-    padding: 32px;
-    margin-bottom: 40px;
-    box-shadow: var(--box-shadow);
-    transition: transform 0.3s ease;
+    overflow: hidden;
+    box-shadow: var(--box-shadow-light);
 }
 
-#review-form-container:hover {
-    transform: translateY(-2px);
-}
-
-#review-form-container h3 {
-    margin-bottom: 24px;
-    font-size: var(--text-xl);
-    color: var(--color-text);
-    font-weight: var(--font-semibold);
-}
-
-.form-group {
-    margin-bottom: 24px;
+.review-toggle .toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    color: var(--color-text-light);
+    transition: all 0.3s ease;
     position: relative;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: var(--font-medium);
+.review-toggle .toggle-btn:hover {
+    background: var(--color-hover);
     color: var(--color-text);
-    font-size: var(--text-base);
-    font-family: var(--font-primary);
 }
 
-.form-group textarea,
-.form-group input[type="file"] {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid var(--color-border);
-    border-radius: var(--border-radius);
-    font-size: var(--text-base);
-    transition: all 0.3s ease;
-    background-color: var(--color-background);
-    font-family: var(--font-primary);
-    line-height: var(--leading-normal);
+.review-toggle .toggle-btn.active {
+    background: var(--color-primary);
+    color: white;
+    font-weight: var(--font-semibold);
 }
 
-.form-group textarea:focus,
-.form-group input[type="file"]:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(3, 65, 127, 0.1);
+.review-toggle .toggle-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--color-secondary);
 }
 
-.form-group textarea::placeholder {
-    color: var(--color-text-light);
-}
-
-.form-group .rating-input .stars {
-    font-size: 1.7em;
-    color: var(--color-border);
-    cursor: pointer;
-    user-select: none;
-}
-
-.form-group .rating-input .stars span:hover,
-.form-group .rating-input .stars span.selected,
-.form-group .rating-input .stars .fas,
-.form-group .rating-input .stars .far {
-    color: #FFB800;
-    text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
-}
-
-#reviews-list .review-item {
-    border: 1px solid var(--color-border);
-    padding: 24px;
-    margin-bottom: 24px;
-    border-radius: var(--border-radius);
+/* Form Containers */
+#review-form-container,
+#comment-form-container {
     background: var(--color-background);
-    transition: all 0.3s ease;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 32px;
+    margin-bottom: 40px;
     box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease;
 }
 
-#reviews-list .review-item:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+#review-form-container:hover,
+#comment-form-container:hover {
     transform: translateY(-2px);
 }
 
-.review-item .review-header {
+/* Comment specific styles */
+.commenter-info {
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
-    gap: 16px;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--color-hover);
+    border-radius: var(--border-radius);
 }
 
-.review-item .author-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-right: 15px;
-}
-
-.review-item .author-info img {
+.commenter-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid var(--color-border);
-    transition: transform 0.3s ease;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-.review-item .author-info img:hover {
-    transform: scale(1.1);
-}
-
-.review-item .author-info span {
-    font-weight: var(--font-bold);
+#commenter-name {
+    font-weight: var(--font-semibold);
     color: var(--color-text);
-    font-size: var(--text-base);
-    letter-spacing: 0.2px;
 }
 
-.review-item .rating,
-.review-item .rating .fas,
-.review-item .rating .far {
-    color: #FFB800;
-    margin-right: 16px;
-    font-size: 1.1em;
-    text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
-}
-
-.review-item .date {
-    font-size: var(--text-sm);
-    color: var(--color-text-light);
-    margin-left: auto;
-    background: var(--color-background-alt);
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-family: var(--font-mono);
-}
-
-.review-item .review-body {
-    margin-bottom: 20px;
-    line-height: var(--leading-relaxed);
-    color: var(--color-text);
-    font-size: var(--text-base);
-    font-family: var(--font-primary);
-}
-
-.review-item .review-media {
+/* Comments List */
+#comments-list {
     display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin: 20px 0;
+    flex-direction: column;
+    gap: 24px;
 }
 
-.review-item .review-media img,
-.review-item .review-media video {
-    max-width: 160px;
-    max-height: 160px;
-    border: 2px solid var(--color-border);
-    border-radius: var(--border-radius);
-    object-fit: cover;
-    transition: all 0.3s ease;
-}
-
-.review-item .review-media img:hover,
-.review-item .review-media video:hover {
-    transform: scale(1.05);
-    box-shadow: var(--box-shadow);
-}
-
-.review-item .review-footer {
-    font-size: var(--text-sm);
-    padding-top: 15px;
-    border-top: 1px solid var(--color-border);
-}
-
-.review-item .helpful-vote button {
-    background: none;
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
-    cursor: pointer;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: var(--font-medium);
-    transition: all 0.3s ease;
-    font-family: var(--font-primary);
-}
-
-.review-item .helpful-vote button:hover {
-    background: var(--color-primary);
-    color: white;
-    transform: translateY(-1px);
-}
-
-/* Card box style for main info and tab content */
-.card-box {
+.comment-item {
     background: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    padding: 32px;
-    margin-bottom: 40px;
-    transition: transform 0.3s ease;
+    padding: 24px;
+    box-shadow: var(--box-shadow-light);
+    transition: all 0.3s ease;
 }
 
-.card-box:hover {
+.comment-item:hover {
     transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.comment-header .author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.comment-header .author-info span {
+    font-weight: var(--font-semibold);
+    color: var(--color-text);
+}
+
+.comment-date {
+    color: var(--color-text-light);
+    font-size: var(--text-sm);
+}
+
+.comment-body {
+    color: var(--color-text);
+    line-height: 1.6;
+    font-size: var(--text-base);
+}
+
+/* Pagination for comments */
+#pagination-comments {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+}
+
+#pagination-comments .page-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-text);
+    text-decoration: none;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
+    font-weight: var(--font-medium);
+}
+
+#pagination-comments .page-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+#pagination-comments .page-btn.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
 }
 
 /* Review form style */

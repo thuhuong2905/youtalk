@@ -1,403 +1,780 @@
-/**
- * post-detail.js - JavaScript for post detail page functionality
- * Handles fetching and displaying post details, comments, and related posts
- */
+// JavaScript for product detail page functionality
+// Handles loading product details, reviews, and related products
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('YouTalk Post Detail JS Loaded');
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('YouTalk Product Detail JS Loaded');
     
-    // Get post ID from URL
+    // Get product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('id');
+    const productId = urlParams.get('id');
+    let productName = '';
     
-    if (!postId) {
-        showError('Không tìm thấy ID bài đăng trong URL');
+    if (productId) {
+        // Load product details and get product name for related discussions
+        const product = await loadProductDetails(productId);
+        productName = product && product.name ? product.name : '';
+        
+        // Load product reviews
+        loadProductReviews(productId);
+        
+        // Load related discussions (by product name)
+        loadRelatedDiscussions(productName);
+        
+        // Set up tab switching
+        setupTabs();
+        
+        // Set up review form
+        setupReviewForm(productId);
+        
+        // Set up product comment form
+        setupProductCommentForm(productId);
+        
+        // Increment view count (use product_id param)
+        incrementViewCount(productId);
+    } else {
+        // No product ID provided, show error or redirect
+        document.getElementById('product-name').textContent = 'Sản phẩm không hợp lệ';
+        document.querySelector('.product-main-info').innerHTML = '<p>Vui lòng chọn một sản phẩm hợp lệ.</p>';
+    }
+});
+
+// Load product details
+async function loadProductDetails(productId) {
+    try {
+        const response = await fetchApi('/src/api/products.php?action=get_by_id', {
+            method: 'POST',
+            body: { id: productId }
+        });
+        // Đọc đúng nhánh dữ liệu trả về từ API (response.data.product hoặc response.product)
+        let product = null;
+        if (response && response.data && response.data.product) {
+            product = response.data.product;
+        } else if (response && response.product) {
+            product = response.product;
+        }
+        if (response.success && product) {
+            // Update page title
+            document.title = `${product.name} - YouTalk`;
+            
+            // Update product name
+            document.getElementById('product-name').textContent = product.name;
+            document.getElementById('breadcrumb-product-name').textContent = product.name;
+            
+            // Update category in breadcrumb
+            if (product.category_id && product.category_name) {
+                const categoryLink = document.getElementById('breadcrumb-category');
+                categoryLink.textContent = product.category_name;
+                categoryLink.href = `category.html?id=${product.category_id}`;
+            }
+            
+            // Update brand/supplier
+            document.getElementById('product-brand').textContent = product.brand || 'Không có thông tin';
+            
+            // Update price
+            const priceDisplay = product.price 
+                ? `${Number(product.price).toLocaleString('vi-VN')} đ` 
+                : 'Liên hệ để biết giá';
+            document.getElementById('product-price').textContent = priceDisplay;
+            
+            // Update description
+            document.getElementById('product-description-content').innerHTML = product.description || 'Không có mô tả chi tiết.';
+            
+            // Update specs/details
+            updateProductSpecs(product.specs);
+            
+            // Update images
+            updateProductImages(product.images);
+            
+            // Update tags
+            updateProductTags(product.tags);
+            
+            // Set up action buttons
+            setupProductActions(product);
+            return product;
+        } else {
+            console.error('Failed to load product details:', response.message);
+            document.getElementById('product-name').textContent = 'Không tìm thấy sản phẩm';
+            document.querySelector('.product-main-info').innerHTML = '<p>Sản phẩm không tồn tại hoặc đã bị xóa.</p>';
+            return null;
+        }
+    } catch (error) {
+        console.error('Error loading product details:', error);
+        return null;
+    }
+}
+
+// Helper: generate stars for ratings
+function generateStars(rating) {
+    const numRating = parseFloat(rating);
+    if (isNaN(numRating) || numRating < 0) rating = 0;
+    if (numRating > 5) rating = 5;
+    const fullStars = Math.floor(numRating);
+    const halfStar = numRating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
+    let starsHTML = "";
+    for (let i = 0; i < fullStars; i++) starsHTML += '<i class="fas fa-star"></i>';
+    if (halfStar) starsHTML += '<i class="fas fa-star-half-alt"></i>';
+    for (let i = 0; i < emptyStars; i++) starsHTML += '<i class="far fa-star"></i>';
+    return starsHTML;
+}
+
+// Update product rating display (main info)
+function updateProductRating(avgRating, reviewCount) {
+    const ratingElement = document.getElementById('product-avg-rating');
+    const countElement = document.getElementById('product-review-count');
+    if (ratingElement) {
+        ratingElement.innerHTML = generateStars(avgRating) + (avgRating > 0 ? ` <span class="rating-number">${avgRating.toFixed(1)}</span>` : '');
+    }
+    if (countElement) {
+        countElement.textContent = `(${reviewCount} đánh giá)`;
+    }
+}
+
+// Update product specs/details
+function updateProductSpecs(specs) {
+    const specsList = document.getElementById('product-specs-list');
+    if (!specsList) return;
+    
+    if (!specs || Object.keys(specs).length === 0) {
+        specsList.innerHTML = '<li>Không có thông số kỹ thuật.</li>';
         return;
     }
     
-    // Initialize page
-    initPostDetail(postId);
+    specsList.innerHTML = '';
     
-    // Set up comment form submission
-    setupCommentForm(postId);
+    // If specs is an array of objects with name/value pairs
+    if (Array.isArray(specs)) {
+        specs.forEach(spec => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${spec.name}:</strong> ${spec.value}`;
+            specsList.appendChild(li);
+        });
+    } 
+    // If specs is an object with key/value pairs
+    else {
+        for (const [key, value] of Object.entries(specs)) {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${key}:</strong> ${value}`;
+            specsList.appendChild(li);
+        }
+    }
+}
+
+// Update product images
+function updateProductImages(images) {
+    const mainImage = document.getElementById('main-product-image');
+    const thumbnailList = document.querySelector('.thumbnail-list');
     
-});
-
-/**
- * Initialize post detail page with data
- * @param {string} postId - The ID of the post to display
- */
-async function initPostDetail(postId) {
-    try {
-        // Kiểm tra đăng nhập để hiển thị form bình luận
-        let isLoggedIn = false;
-        if (typeof window.checkLoginStatus === 'function') {
-            const user = await window.checkLoginStatus();
-            isLoggedIn = !!user;
-        } else {
-            // Fallback nếu không có hàm checkLoginStatus
-            try {
-                const res = await fetchApi('/auth.php?action=status');
-                isLoggedIn = res && res.success && res.data && res.data.authenticated;
-            } catch (e) { isLoggedIn = false; }
-        }
-        // Hiển thị/ẩn form bình luận
-        const commentFormContainer = document.querySelector('.comment-form-container.auth-required');
-        const loginPrompt = document.querySelector('.login-prompt.guest-only');
-        if (isLoggedIn) {
-            if (commentFormContainer) commentFormContainer.style.display = '';
-            if (loginPrompt) loginPrompt.style.display = 'none';
-        } else {
-            if (commentFormContainer) commentFormContainer.style.display = 'none';
-            if (loginPrompt) loginPrompt.style.display = '';
-        }
-        // Load post details
-        await loadPostDetails(postId);
-        // Load comments
-        await loadComments(postId);
-        // Load related posts
-        await loadRelatedPosts(postId);
-        // Update login prompt redirect URL
-        updateLoginPromptUrl(postId);
-    } catch (error) {
-        console.error('Error initializing post detail page:', error);
-        showError('Đã xảy ra lỗi khi tải dữ liệu bài đăng. Vui lòng thử lại sau.');
+    if (!mainImage || !thumbnailList) return;
+    
+    if (!images || images.length === 0) {
+        mainImage.src = 'images/products/default.png';
+        mainImage.alt = 'No image available';
+        return;
     }
-}
-
-/**
- * Helper function to render avatar using avatar.js logic
- * @param {HTMLElement} container - The container element for the avatar
- * @param {string} imageUrl - The URL of the avatar image
- * @param {string} fullName - The full name for fallback initials
- * @param {string} size - The size of the avatar (e.g., '50px')
- */
-function renderAvatar(container, imageUrl, fullName, size) {
-    if (!container) return;
-    container.innerHTML = ''; // Clear previous content
-
-    if (imageUrl) {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.alt = `Avatar của ${fullName}`;
-        img.style.width = size;
-        img.style.height = size;
-        img.style.borderRadius = '50%';
-        img.style.objectFit = 'cover';
+    
+    // Set main image to first image
+    mainImage.src = images[0];
+    mainImage.alt = 'Product Image';
+    
+    // Create thumbnails
+    thumbnailList.innerHTML = '';
+    images.forEach((image, index) => {
+        const thumbnail = document.createElement('img');
+        thumbnail.src = image;
+        thumbnail.alt = `Thumbnail ${index + 1}`;
+        thumbnail.className = index === 0 ? 'active' : '';
         
-        img.onerror = () => {
-            console.warn(`Avatar image failed to load: ${imageUrl}. Using fallback.`);
-            // Use createFallbackHTML directly to avoid class dependency issues if needed
-            container.innerHTML = Avatar.createFallbackHTML(fullName, size);
-        };
-        container.appendChild(img);
-    } else {
-        // If no image URL, directly use fallback
-        container.innerHTML = Avatar.createFallbackHTML(fullName, size);
-    }
-}
-
-/**
- * Load and display post details
- * @param {string} postId - The ID of the post to display
- */
-async function loadPostDetails(postId) {
-    try {
-        const response = await fetchApi(`/src/api/posts.php?action=get&id=${postId}`);
-        if (!response.success) {
-            throw new Error(response.message || 'Failed to load post details');
-        }
-        const post = response.data;
-        document.title = `${post.title} - YouTalk`;
-        document.getElementById('post-title').textContent = post.title;
-        document.getElementById('post-category').textContent = post.category_name || 'Chưa phân loại';
-        const postDate = new Date(post.created_at);
-        document.getElementById('post-date').textContent = postDate.toLocaleDateString('vi-VN', {
-            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-        // Hiển thị fullname nếu có, fallback username
-        document.getElementById('author-name').textContent = getDisplayName(post);
-        document.getElementById('author-role').textContent = post.role === 'admin' ? 'Quản trị viên' : 'Thành viên';
-        const authorAvatarContainer = document.getElementById('author-avatar-container');
-        renderAvatar(authorAvatarContainer, post.profile_picture, getDisplayName(post), '50px');
-        document.getElementById('post-body').innerHTML = post.content;
-        document.getElementById('view-count').textContent = post.view_count || 0;
-        document.getElementById('comment-count').textContent = post.comment_count || 0;
-        document.getElementById('total-comments').textContent = post.comment_count || 0;
-        if (post.tags && post.tags.length > 0) {
-            const tagsContainer = document.getElementById('post-tags');
-            tagsContainer.innerHTML = '';
-            const tags = typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags;
-            tags.forEach(tag => {
-                const tagElement = document.createElement('a');
-                tagElement.href = `forum.html?tag=${encodeURIComponent(tag)}`;
-                tagElement.className = 'tag';
-                tagElement.textContent = tag;
-                tagsContainer.appendChild(tagElement);
-            });
-        } else {
-            document.getElementById('post-tags').style.display = 'none';
-        }
-        // Update author bio: fullname và bio
-        document.getElementById('author-bio-name').textContent = getDisplayName(post);
-        document.getElementById('author-bio-description').textContent = post.user_bio && post.user_bio.trim() ? post.user_bio : 'Người dùng chưa cập nhật thông tin giới thiệu.';
-        const authorBioAvatarContainer = document.getElementById('author-bio-avatar-container');
-        renderAvatar(authorBioAvatarContainer, post.profile_picture, getDisplayName(post), '50px');
-        // Sửa lỗi join date: kiểm tra và lấy đúng ngày tạo tài khoản tác giả
-        if (post.user_created_at) {
-            const joinDate = new Date(post.user_created_at);
-            document.getElementById('author-join-date').textContent = joinDate.toLocaleDateString('vi-VN');
-        } else {
-            document.getElementById('author-join-date').textContent = '--/--/----';
-        }
-        document.getElementById('author-post-count').textContent = post.user_post_count || 0;
-        document.getElementById('author-comment-count').textContent = post.user_comment_count || 0;
-    } catch (error) {
-        console.error('Error loading post details:', error);
-        showError('Không thể tải thông tin bài đăng. Vui lòng thử lại sau.');
-    }
-}
-
-/**
- * Load and display comments for the post
- * @param {string} postId - The ID of the post
- * @param {number} page - The page number for pagination
- */
-async function loadComments(postId, page = 1) {
-    try {
-        const commentsContainer = document.getElementById('comments-list');
-        
-        // Show loading state on first load
-        if (page === 1) {
-            commentsContainer.innerHTML = `
-                <div class="loading-placeholder">
-                    <div class="loading-spinner"></div>
-                    <p>Đang tải bình luận...</p>
-                </div>
-            `;
-        }
-        
-        const response = await fetchApi(`/src/api/posts.php?action=get_comments&post_id=${postId}&page=${page}`);
-        
-        if (!response.success) {
-            throw new Error(response.message || 'Failed to load comments');
-        }
-        
-        const comments = response.data.comments;
-        const totalComments = response.data.total || 0;
-        const totalPages = response.data.total_pages || 1;
-        
-        // Update total comments count
-        document.getElementById('total-comments').textContent = totalComments;
-        document.getElementById('comment-count').textContent = totalComments;
-        
-        // Clear loading placeholder on first page
-        if (page === 1) {
-            commentsContainer.innerHTML = '';
-        }
-        
-        if (comments.length === 0 && page === 1) {
-            commentsContainer.innerHTML = '<p class="no-comments">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</p>';
-            return;
-        }
-        
-        // Append comments to container
-        comments.forEach(comment => {
-            const commentElement = createCommentElement(comment);
-            commentsContainer.appendChild(commentElement);
-        });
-        
-        // Show/hide load more button
-        const loadMoreContainer = document.getElementById('load-more-container');
-        if (page < totalPages) {
-            loadMoreContainer.style.display = 'block';
+        thumbnail.addEventListener('click', () => {
+            // Update main image
+            mainImage.src = image;
             
-            // Set up load more button
-            const loadMoreButton = document.getElementById('load-more-comments');
-            loadMoreButton.onclick = () => loadComments(postId, page + 1);
-        } else {
-            loadMoreContainer.style.display = 'none';
-        }
-        
-    } catch (error) {
-        console.error('Error loading comments:', error);
-        document.getElementById('comments-list').innerHTML = '<p class="error-message">Không thể tải bình luận. Vui lòng thử lại sau.</p>';
-    }
-}
-
-/**
- * Create a comment element from comment data
- * @param {Object} comment - The comment data
- * @returns {HTMLElement} - The comment element
- */
-function createCommentElement(comment) {
-    const commentElement = document.createElement('div');
-    commentElement.className = 'comment-item';
-    
-    // Format date
-    const commentDate = new Date(comment.created_at);
-    const formattedDate = commentDate.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    // Create a unique ID for the avatar container if needed, or use a class
-    const avatarContainerId = `comment-avatar-${comment.id || Math.random().toString(36).substring(7)}`;
-
-    commentElement.innerHTML = `
-        <div class="comment-author">
-            <div id="${avatarContainerId}" class="comment-avatar-container" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 1rem; flex-shrink: 0;"></div>
-            <div class="comment-author-info">
-                <span class="comment-author-name">${getDisplayName(comment)}</span>
-                <span class="comment-date">${formattedDate}</span>
-            </div>
-        </div>
-        <div class="comment-content">
-            ${comment.content}
-        </div>
-    `;
-
-    // Render the avatar after the element is created
-    const avatarContainer = commentElement.querySelector(`#${avatarContainerId}`);
-    renderAvatar(avatarContainer, comment.profile_picture, getDisplayName(comment), '40px');
-    
-    return commentElement;
-}
-
-/**
- * Load and display related posts
- * @param {string} postId - The ID of the current post
- */
-async function loadRelatedPosts(postId) {
-    try {
-        const response = await fetchApi(`/src/api/posts.php?action=get_related&post_id=${postId}`);
-        if (!response.success) throw new Error(response.message || 'Không thể tải bài đăng liên quan.');
-        const posts = response.data.posts || [];
-        const relatedPostsContainer = document.getElementById('related-posts-list');
-        if (!posts.length) {
-            relatedPostsContainer.innerHTML = '<p class="no-related-posts">Không có bài đăng liên quan.</p>';
-            return;
-        }
-        relatedPostsContainer.innerHTML = '';
-        posts.forEach(post => {
-            const postCard = document.createElement('div');
-            postCard.className = 'related-post-card';
-            postCard.innerHTML = `
-                <a href="post-detail.html?id=${post.id}"><strong>${post.title}</strong></a>
-                <div class="related-post-meta">
-                    Bởi <span class="related-author">${getDisplayName(post)}</span>
-                    <span class="related-date">${new Date(post.created_at).toLocaleDateString('vi-VN', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                </div>
-            `;
-            relatedPostsContainer.appendChild(postCard);
+            // Update active thumbnail
+            thumbnailList.querySelectorAll('img').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            thumbnail.classList.add('active');
         });
-    } catch (error) {
-        document.getElementById('related-posts-list').innerHTML = '<p class="error-message">Không thể tải bài đăng liên quan. Vui lòng thử lại sau.</p>';
+        
+        thumbnailList.appendChild(thumbnail);
+    });
+}
+
+// Update product tags
+function updateProductTags(tags) {
+    const tagsContainer = document.getElementById('product-tags');
+    if (!tagsContainer) return;
+    
+    if (!tags || tags.length === 0) {
+        tagsContainer.style.display = 'none';
+        return;
+    }
+    
+    tagsContainer.innerHTML = '';
+    tagsContainer.style.display = 'block';
+    
+    tags.forEach(tag => {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'tag';
+        tagElement.textContent = tag;
+        tagsContainer.appendChild(tagElement);
+    });
+}
+
+// Set up product action buttons
+function setupProductActions(product) {    
+    // Share button
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            // Simple share implementation
+            if (navigator.share) {
+                navigator.share({
+                    title: product.name,
+                    text: `Xem sản phẩm ${product.name} trên YouTalk`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                prompt('Sao chép liên kết này để chia sẻ:', window.location.href);
+            }
+        });
+    }
+    
+    // Contact supplier button
+    const contactBtn = document.getElementById('contact-supplier-btn');
+    if (contactBtn) {
+        contactBtn.addEventListener('click', () => {
+            // This could open a contact form or redirect to a contact page
+            alert('Tính năng liên hệ nhà cung cấp đang được phát triển.');
+        });
     }
 }
 
-/**
- * Set up comment form submission
- * @param {string} postId - The ID of the post
- */
-function setupCommentForm(postId) {
-    const commentForm = document.getElementById('comment-form');
-    
-    if (!commentForm) return;
-    
-    commentForm.addEventListener('submit', async (e) => {
+// Load product reviews
+async function loadProductReviews(productId, sortBy = 'newest') {
+    try {
+        // Map sort option to API parameters
+        let sortParams = {};
+        switch (sortBy) {
+            case 'newest':
+                sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
+                break;
+            case 'helpful':
+                sortParams = { sort_by: 'helpful_count', sort_order: 'DESC' };
+                break;
+            case 'rating_high':
+                sortParams = { sort_by: 'rating', sort_order: 'DESC' };
+                break;
+            case 'rating_low':
+                sortParams = { sort_by: 'rating', sort_order: 'ASC' };
+                break;
+        }
+        // Use GET and query params for backend compatibility
+        const query = new URLSearchParams({
+            product_id: productId,
+            limit: 10,
+            offset: 0,
+            ...sortParams
+        }).toString();
+        const reviewsResponse = await fetchApi(`/src/api/reviews.php?action=get_by_product&${query}`, {
+            method: 'GET'
+        });
+        const statsResponse = await fetchApi(`/src/api/reviews.php?action=get_stats&product_id=${productId}`, {
+            method: 'GET'
+        });
+        // Sau khi lấy stats, luôn cập nhật số sao và số đánh giá từ API stats
+        if (statsResponse && statsResponse.success) {
+            let stats = null;
+            if (statsResponse.data && statsResponse.data.stats) {
+                stats = statsResponse.data.stats;
+            } else if (statsResponse.stats) {
+                stats = statsResponse.stats;
+            }
+            if (stats) {
+                updateProductRating(stats.average_rating, stats.total_reviews);
+            }
+        }
+        const reviewsList = document.getElementById('reviews-list');
+        if (!reviewsList) return;
+        reviewsList.innerHTML = '';
+        // Sửa: lấy đúng trường reviews từ response.data.reviews hoặc response.reviews
+        let reviews = [];
+        if (reviewsResponse && reviewsResponse.data && Array.isArray(reviewsResponse.data.reviews)) {
+            reviews = reviewsResponse.data.reviews;
+        } else if (reviewsResponse && Array.isArray(reviewsResponse.reviews)) {
+            reviews = reviewsResponse.reviews;
+        }
+        if (reviewsResponse.success && reviews.length > 0) {
+            reviews.forEach(review => {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                // Format date
+                const reviewDate = new Date(review.created_at);
+                const formattedDate = reviewDate.toLocaleDateString('vi-VN');
+                // Create star display (Font Awesome)
+                const stars = generateStars(review.rating);
+                reviewItem.innerHTML = `
+                    <div class="review-header">
+                        <div class="author-info">
+                            ${getUserAvatarHtml(review, 'user-avatar-review')}
+                            <span>${getDisplayName(review)}</span>
+                        </div>
+                        <div class="review-rating">${stars}</div>
+                        <div class="review-date">${formattedDate}</div>
+                    </div>
+                    <div class="review-body">${review.content ? review.content : ''}</div>
+                `;
+                
+                // Add media if available
+                if (review.media && review.media.length > 0) {
+                    const mediaContainer = document.createElement('div');
+                    mediaContainer.className = 'review-media';
+                    
+                    review.media.forEach(mediaUrl => {
+                        // Determine if it's an image or video based on extension
+                        const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaUrl);
+                        
+                        if (isVideo) {
+                            const video = document.createElement('video');
+                            video.controls = true;
+                            video.src = mediaUrl;
+                            mediaContainer.appendChild(video);
+                        } else {
+                            const img = document.createElement('img');
+                            img.src = mediaUrl;
+                            img.alt = 'Review media';
+                            mediaContainer.appendChild(img);
+                        }
+                    });
+                    
+                    reviewItem.querySelector('.review-body').appendChild(mediaContainer);
+                }
+                
+                // Add helpful button
+                const reviewFooter = document.createElement('div');
+                reviewFooter.className = 'review-footer';
+                reviewFooter.innerHTML = `
+                    <div class="helpful-vote">
+                        <span>Đánh giá này có hữu ích? </span>
+                        <button class="helpful-btn">Có (${review.helpful_count || 0})</button>
+                    </div>
+                `;
+                
+                // Add event listener for helpful button
+                reviewFooter.querySelector('.helpful-btn').addEventListener('click', async () => {
+                    const helpfulBtn = reviewFooter.querySelector('.helpful-btn');
+                    // Kiểm tra localStorage để ngăn user bấm nhiều lần
+                    const helpfulKey = `helpful_review_${review.id}`;
+                    if (localStorage.getItem(helpfulKey)) {
+                        alert('Bạn đã đánh giá hữu ích cho nhận xét này!');
+                        return;
+                    }
+                    try {
+                        const res = await fetchApi('/src/api/reviews.php?action=mark_helpful', {
+                            method: 'POST',
+                            body: { review_id: review.id }
+                        });
+                        if (res.success) {
+                            const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
+                            helpfulBtn.textContent = `Có (${currentCount + 1})`;
+                            localStorage.setItem(helpfulKey, '1');
+                        } else {
+                            alert('Không thể ghi nhận đánh giá hữu ích.');
+                        }
+                    } catch (e) {
+                        alert('Có lỗi khi ghi nhận đánh giá hữu ích.');
+                    }
+                });
+                
+                reviewItem.appendChild(reviewFooter);
+                reviewsList.appendChild(reviewItem);
+            });
+        } else if (reviewsResponse.success && reviews.length === 0) {
+            reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
+        } else {
+            reviewsList.innerHTML = '<p>Không thể tải đánh giá.</p>';
+        
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+    }
+}
+
+// Load product comments
+async function loadProductComments(productId, sortBy = 'newest') {
+    try {
+        // Map sort option to API parameters
+        let sortParams = {};
+        switch (sortBy) {
+            case 'newest':
+                sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
+                break;
+            case 'oldest':
+                sortParams = { sort_by: 'created_at', sort_order: 'ASC' };
+                break;
+        }
+        
+        const query = new URLSearchParams({
+            product_id: productId,
+            limit: 10,
+            offset: 0,
+            ...sortParams
+        }).toString();
+        
+        const response = await fetchApi(`/src/api/product-comments.php?action=get_by_product&${query}`, {
+            method: 'GET'
+        });
+        
+        const commentsList = document.getElementById('comments-list');
+        if (!commentsList) return;
+        
+        commentsList.innerHTML = '';
+        
+        let comments = [];
+        if (response && response.data && Array.isArray(response.data.comments)) {
+            comments = response.data.comments;
+        } else if (response && Array.isArray(response.comments)) {
+            comments = response.comments;
+        }
+        
+        if (response.success && comments.length > 0) {
+            comments.forEach(comment => {
+                const commentItem = document.createElement('div');
+                commentItem.className = 'comment-item';
+                
+                // Format date
+                const commentDate = new Date(comment.created_at);
+                const formattedDate = commentDate.toLocaleDateString('vi-VN');
+                
+                commentItem.innerHTML = `
+                    <div class="comment-header">
+                        <div class="author-info">
+                            ${getUserAvatarHtml(comment, 'user-avatar-comment')}
+                            <span>${getDisplayName(comment)}</span>
+                        </div>
+                        <div class="comment-date">${formattedDate}</div>
+                    </div>
+                    <div class="comment-body">${comment.content}</div>
+                `;
+                
+                commentsList.appendChild(commentItem);
+            });
+        } else if (response.success && comments.length === 0) {
+            commentsList.innerHTML = '<p>Chưa có bình luận nào cho sản phẩm này.</p>';
+        } else {
+            commentsList.innerHTML = '<p>Không thể tải bình luận.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading product comments:', error);
+        const commentsList = document.getElementById('comments-list');
+        if (commentsList) {
+            commentsList.innerHTML = '<p>Có lỗi khi tải bình luận.</p>';
+        }
+    }
+}
+
+// Set up product comment form
+function setupProductCommentForm(productId) {
+    const formContainer = document.getElementById('comment-form-container');
+    const form = document.getElementById('product-comment-form');
+    if (!formContainer || !form) return;
+
+    // Check login status to show/hide form
+    if (typeof window.checkLoginStatus === 'function') {
+        window.checkLoginStatus().then(user => {
+            if (user) {
+                formContainer.style.display = '';
+                // Show avatar and name
+                const avatarDiv = document.getElementById('commenter-avatar');
+                if (avatarDiv) {
+                    avatarDiv.innerHTML = getUserAvatarHtml(user, 'commenter-avatar');
+                }
+                document.getElementById('commenter-name').textContent = user.full_name || 'Bạn';
+            } else {
+                formContainer.style.display = 'none';
+            }
+        });
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
+        const content = form.querySelector('#comment-content').value.trim();
         
-        const commentContent = document.getElementById('comment-content').value.trim();
-        
-        if (!commentContent) {
-            alert('Vui lòng nhập nội dung bình luận');
+        if (!content) {
+            alert('Vui lòng nhập nội dung bình luận!');
             return;
         }
+        
+        if (content.length < 10) {
+            alert('Bình luận phải có ít nhất 10 ký tự!');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('content', content);
         
         try {
-            const submitButton = commentForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Đang gửi...';
-            
-            const response = await fetchApi('/src/api/comments.php?action=create', {
+            const res = await fetch('/src/api/product-comments.php?action=create', {
                 method: 'POST',
-                body: {
-                    post_id: postId,
-                    content: commentContent
-                }
+                body: formData,
+                credentials: 'include'
             });
+            const data = await res.json();
             
-            if (!response.success) {
-                throw new Error(response.message || 'Failed to add comment');
+            if (data.success) {
+                alert('Bình luận của bạn đã được gửi!');
+                form.reset();
+                // Reload comments
+                loadProductComments(productId);
+            } else {
+                alert(data.message || 'Gửi bình luận thất bại!');
             }
-            
-            // Comment added successfully, reload comments
-            await loadComments(postId);
-            
-            // Clear comment form
-            document.getElementById('comment-content').value = '';
-            
-            alert('Bình luận của bạn đã được gửi đi!');
-        } catch (error) {
-            console.error('Error submitting comment:', error);
-            alert('Đã xảy ra lỗi khi gửi bình luận. Vui lòng thử lại sau.');
-        } finally {
-            const submitButton = commentForm.querySelector('button[type="submit"]');
-            submitButton.disabled = false;
-            submitButton.textContent = 'Gửi bình luận';
+        } catch (err) {
+            alert('Lỗi gửi bình luận!');
         }
     });
 }
 
-/**
- * Show an error message to the user
- * @param {string} message - The error message to display
- */
-function showError(message) {
-    const errorContainer = document.getElementById('error-message');
-    if (errorContainer) {
-        errorContainer.textContent = message;
-        errorContainer.style.display = 'block';
-    } else {
-        alert(message);
+// Load related discussions
+async function loadRelatedDiscussions(productName) {
+    try {
+        if (!productName) return;
+        // Use GET and query param for backend compatibility, search by product name
+        const query = new URLSearchParams({
+            query: productName,
+            limit: 5
+        }).toString();
+        const response = await fetchApi(`/src/api/posts.php?action=search&${query}`, {
+            method: 'GET'
+        });
+        const discussionList = document.getElementById('related-discussion-list');
+        if (!discussionList) return;
+        discussionList.innerHTML = '';
+        // Sửa: lấy đúng trường posts từ response.data.posts hoặc response.posts
+        let posts = [];
+        if (response && response.data && Array.isArray(response.data.posts)) {
+            posts = response.data.posts;
+        } else if (response && Array.isArray(response.posts)) {
+            posts = response.posts;
+        }
+        if (response.success && posts.length > 0) {
+            posts.forEach(post => {
+                const discussionItem = document.createElement('div');
+                discussionItem.className = 'discussion-item';
+                
+                // Format date
+                const postDate = new Date(post.created_at);
+                const formattedDate = postDate.toLocaleDateString('vi-VN');
+                
+                discussionItem.innerHTML = `
+                    <h3><a href="post-detail.html?id=${post.id}">${post.title}</a></h3>
+                    <div class="meta">
+                        <span class="author">Bởi: ${getDisplayName(post)}</span>
+                        <span class="date">${formattedDate}</span>
+                        <span class="comments">${post.comment_count || 0} bình luận</span>
+                    </div>
+                `;
+                discussionList.appendChild(discussionItem);
+            });
+        } else if (response.success && posts.length === 0) {
+            discussionList.innerHTML = '<p>Chưa có thảo luận nào liên quan đến sản phẩm này.</p>';
+        } else {
+            discussionList.innerHTML = '<p>Không thể tải thảo luận liên quan.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading related discussions:', error);
     }
 }
 
-/**
- * Update the login prompt URL for the current post
- * @param {string} postId - The ID of the post
- */
-function updateLoginPromptUrl(postId) {
-    const loginPrompt = document.querySelector('.login-prompt.guest-only a');
-    if (loginPrompt) {
-        loginPrompt.href = `login.html?redirect_to=${encodeURIComponent(window.location.href)}`;
-    }
-}
-
-/**
- * Fetch API helper function
- * @param {string} url - The API endpoint URL
- * @param {Object} options - The fetch options
- * @returns {Promise<Object>} - The JSON response from the API
- */
-async function fetchApi(url, options = {}) {
-    const response = await fetch(url, {
-        method: options.method || 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-        },
-        body: options.body ? JSON.stringify(options.body) : undefined
+// Set up tab switching
+function setupTabs() {
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabLinks.forEach(tabLink => {
+        tabLink.addEventListener('click', () => {
+            tabLinks.forEach(link => link.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            tabLink.classList.add('active');
+            const tabId = tabLink.getAttribute('data-tab');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        });
     });
     
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return response.json();
+    // Set up review/comment toggle in reviews tab
+    setupReviewToggle();
 }
 
+// Set up toggle between reviews and comments
+function setupReviewToggle() {
+    const toggleBtns = document.querySelectorAll('.review-toggle .toggle-btn');
+    const reviewFormContainer = document.getElementById('review-form-container');
+    const commentFormContainer = document.getElementById('comment-form-container');
+    const reviewsList = document.getElementById('reviews-list');
+    const commentsList = document.getElementById('comments-list');
+    const paginationReviews = document.getElementById('pagination-reviews');
+    const paginationComments = document.getElementById('pagination-comments');
+    
+    if (!toggleBtns.length) return;
+    
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all buttons
+            toggleBtns.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            btn.classList.add('active');
+            
+            const type = btn.getAttribute('data-type');
+            
+            if (type === 'reviews') {
+                // Show reviews, hide comments
+                if (reviewFormContainer) reviewFormContainer.style.display = '';
+                if (commentFormContainer) commentFormContainer.style.display = 'none';
+                if (reviewsList) reviewsList.style.display = '';
+                if (commentsList) commentsList.style.display = 'none';
+                if (paginationReviews) paginationReviews.style.display = '';
+                if (paginationComments) paginationComments.style.display = 'none';
+                
+                // Load reviews if not already loaded
+                const urlParams = new URLSearchParams(window.location.search);
+                const productId = urlParams.get('id');
+                if (productId) {
+                    loadProductReviews(productId);
+                }
+            } else if (type === 'comments') {
+                // Show comments, hide reviews
+                if (reviewFormContainer) reviewFormContainer.style.display = 'none';
+                if (commentFormContainer) commentFormContainer.style.display = '';
+                if (reviewsList) reviewsList.style.display = 'none';
+                if (commentsList) commentsList.style.display = '';
+                if (paginationReviews) paginationReviews.style.display = 'none';
+                if (paginationComments) paginationComments.style.display = '';
+                
+                // Load comments if not already loaded
+                const urlParams = new URLSearchParams(window.location.search);
+                const productId = urlParams.get('id');
+                if (productId) {
+                    loadProductComments(productId);
+                }
+            }
+        });
+    });
+}
+
+// Set up review form
+// Setup review form (hiển thị avatar, rating, gửi API)
+function setupReviewForm(productId) {
+    const formContainer = document.getElementById('review-form-container');
+    const form = document.getElementById('review-form');
+    if (!formContainer || !form) return;
+
+    // Kiểm tra đăng nhập để hiển thị form
+    if (typeof window.checkLoginStatus === 'function') {
+        window.checkLoginStatus().then(user => {
+            if (user) {
+                formContainer.style.display = '';
+                // Hiển thị avatar và tên
+                const avatarDiv = document.getElementById('reviewer-avatar');
+                if (avatarDiv) {
+                    avatarDiv.innerHTML = getUserAvatarHtml(user, 'reviewer-avatar');
+                }
+                document.getElementById('reviewer-name').textContent = user.full_name || 'Bạn';
+            } else {
+                formContainer.style.display = 'none';
+            }
+        });
+    }
+
+    // Modern star rating logic (Font Awesome)
+    const stars = document.querySelectorAll('#review-rating-stars .star');
+    const ratingInput = document.getElementById('review-rating');
+    let selectedRating = 0;
+
+    function updateStarIcons(val) {
+        stars.forEach((star, idx) => {
+            if (idx < val) {
+                star.classList.remove('far');
+                star.classList.add('fas', 'selected');
+            } else {
+                star.classList.remove('fas', 'selected');
+                star.classList.add('far');
+            }
+        });
+    }
+
+    stars.forEach(star => {
+        star.addEventListener('mouseenter', function() {
+            updateStarIcons(parseInt(this.dataset.value));
+        });
+        star.addEventListener('mouseleave', function() {
+            updateStarIcons(selectedRating);
+        });
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.value);
+            ratingInput.value = selectedRating;
+            updateStarIcons(selectedRating);
+        });
+    });
+    // Khởi tạo trạng thái ban đầu
+    updateStarIcons(0);
+
+    // Gửi form đánh giá
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const content = form.querySelector('#review-content').value.trim();
+        const rating = form.querySelector('#review-rating').value;
+        if (!content || !rating || rating < 1) {
+            alert('Vui lòng nhập nội dung và chọn số sao!');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('comment', content); // Sửa từ 'content' thành 'comment' để backend nhận đúng
+        formData.append('rating', rating);
+        try {
+            const res = await fetch('/src/api/reviews.php?action=create', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Đánh giá của bạn đã được gửi!');
+                form.reset();
+                selectedRating = 0;
+                updateStarIcons(0);
+                // Reload reviews
+                loadProductReviews(productId);
+            } else {
+                alert(data.message || 'Gửi đánh giá thất bại!');
+            }
+        } catch (err) {
+            alert('Lỗi gửi đánh giá!');
+        }
+    });
+}
+
+// Increment view count
+async function incrementViewCount(productId) {
+    try {
+        await fetchApi('/src/api/products.php?action=view', {
+            method: 'POST',
+            body: { product_id: productId }
+        });
+    } catch (error) {
+        console.error('Error incrementing view count:', error);
+    }
+}
+
+// Check authentication status
+async function checkAuthStatus() {
+    try {
+        const response = await fetchApi('/src/api/auth.php?action=status');
+        return response;
+    } catch (error) {
+        console.error('Error checking auth status:', error);
+        return { authenticated: false };
+    }
+}
