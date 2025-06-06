@@ -19,6 +19,9 @@ function initAuthPage() {
     // Set up password visibility toggle
     setupPasswordToggle();
 
+    // Set up forgot password modal
+    setupForgotPasswordModal();
+
     // Check for redirect parameter
     checkRedirectParam();
 }
@@ -256,11 +259,13 @@ function setupFormValidation() {
  * @param {string} message - The error message to display
  */
 function showFormError(container, message) {
+    // Use toast notification instead of form container
+    showError(message);
+    
+    // Still update container for fallback
     if (container) {
         container.textContent = message;
         container.style.display = "block";
-    } else {
-        alert(message);
     }
 }
 
@@ -295,15 +300,19 @@ async function handleLogin() {
 
         // Handle response
         if (response.success) {
+            showSuccess('Đăng nhập thành công! Đang chuyển hướng...');
+            
             // Get redirect URL from query parameter or default to homepage
             const urlParams = new URLSearchParams(window.location.search);
             const redirectUrl = urlParams.get("redirect") || "index.html";
             
-            // Redirect to specified page
-            window.location.href = redirectUrl;
+            // Redirect to specified page after short delay
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 1000);
         } else {
             // Show error message
-            showFormError(errorContainer, response.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.");
+            showError(response.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.");
             // Re-enable form submission
             if (submitButton) {
                 submitButton.disabled = false;
@@ -315,7 +324,7 @@ async function handleLogin() {
         console.error("Login error:", error);
         
         // Show error message
-        showFormError(errorContainer, "Tên đăng nhập/email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.");
+        showError("Tên đăng nhập/email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.");
         
         // Re-enable form submission
         const submitButton = document.querySelector("#login-form .auth-submit-btn");
@@ -364,25 +373,29 @@ async function handleRegister() {
 
         // Handle response
         if (response.success) {
+            showSuccess('Đăng ký thành công! Đang chuyển hướng...');
+            
             // Get redirect URL from query parameter or default to homepage
             const urlParams = new URLSearchParams(window.location.search);
             const redirectUrl = urlParams.get("redirect") || "index.html";
             
-            // Redirect to specified page
-            window.location.href = redirectUrl;
+            // Redirect to specified page after short delay
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 1000);
         } else {
             // Xử lý lỗi 409: tên đăng nhập hoặc email đã tồn tại
             if (response.status === 409 && response.message) {
                 if (response.message.includes('Username')) {
-                    showFormError(errorContainer, "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.");
+                    showError("Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.");
                 } else if (response.message.includes('Email')) {
-                    showFormError(errorContainer, "Email đã được sử dụng. Vui lòng chọn email khác.");
+                    showError("Email đã được sử dụng. Vui lòng chọn email khác.");
                 } else {
-                    showFormError(errorContainer, response.message);
+                    showError(response.message);
                 }
             } else {
                 // Show error message mặc định
-                showFormError(errorContainer, response.message || "Đăng ký thất bại. Vui lòng thử lại.");
+                showError(response.message || "Đăng ký thất bại. Vui lòng thử lại.");
             }
 
             // Re-enable form submission
@@ -395,7 +408,7 @@ async function handleRegister() {
         console.error("Registration error:", error);
         
         // Show error message
-        showFormError(errorContainer, "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại sau.");
+        showError("Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại sau.");
         
         // Re-enable form submission
         const submitButton = document.querySelector("#register-form .auth-submit-btn");
@@ -403,6 +416,137 @@ async function handleRegister() {
             submitButton.disabled = false;
             submitButton.textContent = "Đăng ký";
         }
+    }
+}
+
+/**
+ * Set up forgot password modal functionality
+ */
+function setupForgotPasswordModal() {
+    const forgotPasswordLink = document.querySelector('.forgot-password-link');
+    const forgotPasswordModal = document.getElementById('forgot-password-modal');
+    const closeModalButtons = document.querySelectorAll('#forgot-password-modal .close-modal, #cancel-forgot-password');
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
+
+    console.log('Setting up forgot password modal...', {
+        forgotPasswordLink,
+        forgotPasswordModal,
+        closeModalButtons: closeModalButtons.length
+    });
+
+    // Open modal when forgot password link is clicked
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Forgot password link clicked');
+            if (forgotPasswordModal) {
+                forgotPasswordModal.style.display = 'block';
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            }
+        });
+    } else {
+        console.warn('Forgot password link not found');
+    }
+
+    // Close modal when close buttons are clicked
+    if (closeModalButtons && closeModalButtons.length > 0) {
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (forgotPasswordModal) {
+                    forgotPasswordModal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
+                    // Clear form
+                    if (forgotPasswordForm) forgotPasswordForm.reset();
+                    clearMessages('forgot-password');
+                }
+            });
+        });
+    }
+
+    // Close modal when clicking outside
+    if (forgotPasswordModal) {
+        forgotPasswordModal.addEventListener('click', (e) => {
+            if (e.target === forgotPasswordModal) {
+                forgotPasswordModal.style.display = 'none';
+                document.body.style.overflow = ''; // Restore scrolling
+                if (forgotPasswordForm) forgotPasswordForm.reset();
+                clearMessages('forgot-password');
+            }
+        });
+    }
+
+    // Handle form submission
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('forgot-email').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-new-password').value;
+            const errorDiv = document.getElementById('forgot-password-error');
+            const successDiv = document.getElementById('forgot-password-success');
+            
+            // Clear previous messages
+            clearMessages('forgot-password');
+            
+            // Basic validation
+            if (!email || !newPassword || !confirmPassword) {
+                showError('Vui lòng điền đầy đủ thông tin.');
+                return;
+            }
+            
+            if (!/^\S+@\S+\.\S+$/.test(email)) {
+                showError('Email không hợp lệ.');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showError('Mật khẩu mới và xác nhận mật khẩu không khớp.');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showError('Mật khẩu mới phải có ít nhất 8 ký tự.');
+                return;
+            }
+            
+            // Enhanced password validation
+            if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+                showError('Mật khẩu mới phải có chữ hoa, chữ thường và số.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/src/api/auth.php?action=reset_password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result && result.success) {
+                    showSuccess('Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.');
+                    setTimeout(() => {
+                        forgotPasswordModal.style.display = 'none';
+                        document.body.style.overflow = ''; // Restore scrolling
+                        forgotPasswordForm.reset();
+                        clearMessages('forgot-password');
+                    }, 2000);
+                } else {
+                    showError(result.message || 'Không thể đặt lại mật khẩu.');
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                showError('Đã xảy ra lỗi khi đặt lại mật khẩu.');
+            }
+        });
     }
 }
 
@@ -616,5 +760,31 @@ function requireAuth(redirectUrl = null) {
         return false;
     }
     return true;
+}
+
+/**
+ * Helper function to clear error/success messages
+ */
+function clearMessages(prefix) {
+    const errorDiv = document.getElementById(`${prefix}-error`);
+    const successDiv = document.getElementById(`${prefix}-success`);
+    if (errorDiv) errorDiv.textContent = '';
+    if (successDiv) successDiv.textContent = '';
+}
+
+/**
+ * Helper function to show error message
+ */
+function showError(prefix, message) {
+    const errorDiv = document.getElementById(`${prefix}-error`);
+    if (errorDiv) errorDiv.textContent = message;
+}
+
+/**
+ * Helper function to show success message
+ */
+function showSuccess(prefix, message) {
+    const successDiv = document.getElementById(`${prefix}-success`);
+    if (successDiv) successDiv.textContent = message;
 }
 

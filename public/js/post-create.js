@@ -53,8 +53,10 @@ async function checkAuthForPostCreate() {
             }
         }
     } catch (err) {
-        alert('Không thể kiểm tra trạng thái đăng nhập. Vui lòng thử lại sau.');
-        window.location.href = 'login-register.html';
+        showError('Không thể kiểm tra trạng thái đăng nhập. Vui lòng thử lại sau.');
+        setTimeout(() => {
+            window.location.href = 'login-register.html';
+        }, 2000);
     }
 }
 
@@ -374,49 +376,38 @@ function setupFormSubmission() {
         const mediaInput = document.getElementById('post-media');
         const files = mediaInput ? mediaInput.files : [];
         if (!title) {
-            alert('Vui lòng nhập tiêu đề bài viết.');
+            showError('Vui lòng nhập tiêu đề bài viết.');
             return false;
         }
         if (title.length > 100) {
-            alert('Tiêu đề không được vượt quá 100 ký tự.');
+            showError('Tiêu đề không được vượt quá 100 ký tự.');
             return false;
         }
         if (!postType) {
-            alert('Vui lòng chọn loại bài viết.');
+            showError('Vui lòng chọn loại bài viết.');
             return false;
         }
         if (!category) {
-            alert('Vui lòng chọn danh mục.');
+            showError('Vui lòng chọn danh mục.');
             return false;
         }
         if (!content) {
-            alert('Vui lòng nhập nội dung bài viết.');
+            showError('Vui lòng nhập nội dung bài viết.');
             return false;
         }
         if (tags.length > 5) {
-            alert('Bạn chỉ có thể thêm tối đa 5 thẻ.');
+            showError('Bạn chỉ có thể thêm tối đa 5 thẻ.');
             return false;
         }
         for (let tag of tags) {
             if (typeof tag !== 'string' || tag.length > 30) {
-                alert('Mỗi thẻ phải là chuỗi tối đa 30 ký tự.');
+                showError('Mỗi thẻ phải là chuỗi tối đa 30 ký tự.');
                 return false;
             }
         }
         if (files && files.length > 10) {
-            alert('Chỉ cho phép tối đa 10 hình ảnh.');
+            showError('Bạn chỉ có thể tải lên tối đa 10 ảnh.');
             return false;
-        }
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (!file.type.startsWith('image/')) {
-                alert('Chỉ chấp nhận file hình ảnh.');
-                return false;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Kích thước file không được vượt quá 5MB.');
-                return false;
-            }
         }
         return true;
     }
@@ -424,7 +415,6 @@ function setupFormSubmission() {
         try {
             submitBtn.disabled = true;
             const formData = new FormData(form);
-            // Đảm bảo luôn gửi post_type
             if (!formData.get('post_type')) {
                 formData.set('post_type', 'discussion');
             }
@@ -436,22 +426,22 @@ function setupFormSubmission() {
             try {
                 data = await response.json();
             } catch (err) {
-                alert('Lỗi hệ thống hoặc kết nối. Vui lòng thử lại sau.');
+                showError('Lỗi hệ thống hoặc kết nối. Vui lòng thử lại sau.');
                 submitBtn.disabled = false;
                 return;
             }
             if (data.success) {
-                alert('Đăng bài thành công!');
-                window.location.href = `post-detail.html?id=${data.data.post_id}`;
+                showSuccess('Đăng bài thành công! Đang chuyển hướng...');
+                setTimeout(() => {
+                    window.location.href = `post-detail.html?id=${data.data.post_id}`;
+                }, 1200);
             } else {
-                // Log lỗi chi tiết để debug
-                console.error('Đăng bài thất bại:', data);
-                alert(`Không thể đăng bài: ${data.message || 'Lỗi không xác định.'}`);
+                showError(`Không thể đăng bài: ${data.message || 'Lỗi không xác định.'}`);
                 submitBtn.disabled = false;
             }
         } catch (error) {
             console.error('Error submitting post:', error);
-            alert('Đã xảy ra lỗi khi đăng bài. Vui lòng thử lại sau.');
+            showError('Đã xảy ra lỗi khi đăng bài. Vui lòng thử lại sau.');
             submitBtn.disabled = false;
         }
     }

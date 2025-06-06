@@ -252,36 +252,28 @@ function generateAvatarHtml(profilePicture, username, fullName = null) {
 // Setup comment form
 function setupCommentForm(postId) {
     const commentForm = document.getElementById('comment-form');
-    
     if (commentForm) {
         commentForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const contentInput = document.getElementById('comment-content');
             const content = contentInput.value.trim();
-            
             if (!content) {
-                showNotification('Vui lòng nhập nội dung bình luận.', 'warning');
+                showWarning('Vui lòng nhập nội dung bình luận.');
                 return;
             }
-            
             // Check authentication before submitting
             const isLoggedIn = await (window.checkLoginStatus ? !!(await window.checkLoginStatus()) : (window.checkAuthStatus ? window.checkAuthStatus() : false));
             if (!isLoggedIn) {
-                showNotification('Bạn cần đăng nhập để bình luận.', 'error');
+                showError('Bạn cần đăng nhập để bình luận.');
                 return;
             }
-            
             const submitButton = commentForm.querySelector('button[type="submit"]');
             const originalText = submitButton?.textContent || 'Gửi bình luận';
-            
             try {
-                // Disable submit button
                 if (submitButton) {
                     submitButton.disabled = true;
                     submitButton.textContent = 'Đang gửi...';
                 }
-                
                 const response = await (window.fetchApi || fetchApi)('comments.php?action=create', {
                     method: 'POST',
                     body: {
@@ -289,12 +281,8 @@ function setupCommentForm(postId) {
                         content: content
                     }
                 });
-                
                 if (response && response.success) {
-                    // Show success message
-                    showNotification('Bình luận đã được thêm thành công!', 'success');
-                    
-                    // Reload page after a short delay to show the notification
+                    showSuccess('Bình luận đã được thêm thành công!');
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
@@ -303,9 +291,8 @@ function setupCommentForm(postId) {
                 }
             } catch (error) {
                 console.error('Error submitting comment:', error);
-                showNotification('Có lỗi xảy ra khi gửi bình luận: ' + error.message, 'error');
+                showError('Có lỗi xảy ra khi gửi bình luận: ' + error.message);
             } finally {
-                // Re-enable submit button
                 if (submitButton) {
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
@@ -469,54 +456,4 @@ function showErrorState(message) {
     safeSetInnerHTML('post-body', `<p class="error-message">${message}</p>`);
 }
 
-function showNotification(message, type = 'info') {
-    // Create or update notification
-    let notification = document.getElementById('notification');
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'notification';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            border-radius: 4px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            transition: opacity 0.3s ease;
-        `;
-        document.body.appendChild(notification);
-    }
-    
-    // Set message and style based on type
-    notification.textContent = message;
-    notification.className = `notification notification-${type}`;
-    
-    switch (type) {
-        case 'success':
-            notification.style.backgroundColor = '#10b981';
-            break;
-        case 'error':
-            notification.style.backgroundColor = '#ef4444';
-            break;
-        case 'warning':
-            notification.style.backgroundColor = '#f59e0b';
-            break;
-        default:
-            notification.style.backgroundColor = '#3b82f6';
-    }
-    
-    // Show notification
-    notification.style.opacity = '1';
-    
-    // Hide after 3 seconds
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
+// Thay thế các hàm showNotification cũ bằng showSuccess/showError/showWarning từ notifications.js

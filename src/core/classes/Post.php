@@ -127,7 +127,10 @@ class Post {
                 case 'oldest':
                     $orderBy = 'p.created_at ASC';
                     break;
-                case 'popular': // Dựa trên số lượng bình luận
+                case 'popular': // Dựa trên điểm tổng hợp (views + comments)
+                    $orderBy = '(p.view_count * 0.7 + comment_count * 0.3) DESC, p.created_at DESC';
+                    break;
+                case 'comments': // Sắp xếp theo số lượng bình luận
                     $orderBy = 'comment_count DESC, p.created_at DESC';
                     break;
                 case 'views':

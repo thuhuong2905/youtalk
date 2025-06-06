@@ -76,7 +76,7 @@ class User {
      * Get user by email
      * 
      * @param string $email The email to retrieve
-     * @return array|null User data or null if not found
+     * @return array User data with success/data structure
      */
     public function getUserByEmail($email) {
         try {
@@ -92,10 +92,14 @@ class User {
             
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            return $user ?: null;
+            if ($user) {
+                return ['success' => true, 'data' => $user];
+            } else {
+                return ['success' => false, 'message' => 'User not found'];
+            }
         } catch (PDOException $e) {
             error_log('Error fetching user by email: ' . $e->getMessage());
-            return null;
+            return ['success' => false, 'message' => 'Database error'];
         }
     }
     
@@ -528,4 +532,3 @@ class User {
     }
 }
 ?>
-

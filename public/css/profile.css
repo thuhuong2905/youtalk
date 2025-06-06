@@ -167,11 +167,34 @@
     background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);
 }
 
+/* Camera icon styling */
+.change-avatar-button .icon-camera {
+    font-size: 1.2em;
+}
+
+/* Fallback for browsers without icon font */
+.change-avatar-button .icon-camera::before {
+    content: "📷";
+    font-size: 1em;
+}
+
 /* Profile Info - Enhanced Typography */
 .profile-info {
     flex: 1;
     color: white;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Profile fullname styling - matching forum banner style */
+#profile-fullname {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: var(--font-bold);
+    color: white;
+    margin-bottom: 0.5rem;
+    letter-spacing: var(--tracking-tight);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2;
 }
 
 .profile-name {

@@ -296,8 +296,77 @@ switch ($action) {
         }
         break;
         
+    case 'reset_password':
+        // Handle password reset
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$data) {
+            $data = $_POST;
+        }
+        
+        // Validate required fields
+        if (!isset($data['email']) || empty(trim($data['email']))) {
+            sendResponse(false, 'Email is required', null, 400);
+            break;
+        }
+        
+        if (!isset($data['new_password']) || empty($data['new_password'])) {
+            sendResponse(false, 'New password is required', null, 400);
+            break;
+        }
+        
+        if (!isset($data['confirm_password']) || empty($data['confirm_password'])) {
+            sendResponse(false, 'Password confirmation is required', null, 400);
+            break;
+        }
+        
+        $email = trim($data['email']);
+        $newPassword = $data['new_password'];
+        $confirmPassword = $data['confirm_password'];
+        
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            sendResponse(false, 'Invalid email format', null, 400);
+            break;
+        }
+        
+        // Validate password match
+        if ($newPassword !== $confirmPassword) {
+            sendResponse(false, 'Passwords do not match', null, 400);
+            break;
+        }
+        
+        // Validate password strength
+        if (strlen($newPassword) < 8) {
+            sendResponse(false, 'Password must be at least 8 characters long', null, 400);
+            break;
+        }
+        
+        if (!preg_match('/[A-Z]/', $newPassword) || !preg_match('/[a-z]/', $newPassword) || !preg_match('/[0-9]/', $newPassword)) {
+            sendResponse(false, 'Password must contain uppercase, lowercase, and number', null, 400);
+            break;
+        }
+        
+        // Check if user exists with this email
+        $existingUser = $user->getUserByEmail($email);
+        if (!$existingUser['success']) {
+            sendResponse(false, 'No account found with this email', null, 404);
+            break;
+        }
+        
+        $userId = $existingUser['data']['id'];
+        
+        // Update password
+        $result = $user->updateUserById($userId, ['password' => $newPassword]);
+        
+        if ($result['success']) {
+            sendResponse(true, 'Password reset successfully');
+        } else {
+            sendResponse(false, $result['message'], null, 500);
+        }
+        break;
+        
     default:
         sendResponse(false, 'Invalid action specified', null, 400);
         break;
 }
-

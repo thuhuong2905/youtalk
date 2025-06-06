@@ -105,7 +105,7 @@ async function loadTopics(postType, page, searchQuery, sortBy) {
             params.search = searchQuery;
         }
         
-        const response = await fetchApi(`/src/api/posts.php?action=get_topics&${new URLSearchParams(params)}`);
+        const response = await fetchApi(`posts.php?action=get_topics&${new URLSearchParams(params)}`);
         
         if (!response.success) {
             console.error('Failed to load topics:', response.message);
@@ -163,10 +163,10 @@ function renderTopics(topics, container) {
                 </div>
             `;
             
-            // Gán avatar sử dụng class Avatar
+            // Gán avatar đồng bộ với thành viên tích cực
             const avatarContainer = topicCard.querySelector(`#avatar-${topic.id}`);
             if (avatarContainer) {
-                avatarContainer.innerHTML = Avatar.createFallbackHTML(getDisplayName(topic), '40px');
+                setUserAvatar(avatarContainer, topic.profile_picture, getDisplayName(topic), '40px');
             }
         container.appendChild(topicCard);
     });
@@ -336,50 +336,60 @@ function renderActiveUsers(users, container) {
         
         activeUser.innerHTML = `
             <a href="profile.html?user_id=${userId}" class="active-user-link" title="${activityDetails}">
-                <div class="avatar-container" id="${avatarId}"></div>
                 <div class="user-info">
+                    <div class="avatar-container" id="${avatarId}"></div>
                     <div class="user-name">${fullName}</div>
-                    <div class="user-stats">
-                        <span class="activity-score">${activityScore} điểm</span>
-                        <span class="post-count">${postCount} bài viết</span>
-                    </div>
                 </div>
+                <div class="user-stats">${postCount} bài viết</div>
             </a>
         `;
 
         container.appendChild(activeUser);
         
-        // ✅ FIXED: Avatar logic - chỉ sử dụng 2 cách: ảnh thật hoặc fallback
+        // Thiết lập avatar sử dụng hàm helper tối ưu
         setTimeout(() => {
             const avatarContainer = activeUser.querySelector(`#${avatarId}`);
             if (avatarContainer) {
-                // Kiểm tra nếu user có profile_picture
-                if (user.profile_picture && user.profile_picture.trim() !== '') {
-                    // Tạo img element cho ảnh thật
-                    const img = document.createElement('img');
-                    img.src = user.profile_picture;
-                    img.alt = `Avatar của ${fullName}`;
-                    img.style.cssText = `
-                        width: 100%;
-                        height: 100%;
-                        border-radius: 50%;
-                        object-fit: cover;
-                    `;
-                    
-                    // Xử lý lỗi load ảnh
-                    img.onerror = () => {
-                        console.warn(`Avatar image failed to load for user: ${fullName}. Using fallback.`);
-                        avatarContainer.innerHTML = Avatar.createFallbackHTML(fullName, '40px');
-                    };
-                    
-                    avatarContainer.appendChild(img);
-                } else {
-                    // Không có ảnh, sử dụng fallback
-                    avatarContainer.innerHTML = Avatar.createFallbackHTML(fullName, '40px');
-                }
+                setUserAvatar(avatarContainer, user.profile_picture, fullName, '32px');
             }
         }, 0);
     });
+}
+
+/**
+ * Hàm helper tối ưu: Thiết lập avatar cho user (tái sử dụng cho nhiều nơi)
+ * @param {HTMLElement} container - Container chứa avatar
+ * @param {string} profilePicture - URL ảnh avatar (có thể null/empty)
+ * @param {string} displayName - Tên hiển thị của user
+ * @param {string} size - Kích thước avatar (ví dụ: '40px')
+ */
+function setUserAvatar(container, profilePicture, displayName, size = '40px') {
+    if (!container) return;
+    
+    // Kiểm tra nếu user có profile_picture
+    if (profilePicture && profilePicture.trim() !== '') {
+        // Tạo img element cho ảnh thật
+        const img = document.createElement('img');
+        img.src = profilePicture;
+        img.alt = `Avatar của ${displayName}`;
+        img.style.cssText = `
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        `;
+        
+        // Xử lý lỗi load ảnh
+        img.onerror = () => {
+            console.warn(`Avatar image failed to load for user: ${displayName}. Using fallback.`);
+            container.innerHTML = Avatar.createFallbackHTML(displayName, size);
+        };
+        
+        container.appendChild(img);
+    } else {
+        // Không có ảnh, sử dụng fallback
+        container.innerHTML = Avatar.createFallbackHTML(displayName, size);
+    }
 }
 
 /**

@@ -11,7 +11,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /**
- * Helper function to render avatar using avatar.js logic
+ * Helper function to render avatar using avatar.js logic for profile page
+ * This function preserves the upload button by only updating avatar content
+ * @param {HTMLElement} container - The container element for the avatar
+ * @param {string} imageUrl - The URL of the avatar image
+ * @param {string} fullName - The full name for fallback initials
+ * @param {string} size - The size of the avatar (e.g., '150px')
+ */
+function renderProfileAvatar(container, imageUrl, fullName, size) {
+    if (!container) return;
+    
+    // Clear only avatar content, not the entire container
+    const existingAvatar = container.querySelector('img, .profile-avatar-fallback, .user-avatar-fallback');
+    if (existingAvatar) {
+        existingAvatar.remove();
+    }
+
+    if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = `Avatar của ${fullName}`;
+        img.className = 'profile-avatar-img';
+        img.style.width = size;
+        img.style.height = size;
+        img.style.borderRadius = '50%';
+        img.style.objectFit = 'cover';
+        
+        img.onerror = () => {
+            console.warn(`Avatar image failed to load: ${imageUrl}. Using fallback.`);
+            img.remove();
+            // Use Avatar.createFallback() directly to avoid nested divs
+            const fallbackElement = Avatar.createFallback(fullName, size);
+            fallbackElement.className = 'profile-avatar-fallback';
+            container.appendChild(fallbackElement);
+        };
+        container.appendChild(img);
+    } else {
+        // If no image URL, directly use Avatar.createFallback()
+        const fallbackElement = Avatar.createFallback(fullName, size);
+        fallbackElement.className = 'profile-avatar-fallback';
+        container.appendChild(fallbackElement);
+    }
+}
+
+/**
+ * Helper function to render avatar for other components (comments, etc.)
  * @param {HTMLElement} container - The container element for the avatar
  * @param {string} imageUrl - The URL of the avatar image
  * @param {string} fullName - The full name for fallback initials
@@ -32,7 +76,6 @@ function renderAvatar(container, imageUrl, fullName, size) {
         
         img.onerror = () => {
             console.warn(`Avatar image failed to load: ${imageUrl}. Using fallback.`);
-            // Use createFallbackHTML directly to avoid class dependency issues if needed
             container.innerHTML = Avatar.createFallbackHTML(fullName, size);
         };
         container.appendChild(img);
@@ -184,10 +227,10 @@ function displayUserProfile(userData, counts, isOwnProfile = false) {
         elements.profileFollowingCount.textContent = Number(counts.following || 0);
     }
 
-    // Update profile picture using renderAvatar
-    // Determine size from CSS or set a default (e.g., '100px' based on profile.css)
-    const profilePicSize = elements.profilePictureContainer?.style.width || '150px'; // Adjust size as needed
-    renderAvatar(elements.profilePictureContainer, userData.profile_picture, userData.full_name || 'Ẩn danh', profilePicSize);
+    // Update profile picture using renderProfileAvatar (preserves upload button)
+    // Determine size from CSS or set a default (e.g., '150px' based on profile.css)
+    const profilePicSize = elements.profilePictureContainer?.style.width || '150px';
+    renderProfileAvatar(elements.profilePictureContainer, userData.profile_picture, userData.full_name || 'Ẩn danh', profilePicSize);
 
     // Update dynamic usernames in tab headers
     const dynamicUsernames = document.querySelectorAll('.dynamic-username');
@@ -260,11 +303,11 @@ async function handleSettingsFormSubmit(event) {
     if (successDiv) successDiv.textContent = '';
     
     if (!full_name || !email) {
-        if (errorDiv) errorDiv.textContent = 'Vui lòng nhập đầy đủ thông tin bắt buộc.';
+        showError('Vui lòng nhập đầy đủ thông tin bắt buộc.');
         return;
     }
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-        if (errorDiv) errorDiv.textContent = 'Email không hợp lệ.';
+        showError('Email không hợp lệ.');
         return;
     }
     try {
@@ -274,25 +317,36 @@ async function handleSettingsFormSubmit(event) {
             body: JSON.stringify({ full_name, email, bio })
         });
         const data = await res.json();
-        if (data.success) {
-            if (successDiv) successDiv.textContent = 'Cập nhật thông tin thành công!';
-            setTimeout(() => {
-                location.reload();
-            }, 1500); // Reload sau 1.5 giây để người dùng có thể đọc thông báo
-
-            // Nếu backend trả về user mới, cập nhật lại form
+        console.log('Profile update response:', data);
+        
+        // Check for different success response formats
+        if (data.success === 200 || data.success === true || data.success === 'true') {
+            showSuccess('Cập nhật thông tin thành công!');
+            
+            // Nếu backend trả về user mới, cập nhật lại form ngay lập tức
             if (data.user) {
                 populateSettingsForm(data.user);
             }
+            
+            // Reload sau 2 giây để người dùng có thể đọc thông báo
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         } else {
             let msg = data.message;
             if (typeof msg === 'object') {
                 msg = JSON.stringify(msg);
             }
-            if (errorDiv) errorDiv.textContent = msg || 'Có lỗi xảy ra.';
+            // Handle specific email error message
+            if (msg && msg.includes('Địa chỉ email này đã được sử dụng')) {
+                showError('Địa chỉ email này đã được sử dụng bởi tài khoản khác.');
+            } else {
+                showError(msg || 'Có lỗi xảy ra khi cập nhật thông tin.');
+            }
         }
     } catch (error) {
-        if (errorDiv) errorDiv.textContent = 'Không thể kết nối máy chủ.';
+        console.error('Profile update error:', error);
+        showError('Không thể kết nối máy chủ.');
     }
 }
 
@@ -722,32 +776,48 @@ function initializeAvatarUpload() {
     const avatarFileInput = document.getElementById('avatar-file');
     const avatarPreviewContainer = document.getElementById('avatar-preview-container');
     
-    // Hide avatar upload container initially (will be shown only for own profile)
-    const avatarUploadContainer = document.getElementById('avatar-upload-container');
-    if (avatarUploadContainer) {
-        avatarUploadContainer.style.display = 'none';
-    }
+    // Avatar upload container visibility will be controlled by displayUserProfile()
+    // based on whether it's the user's own profile
     
     // Open modal when change avatar button is clicked
     if (changeAvatarButton) {
         changeAvatarButton.addEventListener('click', () => {
             if (avatarUploadModal) {
                 avatarUploadModal.style.display = 'block';
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                // Focus on file input
+                if (avatarFileInput) {
+                    setTimeout(() => avatarFileInput.focus(), 100);
+                }
             }
         });
     }
     
     // Close modal when close buttons are clicked
-    if (closeModalButtons) {
+    if (closeModalButtons && closeModalButtons.length > 0) {
         closeModalButtons.forEach(button => {
             button.addEventListener('click', () => {
                 if (avatarUploadModal) {
                     avatarUploadModal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
                     // Clear preview and file input
                     if (avatarFileInput) avatarFileInput.value = '';
                     if (avatarPreviewContainer) avatarPreviewContainer.innerHTML = '';
                 }
             });
+        });
+    }
+    
+    // Close modal when clicking outside
+    if (avatarUploadModal) {
+        avatarUploadModal.addEventListener('click', (e) => {
+            if (e.target === avatarUploadModal) {
+                avatarUploadModal.style.display = 'none';
+                document.body.style.overflow = ''; // Restore scrolling
+                // Clear preview and file input
+                if (avatarFileInput) avatarFileInput.value = '';
+                if (avatarPreviewContainer) avatarPreviewContainer.innerHTML = '';
+            }
         });
     }
     
@@ -779,12 +849,34 @@ function initializeAvatarUpload() {
             e.preventDefault();
             
             if (!avatarFileInput.files || !avatarFileInput.files[0]) {
-                alert('Vui lòng chọn một tệp ảnh.');
+                showError('Vui lòng chọn một tệp ảnh.');
+                return;
+            }
+            
+            const file = avatarFileInput.files[0];
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showError('Vui lòng chọn tệp ảnh hợp lệ (JPG, PNG, GIF, WEBP).');
+                return;
+            }
+            
+            // Validate file size (5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+                showError('Kích thước tệp quá lớn. Vui lòng chọn ảnh nhỏ hơn 5MB.');
                 return;
             }
             
             const formData = new FormData();
-            formData.append('avatarFile', avatarFileInput.files[0]);
+            formData.append('avatarFile', file);
+            
+            // Show loading state
+            const submitButton = avatarUploadForm.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Đang tải lên...';
+            submitButton.disabled = true;
             
             try {
                 const response = await fetch('/src/api/avatar_upload.php', {
@@ -796,17 +888,25 @@ function initializeAvatarUpload() {
                 const result = await response.json();
                 
                 if (result.success === 200 || result.success === true) {
-                    alert('Cập nhật ảnh đại diện thành công!');
+                    showSuccess('Cập nhật ảnh đại diện thành công!');
                     // Close modal
                     avatarUploadModal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
+                    // Clear form
+                    avatarFileInput.value = '';
+                    if (avatarPreviewContainer) avatarPreviewContainer.innerHTML = '';
                     // Reload profile to show new avatar
                     await loadUserProfile();
                 } else {
-                    alert('Lỗi: ' + (result.message || 'Không thể cập nhật ảnh đại diện.'));
+                    showError('Lỗi: ' + (result.message || 'Không thể cập nhật ảnh đại diện.'));
                 }
             } catch (error) {
                 console.error('Error uploading avatar:', error);
-                alert('Đã xảy ra lỗi khi tải lên ảnh đại diện.');
+                showError('Đã xảy ra lỗi khi tải lên ảnh đại diện.');
+            } finally {
+                // Restore button state
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
             }
         });
     }
@@ -837,23 +937,23 @@ function initializePasswordChange() {
             
             // Basic validation
             if (!currentPassword || !newPassword || !confirmPassword) {
-                if (errorDiv) errorDiv.textContent = 'Vui lòng điền đầy đủ thông tin.';
+                showError('Vui lòng điền đầy đủ thông tin.');
                 return;
             }
             
             if (newPassword !== confirmPassword) {
-                if (errorDiv) errorDiv.textContent = 'Mật khẩu mới và xác nhận mật khẩu không khớp.';
+                showError('Mật khẩu mới và xác nhận mật khẩu không khớp.');
                 return;
             }
             
             if (newPassword.length < 8) {
-                if (errorDiv) errorDiv.textContent = 'Mật khẩu mới phải có ít nhất 8 ký tự.';
+                showError('Mật khẩu mới phải có ít nhất 8 ký tự.');
                 return;
             }
             
             // Enhanced password validation
             if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-                if (errorDiv) errorDiv.textContent = 'Mật khẩu mới phải có chữ hoa, chữ thường và số.';
+                showError('Mật khẩu mới phải có chữ hoa, chữ thường và số.');
                 return;
             }
             
@@ -873,15 +973,15 @@ function initializePasswordChange() {
                 const result = await response.json();
                 
                 if (result && result.success) {
-                    if (successDiv) successDiv.textContent = 'Đổi mật khẩu thành công!';
+                    showSuccess('Đổi mật khẩu thành công!');
                     // Clear form
                     changePasswordForm.reset();
                 } else {
-                    if (errorDiv) errorDiv.textContent = result.message || 'Không thể đổi mật khẩu.';
+                    showError(result.message || 'Không thể đổi mật khẩu.');
                 }
             } catch (error) {
                 console.error('Error changing password:', error);
-                if (errorDiv) errorDiv.textContent = 'Đã xảy ra lỗi khi đổi mật khẩu.';
+                showError('Đã xảy ra lỗi khi đổi mật khẩu.');
             }
         });
     }
@@ -891,23 +991,29 @@ function initializePasswordChange() {
 }
 
 /**
- * ✅ FIXED: Setup password toggle functionality (extracted to prevent duplication)
+ * ✅ FIXED: Setup password toggle functionality - synchronized with auth.js
  */
 function setupPasswordToggle() {
-    document.querySelectorAll('.toggle-password').forEach(function (icon) {
+    document.querySelectorAll('.toggle-password').forEach(function (toggle) {
         // Remove existing listeners to prevent duplicates
-        icon.onclick = null;
+        toggle.onclick = null;
         
-        icon.addEventListener('click', function () {
-            const targetId = icon.getAttribute('data-target');
-            const input = document.getElementById(targetId);
-            if (input) {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.textContent = '🙈';
-                } else {
-                    input.type = 'password';
-                    icon.textContent = '👁️';
+        toggle.addEventListener('click', function () {
+            const passwordWrapper = this.closest(".password-input-wrapper");
+            const passwordInput = passwordWrapper.querySelector("input[type='password'], input[type='text']");
+            const icon = this.querySelector("i");
+
+            if (passwordInput && passwordInput.type === "password") {
+                passwordInput.type = "text";
+                if (icon) {
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                }
+            } else if (passwordInput) {
+                passwordInput.type = "password";
+                if (icon) {
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
                 }
             }
         });
@@ -968,15 +1074,12 @@ function initializeAccountManagement() {
     if (accountActionForm) {
         accountActionForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const password = document.getElementById('confirm-password-action').value;
             const action = accountActionType.value;
-            
             if (!password) {
-                alert('Vui lòng nhập mật khẩu để xác nhận.');
+                showError('Vui lòng nhập mật khẩu để xác nhận.');
                 return;
             }
-            
             try {
                 const response = await fetchApi('/src/api/account_management.php', {
                     method: 'POST',
@@ -988,17 +1091,17 @@ function initializeAccountManagement() {
                         password: password
                     })
                 });
-                
                 if (response && response.success === 200) {
-                    alert(response.message || 'Thao tác thành công!');
-                    // Redirect to home page after successful account action
-                    window.location.href = 'index.html';
+                    showSuccess(response.message || 'Thao tác thành công!');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1200);
                 } else {
-                    alert('Lỗi: ' + (response.message || 'Không thể thực hiện thao tác.'));
+                    showError('Lỗi: ' + (response.message || 'Không thể thực hiện thao tác.'));
                 }
             } catch (error) {
                 console.error('Error performing account action:', error);
-                alert('Đã xảy ra lỗi khi thực hiện thao tác.');
+                showError('Đã xảy ra lỗi khi thực hiện thao tác.');
             }
         });
     }

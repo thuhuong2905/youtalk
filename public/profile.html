@@ -8,14 +8,13 @@
     <link rel="stylesheet" href="css/header-footer.css">
     <link rel="stylesheet" href="css/profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
     <script defer src="js/main.js"></script>
     <script defer src="js/api.js"></script>
     <script defer src="js/avatar.js"></script>
+    <script defer src="js/notifications.js"></script>
     <script defer src="js/profile.js"></script>
 </head>
 <body>
-
     <header id="main-header">
         <!-- Header content (same as index.html, ideally loaded dynamically/template) -->
         <div class="container header-container">
@@ -173,21 +172,21 @@
                                     <label for="current_password">Mật khẩu hiện tại</label>
                                     <div class="password-input-wrapper">
                                       <input type="password" id="current_password" name="current_password" autocomplete="current-password">
-                                      <span class="toggle-password" data-target="current_password">👁️</span>
+                                      <span class="toggle-password"><i class="fas fa-eye"></i></span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="new_password">Mật khẩu mới</label>
                                     <div class="password-input-wrapper">
                                       <input type="password" id="new_password" name="new_password" autocomplete="new-password">
-                                      <span class="toggle-password" data-target="new_password">👁️</span>
+                                      <span class="toggle-password"><i class="fas fa-eye"></i></span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="confirm_password">Xác nhận mật khẩu mới</label>
                                     <div class="password-input-wrapper">
                                       <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password">
-                                      <span class="toggle-password" data-target="confirm_password">👁️</span>
+                                      <span class="toggle-password"><i class="fas fa-eye"></i></span>
                                     </div>
                                 </div>
                                 <div class="form-error" id="password-error"></div>
