@@ -430,7 +430,29 @@ function checkRedirectParam() {
     }
 }
 
+// Check authentication status
+function checkAuthStatus() {
+    // Check if there's a user session/token
+    const userToken = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+    const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+    
+    // Return true if user is logged in
+    return !!(userToken && userData);
+}
 
+// Get current user data
+function getCurrentUser() {
+    const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+    if (userData) {
+        try {
+            return JSON.parse(userData);
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            return null;
+        }
+    }
+    return null;
+}
 
 /**
  * Check user login status via API and return user data if logged in.
@@ -456,4 +478,143 @@ async function checkLoginStatus() {
 
 // Expose the function globally so other scripts like main.js can call it
 window.checkLoginStatus = checkLoginStatus;
+window.checkAuthStatus = checkAuthStatus;
+window.getCurrentUser = getCurrentUser;
+window.logout = logout;
+window.updateAuthUI = updateAuthUI;
+window.requireAuth = requireAuth;
+
+/**
+ * Logout user and clear session data
+ */
+async function logout() {
+    try {
+        // Call backend logout API
+        await fetchApi("/auth.php?action=logout", {
+            method: "POST"
+        });
+    } catch (error) {
+        console.error('Logout API error:', error);
+    } finally {
+        // Always clear local authentication data
+        clearAuthData();
+        
+        // Redirect to login page if not already there
+        if (!window.location.pathname.includes('login-register.html')) {
+            window.location.href = 'login-register.html';
+        }
+    }
+}
+
+/**
+ * Clear authentication data from storage
+ */
+function clearAuthData() {
+    // Clear all possible authentication keys
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userSession');
+    
+    sessionStorage.removeItem('userToken');
+    sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('userSession');
+}
+
+/**
+ * Update authentication-dependent UI elements
+ */
+function updateAuthUI() {
+    const isLoggedIn = checkAuthStatus();
+    const user = getCurrentUser();
+    
+    // Update authentication-dependent elements
+    const authRequiredElements = document.querySelectorAll('.auth-required');
+    const guestOnlyElements = document.querySelectorAll('.guest-only');
+    const userDisplayElements = document.querySelectorAll('.user-display');
+
+    if (isLoggedIn && user) {
+        // Show authenticated elements
+        authRequiredElements.forEach(el => {
+            el.style.display = 'block';
+        });
+        
+        // Hide guest-only elements
+        guestOnlyElements.forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Update user display elements
+        userDisplayElements.forEach(el => {
+            updateUserDisplayElement(el, user);
+        });
+        
+    } else {
+        // Hide authenticated elements
+        authRequiredElements.forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Show guest-only elements
+        guestOnlyElements.forEach(el => {
+            el.style.display = 'block';
+        });
+    }
+}
+
+/**
+ * Update user display element with user data
+ */
+function updateUserDisplayElement(element, user) {
+    if (!user) return;
+
+    const userNameElement = element.querySelector('.user-name');
+    const userAvatarElement = element.querySelector('.user-avatar');
+    const userEmailElement = element.querySelector('.user-email');
+
+    if (userNameElement) {
+        userNameElement.textContent = user.full_name || user.username || 'User';
+    }
+
+    if (userEmailElement) {
+        userEmailElement.textContent = user.email || '';
+    }
+
+    if (userAvatarElement) {
+        updateUserAvatar(userAvatarElement, user);
+    }
+}
+
+/**
+ * Update user avatar element
+ */
+function updateUserAvatar(avatarElement, user) {
+    if (!user) return;
+
+    const { profile_picture, username, full_name } = user;
+    const displayName = full_name || username || 'User';
+
+    if (profile_picture) {
+        // If profile picture exists, show image with error handling
+        avatarElement.innerHTML = `<img src="images/profiles/${profile_picture}" alt="${displayName}" class="avatar-img" 
+                                   onerror="this.parentNode.innerHTML = Avatar.createFallbackHTML('${displayName}', '40px')">`;
+    } else {
+        // If no profile picture, use Avatar fallback directly
+        avatarElement.innerHTML = Avatar.createFallbackHTML(displayName, '40px');
+    }
+}
+
+/**
+ * Require authentication (redirect if not authenticated)
+ */
+function requireAuth(redirectUrl = null) {
+    if (!checkAuthStatus()) {
+        const currentUrl = encodeURIComponent(window.location.href);
+        const loginUrl = redirectUrl || `login-register.html?redirect=${currentUrl}`;
+        window.location.href = loginUrl;
+        return false;
+    }
+    return true;
+}
 

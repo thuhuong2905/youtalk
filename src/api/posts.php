@@ -718,7 +718,7 @@ function handleGetRelatedPosts($post, $params) {
         return;
     }
     $category_id = $row['category_id'];
-    $stmt2 = $conn->prepare("SELECT p.id, p.title, p.created_at, u.username, u.full_name AS full_name FROM posts p LEFT JOIN users u ON p.user_id = u.id WHERE p.category_id = :category_id AND p.id != :post_id AND p.status = 'active' ORDER BY p.created_at DESC LIMIT :limit");
+    $stmt2 = $conn->prepare("SELECT p.id, p.title, p.content, p.created_at, u.username, u.full_name AS full_name FROM posts p LEFT JOIN users u ON p.user_id = u.id WHERE p.category_id = :category_id AND p.id != :post_id AND p.status = 'active' ORDER BY p.created_at DESC LIMIT :limit");
     $stmt2->bindParam(':category_id', $category_id, PDO::PARAM_INT);
     $stmt2->bindParam(':post_id', $post_id, PDO::PARAM_INT);
     $stmt2->bindValue(':limit', $limit, PDO::PARAM_INT);

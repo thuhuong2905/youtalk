@@ -1,780 +1,522 @@
-// JavaScript for product detail page functionality
-// Handles loading product details, reviews, and related products
+// JavaScript for post detail page functionality
+// Handles loading post details, comments, and related posts
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('YouTalk Product Detail JS Loaded');
+    console.log('YouTalk Post Detail JS Loaded');
     
-    // Get product ID from URL
+    // Get post ID from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    let productName = '';
+    const postId = urlParams.get('id');
     
-    if (productId) {
-        // Load product details and get product name for related discussions
-        const product = await loadProductDetails(productId);
-        productName = product && product.name ? product.name : '';
+    if (postId) {
+        console.log('Loading post with ID:', postId);
         
-        // Load product reviews
-        loadProductReviews(productId);
+        try {
+            // Show loading state
+            showLoadingState();
+            
+            // Setup authentication-dependent UI first
+            await setupAuthDependentUI();
+            
+            // Load all data in parallel for better performance
+            await Promise.allSettled([
+                loadPostDetails(postId),
+                loadComments(postId),
+                loadRelatedPosts(postId)
+            ]);
+            
+            // Set up comment form after auth check
+            setupCommentForm(postId);
+            
+        } catch (error) {
+            console.error('Error initializing post detail page:', error);
+            showErrorState('Có lỗi xảy ra khi tải trang');
+        } finally {
+            hideLoadingState();
+        }
         
-        // Load related discussions (by product name)
-        loadRelatedDiscussions(productName);
-        
-        // Set up tab switching
-        setupTabs();
-        
-        // Set up review form
-        setupReviewForm(productId);
-        
-        // Set up product comment form
-        setupProductCommentForm(productId);
-        
-        // Increment view count (use product_id param)
-        incrementViewCount(productId);
     } else {
-        // No product ID provided, show error or redirect
-        document.getElementById('product-name').textContent = 'Sản phẩm không hợp lệ';
-        document.querySelector('.product-main-info').innerHTML = '<p>Vui lòng chọn một sản phẩm hợp lệ.</p>';
+        // No post ID provided, show error
+        console.error('No post ID provided');
+        document.getElementById('post-title').textContent = 'Bài viết không hợp lệ';
+        document.getElementById('post-body').innerHTML = '<p>Vui lòng chọn một bài viết hợp lệ.</p>';
     }
 });
 
-// Load product details
-async function loadProductDetails(productId) {
+// Load post details
+async function loadPostDetails(postId) {
     try {
-        const response = await fetchApi('/src/api/products.php?action=get_by_id', {
-            method: 'POST',
-            body: { id: productId }
-        });
-        // Đọc đúng nhánh dữ liệu trả về từ API (response.data.product hoặc response.product)
-        let product = null;
-        if (response && response.data && response.data.product) {
-            product = response.data.product;
-        } else if (response && response.product) {
-            product = response.product;
-        }
-        if (response.success && product) {
-            // Update page title
-            document.title = `${product.name} - YouTalk`;
-            
-            // Update product name
-            document.getElementById('product-name').textContent = product.name;
-            document.getElementById('breadcrumb-product-name').textContent = product.name;
-            
-            // Update category in breadcrumb
-            if (product.category_id && product.category_name) {
-                const categoryLink = document.getElementById('breadcrumb-category');
-                categoryLink.textContent = product.category_name;
-                categoryLink.href = `category.html?id=${product.category_id}`;
-            }
-            
-            // Update brand/supplier
-            document.getElementById('product-brand').textContent = product.brand || 'Không có thông tin';
-            
-            // Update price
-            const priceDisplay = product.price 
-                ? `${Number(product.price).toLocaleString('vi-VN')} đ` 
-                : 'Liên hệ để biết giá';
-            document.getElementById('product-price').textContent = priceDisplay;
-            
-            // Update description
-            document.getElementById('product-description-content').innerHTML = product.description || 'Không có mô tả chi tiết.';
-            
-            // Update specs/details
-            updateProductSpecs(product.specs);
-            
-            // Update images
-            updateProductImages(product.images);
-            
-            // Update tags
-            updateProductTags(product.tags);
-            
-            // Set up action buttons
-            setupProductActions(product);
-            return product;
+        console.log('Fetching post details for ID:', postId);
+        
+        // Use the centralized API utility instead of fetchApi
+        const response = await (window.fetchApi || fetchApi)(`posts.php?action=get&id=${postId}`);
+        
+        console.log('Post API response:', response);
+        
+        if (response && response.success && response.data) {
+            const post = response.data;
+            renderPostDetails(post);
         } else {
-            console.error('Failed to load product details:', response.message);
-            document.getElementById('product-name').textContent = 'Không tìm thấy sản phẩm';
-            document.querySelector('.product-main-info').innerHTML = '<p>Sản phẩm không tồn tại hoặc đã bị xóa.</p>';
-            return null;
+            throw new Error(response?.message || 'Failed to load post details');
         }
     } catch (error) {
-        console.error('Error loading product details:', error);
-        return null;
+        console.error('Error loading post details:', error);
+        showPostError('Không tìm thấy bài viết', 'Bài viết không tồn tại hoặc đã bị xóa.');
     }
 }
 
-// Helper: generate stars for ratings
-function generateStars(rating) {
-    const numRating = parseFloat(rating);
-    if (isNaN(numRating) || numRating < 0) rating = 0;
-    if (numRating > 5) rating = 5;
-    const fullStars = Math.floor(numRating);
-    const halfStar = numRating % 1 >= 0.5 ? 1 : 0;
-    const emptyStars = 5 - fullStars - halfStar;
-    let starsHTML = "";
-    for (let i = 0; i < fullStars; i++) starsHTML += '<i class="fas fa-star"></i>';
-    if (halfStar) starsHTML += '<i class="fas fa-star-half-alt"></i>';
-    for (let i = 0; i < emptyStars; i++) starsHTML += '<i class="far fa-star"></i>';
-    return starsHTML;
+// Render post details to DOM
+function renderPostDetails(post) {
+    // Update page title
+    document.title = `${post.title} - YouTalk`;
+    
+    // Update post content
+    safeSetTextContent('post-title', post.title || 'Không có tiêu đề');
+    safeSetInnerHTML('post-body', post.content || 'Không có nội dung');
+    safeSetTextContent('post-date', formatDate(post.created_at));
+    
+    // Update category
+    if (post.category_name) {
+        safeSetTextContent('post-category', post.category_name);
+    }
+    
+    // Update author info
+    const authorName = post.full_name || post.username || 'Ẩn danh';
+    safeSetTextContent('author-name', authorName);
+    safeSetTextContent('author-bio-name', authorName);
+    safeSetTextContent('author-bio-description', post.user_bio || 'Chưa có thông tin về tác giả.');
+    safeSetTextContent('author-post-count', post.user_post_count || 0);
+    safeSetTextContent('author-comment-count', post.user_comment_count || 0);
+    safeSetTextContent('author-join-date', formatDate(post.user_created_at));
+    
+    // Update stats
+    safeSetTextContent('view-count', post.view_count || 0);
+    safeSetTextContent('comment-count', post.comment_count || 0);
+    safeSetTextContent('total-comments', post.comment_count || 0);
+    
+    // Update tags and avatars
+    updatePostTags(post.tags);
+    updateAuthorAvatars(post.profile_picture, post.username, post.full_name);
 }
 
-// Update product rating display (main info)
-function updateProductRating(avgRating, reviewCount) {
-    const ratingElement = document.getElementById('product-avg-rating');
-    const countElement = document.getElementById('product-review-count');
-    if (ratingElement) {
-        ratingElement.innerHTML = generateStars(avgRating) + (avgRating > 0 ? ` <span class="rating-number">${avgRating.toFixed(1)}</span>` : '');
-    }
-    if (countElement) {
-        countElement.textContent = `(${reviewCount} đánh giá)`;
-    }
-}
-
-// Update product specs/details
-function updateProductSpecs(specs) {
-    const specsList = document.getElementById('product-specs-list');
-    if (!specsList) return;
-    
-    if (!specs || Object.keys(specs).length === 0) {
-        specsList.innerHTML = '<li>Không có thông số kỹ thuật.</li>';
-        return;
-    }
-    
-    specsList.innerHTML = '';
-    
-    // If specs is an array of objects with name/value pairs
-    if (Array.isArray(specs)) {
-        specs.forEach(spec => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>${spec.name}:</strong> ${spec.value}`;
-            specsList.appendChild(li);
-        });
-    } 
-    // If specs is an object with key/value pairs
-    else {
-        for (const [key, value] of Object.entries(specs)) {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>${key}:</strong> ${value}`;
-            specsList.appendChild(li);
+// Load comments for the post
+async function loadComments(postId) {
+    try {
+        console.log('Loading comments for post:', postId);
+        
+        const response = await (window.fetchApi || fetchApi)(`posts.php?action=get_comments&post_id=${postId}`);
+        
+        console.log('Comments API response:', response);
+        
+        if (response && response.success && response.data && response.data.comments) {
+            const comments = response.data.comments;
+            displayComments(comments);
+        } else {
+            console.log('No comments found or error loading comments');
+            safeSetInnerHTML('comments-list', '<p class="no-comments">Chưa có bình luận nào.</p>');
         }
+    } catch (error) {
+        console.error('Error loading comments:', error);
+        safeSetInnerHTML('comments-list', '<p class="error-message">Có lỗi xảy ra khi tải bình luận.</p>');
     }
 }
 
-// Update product images
-function updateProductImages(images) {
-    const mainImage = document.getElementById('main-product-image');
-    const thumbnailList = document.querySelector('.thumbnail-list');
+// Load related posts
+async function loadRelatedPosts(postId) {
+    try {
+        console.log('Loading related posts for post:', postId);
+        
+        const response = await (window.fetchApi || fetchApi)(`posts.php?action=get_related&post_id=${postId}`);
+        
+        console.log('Related posts API response:', response);
+        
+        if (response && response.success && response.data && response.data.posts) {
+            const relatedPosts = response.data.posts;
+            displayRelatedPosts(relatedPosts);
+        } else {
+            console.log('No related posts found');
+            safeSetInnerHTML('related-posts-list', '<p class="no-related">Không có bài viết liên quan.</p>');
+        }
+    } catch (error) {
+        console.error('Error loading related posts:', error);
+        safeSetInnerHTML('related-posts-list', '<p class="error-message">Có lỗi xảy ra khi tải bài viết liên quan.</p>');
+    }
+}
+
+// Display comments
+function displayComments(comments) {
+    const commentsList = document.getElementById('comments-list');
     
-    if (!mainImage || !thumbnailList) return;
-    
-    if (!images || images.length === 0) {
-        mainImage.src = 'images/products/default.png';
-        mainImage.alt = 'No image available';
+    if (!comments || comments.length === 0) {
+        commentsList.innerHTML = '<p>Chưa có bình luận nào.</p>';
         return;
     }
     
-    // Set main image to first image
-    mainImage.src = images[0];
-    mainImage.alt = 'Product Image';
-    
-    // Create thumbnails
-    thumbnailList.innerHTML = '';
-    images.forEach((image, index) => {
-        const thumbnail = document.createElement('img');
-        thumbnail.src = image;
-        thumbnail.alt = `Thumbnail ${index + 1}`;
-        thumbnail.className = index === 0 ? 'active' : '';
-        
-        thumbnail.addEventListener('click', () => {
-            // Update main image
-            mainImage.src = image;
-            
-            // Update active thumbnail
-            thumbnailList.querySelectorAll('img').forEach(thumb => {
-                thumb.classList.remove('active');
-            });
-            thumbnail.classList.add('active');
-        });
-        
-        thumbnailList.appendChild(thumbnail);
+    let commentsHTML = '';
+    comments.forEach(comment => {
+        commentsHTML += `
+            <div class="comment-item">
+                <div class="comment-author">
+                    <div class="comment-avatar">
+                        ${generateAvatarHtml(comment.profile_picture, comment.username, comment.full_name)}
+                    </div>
+                    <div class="comment-info">
+                        <span class="comment-author-name">${comment.full_name || comment.username || 'Ẩn danh'}</span>
+                        <span class="comment-date">${formatDate(comment.created_at)}</span>
+                    </div>
+                </div>
+                <div class="comment-content">
+                    ${comment.content || ''}
+                </div>
+            </div>
+        `;
     });
+    
+    commentsList.innerHTML = commentsHTML;
 }
 
-// Update product tags
-function updateProductTags(tags) {
-    const tagsContainer = document.getElementById('product-tags');
-    if (!tagsContainer) return;
+// Display related posts
+function displayRelatedPosts(posts) {
+    const relatedPostsList = document.getElementById('related-posts-list');
+    
+    if (!posts || posts.length === 0) {
+        relatedPostsList.innerHTML = '<p>Không có bài viết liên quan.</p>';
+        return;
+    }
+    
+    let postsHTML = '';
+    posts.forEach(post => {
+        postsHTML += `
+            <div class="related-post-item">
+                <h4><a href="post-detail.html?id=${post.id}">${post.title}</a></h4>
+                <div class="related-post-meta">
+                    <span class="author">${post.full_name || post.username || 'Ẩn danh'}</span>
+                    <span class="date">${formatDate(post.created_at)}</span>
+                </div>
+                <p class="related-post-excerpt">${truncateText(post.content, 100)}</p>
+            </div>
+        `;
+    });
+    
+    relatedPostsList.innerHTML = postsHTML;
+}
+
+// Update post tags
+function updatePostTags(tags) {
+    const tagsContainer = document.getElementById('post-tags');
     
     if (!tags || tags.length === 0) {
         tagsContainer.style.display = 'none';
         return;
     }
     
-    tagsContainer.innerHTML = '';
-    tagsContainer.style.display = 'block';
-    
+    let tagsHTML = '';
     tags.forEach(tag => {
-        const tagElement = document.createElement('span');
-        tagElement.className = 'tag';
-        tagElement.textContent = tag;
-        tagsContainer.appendChild(tagElement);
+        tagsHTML += `<span class="tag">${tag}</span>`;
+    });
+    
+    tagsContainer.innerHTML = tagsHTML;
+    tagsContainer.style.display = 'block';
+}
+
+// Update author avatars
+function updateAuthorAvatars(profilePicture, username, fullName = null) {
+    const displayName = fullName || username || 'User';
+    const avatarContainers = [
+        document.getElementById('author-avatar-container'),
+        document.getElementById('author-bio-avatar-container')
+    ];
+    
+    avatarContainers.forEach(container => {
+        if (container) {
+            container.innerHTML = generateAvatarHtml(profilePicture, username, displayName);
+        }
     });
 }
 
-// Set up product action buttons
-function setupProductActions(product) {    
-    // Share button
-    const shareBtn = document.getElementById('share-btn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', () => {
-            // Simple share implementation
-            if (navigator.share) {
-                navigator.share({
-                    title: product.name,
-                    text: `Xem sản phẩm ${product.name} trên YouTalk`,
-                    url: window.location.href
-                });
-            } else {
-                // Fallback for browsers that don't support Web Share API
-                prompt('Sao chép liên kết này để chia sẻ:', window.location.href);
-            }
-        });
-    }
+// Generate avatar HTML
+function generateAvatarHtml(profilePicture, username, fullName = null) {
+    // Determine the display name (prefer fullName, fallback to username)
+    const displayName = fullName || username || 'User';
     
-    // Contact supplier button
-    const contactBtn = document.getElementById('contact-supplier-btn');
-    if (contactBtn) {
-        contactBtn.addEventListener('click', () => {
-            // This could open a contact form or redirect to a contact page
-            alert('Tính năng liên hệ nhà cung cấp đang được phát triển.');
-        });
+    if (profilePicture) {
+        // If profile picture exists, show image with error handling
+        return `<img src="images/profiles/${profilePicture}" alt="${displayName}" class="avatar-img" 
+                 onerror="this.parentNode.innerHTML = Avatar.createFallbackHTML('${displayName}', '40px')">`;
+    } else {
+        // If no profile picture, use Avatar fallback directly
+        return Avatar.createFallbackHTML(displayName, '40px');
     }
 }
 
-// Load product reviews
-async function loadProductReviews(productId, sortBy = 'newest') {
-    try {
-        // Map sort option to API parameters
-        let sortParams = {};
-        switch (sortBy) {
-            case 'newest':
-                sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
-                break;
-            case 'helpful':
-                sortParams = { sort_by: 'helpful_count', sort_order: 'DESC' };
-                break;
-            case 'rating_high':
-                sortParams = { sort_by: 'rating', sort_order: 'DESC' };
-                break;
-            case 'rating_low':
-                sortParams = { sort_by: 'rating', sort_order: 'ASC' };
-                break;
-        }
-        // Use GET and query params for backend compatibility
-        const query = new URLSearchParams({
-            product_id: productId,
-            limit: 10,
-            offset: 0,
-            ...sortParams
-        }).toString();
-        const reviewsResponse = await fetchApi(`/src/api/reviews.php?action=get_by_product&${query}`, {
-            method: 'GET'
-        });
-        const statsResponse = await fetchApi(`/src/api/reviews.php?action=get_stats&product_id=${productId}`, {
-            method: 'GET'
-        });
-        // Sau khi lấy stats, luôn cập nhật số sao và số đánh giá từ API stats
-        if (statsResponse && statsResponse.success) {
-            let stats = null;
-            if (statsResponse.data && statsResponse.data.stats) {
-                stats = statsResponse.data.stats;
-            } else if (statsResponse.stats) {
-                stats = statsResponse.stats;
+// Setup comment form
+function setupCommentForm(postId) {
+    const commentForm = document.getElementById('comment-form');
+    
+    if (commentForm) {
+        commentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const contentInput = document.getElementById('comment-content');
+            const content = contentInput.value.trim();
+            
+            if (!content) {
+                showNotification('Vui lòng nhập nội dung bình luận.', 'warning');
+                return;
             }
-            if (stats) {
-                updateProductRating(stats.average_rating, stats.total_reviews);
+            
+            // Check authentication before submitting
+            const isLoggedIn = await (window.checkLoginStatus ? !!(await window.checkLoginStatus()) : (window.checkAuthStatus ? window.checkAuthStatus() : false));
+            if (!isLoggedIn) {
+                showNotification('Bạn cần đăng nhập để bình luận.', 'error');
+                return;
             }
-        }
-        const reviewsList = document.getElementById('reviews-list');
-        if (!reviewsList) return;
-        reviewsList.innerHTML = '';
-        // Sửa: lấy đúng trường reviews từ response.data.reviews hoặc response.reviews
-        let reviews = [];
-        if (reviewsResponse && reviewsResponse.data && Array.isArray(reviewsResponse.data.reviews)) {
-            reviews = reviewsResponse.data.reviews;
-        } else if (reviewsResponse && Array.isArray(reviewsResponse.reviews)) {
-            reviews = reviewsResponse.reviews;
-        }
-        if (reviewsResponse.success && reviews.length > 0) {
-            reviews.forEach(review => {
-                const reviewItem = document.createElement('div');
-                reviewItem.className = 'review-item';
-                // Format date
-                const reviewDate = new Date(review.created_at);
-                const formattedDate = reviewDate.toLocaleDateString('vi-VN');
-                // Create star display (Font Awesome)
-                const stars = generateStars(review.rating);
-                reviewItem.innerHTML = `
-                    <div class="review-header">
-                        <div class="author-info">
-                            ${getUserAvatarHtml(review, 'user-avatar-review')}
-                            <span>${getDisplayName(review)}</span>
-                        </div>
-                        <div class="review-rating">${stars}</div>
-                        <div class="review-date">${formattedDate}</div>
-                    </div>
-                    <div class="review-body">${review.content ? review.content : ''}</div>
-                `;
-                
-                // Add media if available
-                if (review.media && review.media.length > 0) {
-                    const mediaContainer = document.createElement('div');
-                    mediaContainer.className = 'review-media';
-                    
-                    review.media.forEach(mediaUrl => {
-                        // Determine if it's an image or video based on extension
-                        const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaUrl);
-                        
-                        if (isVideo) {
-                            const video = document.createElement('video');
-                            video.controls = true;
-                            video.src = mediaUrl;
-                            mediaContainer.appendChild(video);
-                        } else {
-                            const img = document.createElement('img');
-                            img.src = mediaUrl;
-                            img.alt = 'Review media';
-                            mediaContainer.appendChild(img);
-                        }
-                    });
-                    
-                    reviewItem.querySelector('.review-body').appendChild(mediaContainer);
+            
+            const submitButton = commentForm.querySelector('button[type="submit"]');
+            const originalText = submitButton?.textContent || 'Gửi bình luận';
+            
+            try {
+                // Disable submit button
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Đang gửi...';
                 }
                 
-                // Add helpful button
-                const reviewFooter = document.createElement('div');
-                reviewFooter.className = 'review-footer';
-                reviewFooter.innerHTML = `
-                    <div class="helpful-vote">
-                        <span>Đánh giá này có hữu ích? </span>
-                        <button class="helpful-btn">Có (${review.helpful_count || 0})</button>
-                    </div>
-                `;
-                
-                // Add event listener for helpful button
-                reviewFooter.querySelector('.helpful-btn').addEventListener('click', async () => {
-                    const helpfulBtn = reviewFooter.querySelector('.helpful-btn');
-                    // Kiểm tra localStorage để ngăn user bấm nhiều lần
-                    const helpfulKey = `helpful_review_${review.id}`;
-                    if (localStorage.getItem(helpfulKey)) {
-                        alert('Bạn đã đánh giá hữu ích cho nhận xét này!');
-                        return;
-                    }
-                    try {
-                        const res = await fetchApi('/src/api/reviews.php?action=mark_helpful', {
-                            method: 'POST',
-                            body: { review_id: review.id }
-                        });
-                        if (res.success) {
-                            const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
-                            helpfulBtn.textContent = `Có (${currentCount + 1})`;
-                            localStorage.setItem(helpfulKey, '1');
-                        } else {
-                            alert('Không thể ghi nhận đánh giá hữu ích.');
-                        }
-                    } catch (e) {
-                        alert('Có lỗi khi ghi nhận đánh giá hữu ích.');
+                const response = await (window.fetchApi || fetchApi)('comments.php?action=create', {
+                    method: 'POST',
+                    body: {
+                        post_id: postId,
+                        content: content
                     }
                 });
                 
-                reviewItem.appendChild(reviewFooter);
-                reviewsList.appendChild(reviewItem);
-            });
-        } else if (reviewsResponse.success && reviews.length === 0) {
-            reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
-        } else {
-            reviewsList.innerHTML = '<p>Không thể tải đánh giá.</p>';
-        
-        }
-    } catch (error) {
-        console.error('Error loading reviews:', error);
-    }
-}
-
-// Load product comments
-async function loadProductComments(productId, sortBy = 'newest') {
-    try {
-        // Map sort option to API parameters
-        let sortParams = {};
-        switch (sortBy) {
-            case 'newest':
-                sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
-                break;
-            case 'oldest':
-                sortParams = { sort_by: 'created_at', sort_order: 'ASC' };
-                break;
-        }
-        
-        const query = new URLSearchParams({
-            product_id: productId,
-            limit: 10,
-            offset: 0,
-            ...sortParams
-        }).toString();
-        
-        const response = await fetchApi(`/src/api/product-comments.php?action=get_by_product&${query}`, {
-            method: 'GET'
-        });
-        
-        const commentsList = document.getElementById('comments-list');
-        if (!commentsList) return;
-        
-        commentsList.innerHTML = '';
-        
-        let comments = [];
-        if (response && response.data && Array.isArray(response.data.comments)) {
-            comments = response.data.comments;
-        } else if (response && Array.isArray(response.comments)) {
-            comments = response.comments;
-        }
-        
-        if (response.success && comments.length > 0) {
-            comments.forEach(comment => {
-                const commentItem = document.createElement('div');
-                commentItem.className = 'comment-item';
-                
-                // Format date
-                const commentDate = new Date(comment.created_at);
-                const formattedDate = commentDate.toLocaleDateString('vi-VN');
-                
-                commentItem.innerHTML = `
-                    <div class="comment-header">
-                        <div class="author-info">
-                            ${getUserAvatarHtml(comment, 'user-avatar-comment')}
-                            <span>${getDisplayName(comment)}</span>
-                        </div>
-                        <div class="comment-date">${formattedDate}</div>
-                    </div>
-                    <div class="comment-body">${comment.content}</div>
-                `;
-                
-                commentsList.appendChild(commentItem);
-            });
-        } else if (response.success && comments.length === 0) {
-            commentsList.innerHTML = '<p>Chưa có bình luận nào cho sản phẩm này.</p>';
-        } else {
-            commentsList.innerHTML = '<p>Không thể tải bình luận.</p>';
-        }
-    } catch (error) {
-        console.error('Error loading product comments:', error);
-        const commentsList = document.getElementById('comments-list');
-        if (commentsList) {
-            commentsList.innerHTML = '<p>Có lỗi khi tải bình luận.</p>';
-        }
-    }
-}
-
-// Set up product comment form
-function setupProductCommentForm(productId) {
-    const formContainer = document.getElementById('comment-form-container');
-    const form = document.getElementById('product-comment-form');
-    if (!formContainer || !form) return;
-
-    // Check login status to show/hide form
-    if (typeof window.checkLoginStatus === 'function') {
-        window.checkLoginStatus().then(user => {
-            if (user) {
-                formContainer.style.display = '';
-                // Show avatar and name
-                const avatarDiv = document.getElementById('commenter-avatar');
-                if (avatarDiv) {
-                    avatarDiv.innerHTML = getUserAvatarHtml(user, 'commenter-avatar');
+                if (response && response.success) {
+                    // Show success message
+                    showNotification('Bình luận đã được thêm thành công!', 'success');
+                    
+                    // Reload page after a short delay to show the notification
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error(response?.message || 'Lỗi không xác định');
                 }
-                document.getElementById('commenter-name').textContent = user.full_name || 'Bạn';
-            } else {
-                formContainer.style.display = 'none';
+            } catch (error) {
+                console.error('Error submitting comment:', error);
+                showNotification('Có lỗi xảy ra khi gửi bình luận: ' + error.message, 'error');
+            } finally {
+                // Re-enable submit button
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalText;
+                }
             }
         });
     }
+}
 
-    // Handle form submission
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const content = form.querySelector('#comment-content').value.trim();
+// Setup authentication-dependent UI
+async function setupAuthDependentUI() {
+    try {
+        // Use the global checkLoginStatus function from auth.js
+        const userData = await (window.checkLoginStatus ? window.checkLoginStatus() : null);
+        const isLoggedIn = !!userData;
         
-        if (!content) {
-            alert('Vui lòng nhập nội dung bình luận!');
-            return;
+        const authRequiredElements = document.querySelectorAll('.auth-required');
+        const guestOnlyElements = document.querySelectorAll('.guest-only');
+        
+        if (isLoggedIn) {
+            authRequiredElements.forEach(el => el.style.display = 'block');
+            guestOnlyElements.forEach(el => el.style.display = 'none');
+            
+            console.log('User is logged in:', userData);
+        } else {
+            authRequiredElements.forEach(el => el.style.display = 'none');
+            guestOnlyElements.forEach(el => el.style.display = 'block');
+            
+            console.log('User is not logged in');
         }
         
-        if (content.length < 10) {
-            alert('Bình luận phải có ít nhất 10 ký tự!');
-            return;
-        }
+        return isLoggedIn;
+    } catch (error) {
+        console.error('Error setting up auth-dependent UI:', error);
+        // Default to guest state on error
+        const authRequiredElements = document.querySelectorAll('.auth-required');
+        const guestOnlyElements = document.querySelectorAll('.guest-only');
+        authRequiredElements.forEach(el => el.style.display = 'none');
+        guestOnlyElements.forEach(el => el.style.display = 'block');
+        return false;
+    }
+}
+
+// Hide loading placeholders
+function hideLoadingPlaceholders() {
+    const loadingPlaceholders = document.querySelectorAll('.loading-placeholder');
+    loadingPlaceholders.forEach(placeholder => {
+        placeholder.style.display = 'none';
+    });
+}
+
+// Utility functions
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function truncateText(text, maxLength) {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+}
+
+// Function to check authentication status (fallback if auth.js not loaded)
+function checkAuthStatus() {
+    // First try to use the global checkAuthStatus from auth.js if available
+    if (typeof window.checkAuthStatus === 'function') {
+        return window.checkAuthStatus();
+    }
+    
+    // Fallback: Check local storage/session storage
+    const userToken = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+    const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+    
+    // Return true if user is logged in
+    return !!(userToken && userData);
+}
+
+// Fallback fetchApi function if not available globally
+if (typeof window.fetchApi === 'undefined') {
+    console.warn('Global fetchApi not found, using fallback');
+    window.fetchApi = async function(endpoint, options = {}) {
+        const API_BASE_URL = '/src/api/';
+        const url = endpoint.startsWith('http') ? endpoint : API_BASE_URL + endpoint;
         
-        const formData = new FormData();
-        formData.append('product_id', productId);
-        formData.append('content', content);
+        const defaultOptions = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
+        };
+        
+        const mergedOptions = { ...defaultOptions, ...options };
+        
+        if (mergedOptions.body && typeof mergedOptions.body === 'object') {
+            mergedOptions.body = JSON.stringify(mergedOptions.body);
+        }
         
         try {
-            const res = await fetch('/src/api/product-comments.php?action=create', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            });
-            const data = await res.json();
+            const response = await fetch(url, mergedOptions);
             
-            if (data.success) {
-                alert('Bình luận của bạn đã được gửi!');
-                form.reset();
-                // Reload comments
-                loadProductComments(productId);
-            } else {
-                alert(data.message || 'Gửi bình luận thất bại!');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        } catch (err) {
-            alert('Lỗi gửi bình luận!');
-        }
-    });
-}
-
-// Load related discussions
-async function loadRelatedDiscussions(productName) {
-    try {
-        if (!productName) return;
-        // Use GET and query param for backend compatibility, search by product name
-        const query = new URLSearchParams({
-            query: productName,
-            limit: 5
-        }).toString();
-        const response = await fetchApi(`/src/api/posts.php?action=search&${query}`, {
-            method: 'GET'
-        });
-        const discussionList = document.getElementById('related-discussion-list');
-        if (!discussionList) return;
-        discussionList.innerHTML = '';
-        // Sửa: lấy đúng trường posts từ response.data.posts hoặc response.posts
-        let posts = [];
-        if (response && response.data && Array.isArray(response.data.posts)) {
-            posts = response.data.posts;
-        } else if (response && Array.isArray(response.posts)) {
-            posts = response.posts;
-        }
-        if (response.success && posts.length > 0) {
-            posts.forEach(post => {
-                const discussionItem = document.createElement('div');
-                discussionItem.className = 'discussion-item';
-                
-                // Format date
-                const postDate = new Date(post.created_at);
-                const formattedDate = postDate.toLocaleDateString('vi-VN');
-                
-                discussionItem.innerHTML = `
-                    <h3><a href="post-detail.html?id=${post.id}">${post.title}</a></h3>
-                    <div class="meta">
-                        <span class="author">Bởi: ${getDisplayName(post)}</span>
-                        <span class="date">${formattedDate}</span>
-                        <span class="comments">${post.comment_count || 0} bình luận</span>
-                    </div>
-                `;
-                discussionList.appendChild(discussionItem);
-            });
-        } else if (response.success && posts.length === 0) {
-            discussionList.innerHTML = '<p>Chưa có thảo luận nào liên quan đến sản phẩm này.</p>';
-        } else {
-            discussionList.innerHTML = '<p>Không thể tải thảo luận liên quan.</p>';
-        }
-    } catch (error) {
-        console.error('Error loading related discussions:', error);
-    }
-}
-
-// Set up tab switching
-function setupTabs() {
-    const tabLinks = document.querySelectorAll('.tab-link');
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabLinks.forEach(tabLink => {
-        tabLink.addEventListener('click', () => {
-            tabLinks.forEach(link => link.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            tabLink.classList.add('active');
-            const tabId = tabLink.getAttribute('data-tab');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-        });
-    });
-    
-    // Set up review/comment toggle in reviews tab
-    setupReviewToggle();
-}
-
-// Set up toggle between reviews and comments
-function setupReviewToggle() {
-    const toggleBtns = document.querySelectorAll('.review-toggle .toggle-btn');
-    const reviewFormContainer = document.getElementById('review-form-container');
-    const commentFormContainer = document.getElementById('comment-form-container');
-    const reviewsList = document.getElementById('reviews-list');
-    const commentsList = document.getElementById('comments-list');
-    const paginationReviews = document.getElementById('pagination-reviews');
-    const paginationComments = document.getElementById('pagination-comments');
-    
-    if (!toggleBtns.length) return;
-    
-    toggleBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active class from all buttons
-            toggleBtns.forEach(b => b.classList.remove('active'));
-            // Add active class to clicked button
-            btn.classList.add('active');
             
-            const type = btn.getAttribute('data-type');
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Response is not JSON');
+            }
             
-            if (type === 'reviews') {
-                // Show reviews, hide comments
-                if (reviewFormContainer) reviewFormContainer.style.display = '';
-                if (commentFormContainer) commentFormContainer.style.display = 'none';
-                if (reviewsList) reviewsList.style.display = '';
-                if (commentsList) commentsList.style.display = 'none';
-                if (paginationReviews) paginationReviews.style.display = '';
-                if (paginationComments) paginationComments.style.display = 'none';
-                
-                // Load reviews if not already loaded
-                const urlParams = new URLSearchParams(window.location.search);
-                const productId = urlParams.get('id');
-                if (productId) {
-                    loadProductReviews(productId);
-                }
-            } else if (type === 'comments') {
-                // Show comments, hide reviews
-                if (reviewFormContainer) reviewFormContainer.style.display = 'none';
-                if (commentFormContainer) commentFormContainer.style.display = '';
-                if (reviewsList) reviewsList.style.display = 'none';
-                if (commentsList) commentsList.style.display = '';
-                if (paginationReviews) paginationReviews.style.display = 'none';
-                if (paginationComments) paginationComments.style.display = '';
-                
-                // Load comments if not already loaded
-                const urlParams = new URLSearchParams(window.location.search);
-                const productId = urlParams.get('id');
-                if (productId) {
-                    loadProductComments(productId);
-                }
-            }
-        });
-    });
-}
-
-// Set up review form
-// Setup review form (hiển thị avatar, rating, gửi API)
-function setupReviewForm(productId) {
-    const formContainer = document.getElementById('review-form-container');
-    const form = document.getElementById('review-form');
-    if (!formContainer || !form) return;
-
-    // Kiểm tra đăng nhập để hiển thị form
-    if (typeof window.checkLoginStatus === 'function') {
-        window.checkLoginStatus().then(user => {
-            if (user) {
-                formContainer.style.display = '';
-                // Hiển thị avatar và tên
-                const avatarDiv = document.getElementById('reviewer-avatar');
-                if (avatarDiv) {
-                    avatarDiv.innerHTML = getUserAvatarHtml(user, 'reviewer-avatar');
-                }
-                document.getElementById('reviewer-name').textContent = user.full_name || 'Bạn';
-            } else {
-                formContainer.style.display = 'none';
-            }
-        });
-    }
-
-    // Modern star rating logic (Font Awesome)
-    const stars = document.querySelectorAll('#review-rating-stars .star');
-    const ratingInput = document.getElementById('review-rating');
-    let selectedRating = 0;
-
-    function updateStarIcons(val) {
-        stars.forEach((star, idx) => {
-            if (idx < val) {
-                star.classList.remove('far');
-                star.classList.add('fas', 'selected');
-            } else {
-                star.classList.remove('fas', 'selected');
-                star.classList.add('far');
-            }
-        });
-    }
-
-    stars.forEach(star => {
-        star.addEventListener('mouseenter', function() {
-            updateStarIcons(parseInt(this.dataset.value));
-        });
-        star.addEventListener('mouseleave', function() {
-            updateStarIcons(selectedRating);
-        });
-        star.addEventListener('click', function() {
-            selectedRating = parseInt(this.dataset.value);
-            ratingInput.value = selectedRating;
-            updateStarIcons(selectedRating);
-        });
-    });
-    // Khởi tạo trạng thái ban đầu
-    updateStarIcons(0);
-
-    // Gửi form đánh giá
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const content = form.querySelector('#review-content').value.trim();
-        const rating = form.querySelector('#review-rating').value;
-        if (!content || !rating || rating < 1) {
-            alert('Vui lòng nhập nội dung và chọn số sao!');
-            return;
+            return await response.json();
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
         }
-        const formData = new FormData();
-        formData.append('product_id', productId);
-        formData.append('comment', content); // Sửa từ 'content' thành 'comment' để backend nhận đúng
-        formData.append('rating', rating);
-        try {
-            const res = await fetch('/src/api/reviews.php?action=create', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('Đánh giá của bạn đã được gửi!');
-                form.reset();
-                selectedRating = 0;
-                updateStarIcons(0);
-                // Reload reviews
-                loadProductReviews(productId);
-            } else {
-                alert(data.message || 'Gửi đánh giá thất bại!');
+    };
+}
+
+// Utility functions for DOM manipulation and error handling
+function safeSetTextContent(elementId, content) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = content;
+    }
+}
+
+function safeSetInnerHTML(elementId, content) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.innerHTML = content;
+    }
+}
+
+function showPostError(title, message) {
+    safeSetTextContent('post-title', title);
+    safeSetInnerHTML('post-body', `<p class="error-message">${message}</p>`);
+}
+
+function showLoadingState() {
+    const loadingElements = document.querySelectorAll('.loading-placeholder');
+    loadingElements.forEach(el => el.style.display = 'block');
+}
+
+function hideLoadingState() {
+    const loadingElements = document.querySelectorAll('.loading-placeholder');
+    loadingElements.forEach(el => el.style.display = 'none');
+}
+
+function showErrorState(message) {
+    safeSetTextContent('post-title', 'Có lỗi xảy ra');
+    safeSetInnerHTML('post-body', `<p class="error-message">${message}</p>`);
+}
+
+function showNotification(message, type = 'info') {
+    // Create or update notification
+    let notification = document.getElementById('notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        `;
+        document.body.appendChild(notification);
+    }
+    
+    // Set message and style based on type
+    notification.textContent = message;
+    notification.className = `notification notification-${type}`;
+    
+    switch (type) {
+        case 'success':
+            notification.style.backgroundColor = '#10b981';
+            break;
+        case 'error':
+            notification.style.backgroundColor = '#ef4444';
+            break;
+        case 'warning':
+            notification.style.backgroundColor = '#f59e0b';
+            break;
+        default:
+            notification.style.backgroundColor = '#3b82f6';
+    }
+    
+    // Show notification
+    notification.style.opacity = '1';
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
             }
-        } catch (err) {
-            alert('Lỗi gửi đánh giá!');
-        }
-    });
-}
-
-// Increment view count
-async function incrementViewCount(productId) {
-    try {
-        await fetchApi('/src/api/products.php?action=view', {
-            method: 'POST',
-            body: { product_id: productId }
-        });
-    } catch (error) {
-        console.error('Error incrementing view count:', error);
-    }
-}
-
-// Check authentication status
-async function checkAuthStatus() {
-    try {
-        const response = await fetchApi('/src/api/auth.php?action=status');
-        return response;
-    } catch (error) {
-        console.error('Error checking auth status:', error);
-        return { authenticated: false };
-    }
+        }, 300);
+    }, 3000);
 }
