@@ -1,13 +1,11 @@
 -- Insert 50 users
 INSERT INTO users (username, full_name, email, password, profile_picture, bio, role, status) VALUES
--- Existing users from youtalk_database.sql (5 users)
+-- Existing users from youtalk_database.sql (50 users)
 ('admin', 'Quản trị viên', 'admin@youtalk.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/A.png', 'Quản trị viên của YouTalk', 'admin', 'active'),
 ('nguyenvan', 'Nguyễn Văn A', 'nguyenvan@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/A.png', 'Tôi là người đam mê công nghệ và thích khám phá sản phẩm mới', 'user', 'active'),
 ('thanhha', 'Trần Thanh Hà', 'thanhha@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/H.png', 'Chuyên gia đánh giá thời trang và mỹ phẩm', 'user', 'active'),
 ('minhtuan', 'Nguyễn Minh Tuấn', 'minhtuan@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/T.png', 'Người yêu thích du lịch và ẩm thực', 'user', 'active'),
 ('phuonglinh', 'Phạm Phương Linh', 'phuonglinh@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/L.png', 'Giáo viên tiếng Anh, thích chia sẻ kinh nghiệm giáo dục', 'user', 'active'),
-
--- Existing users from youtalk_sample_data.sql (45 users)
 ('hoangminh', 'Hoàng Minh Khôi', 'hoangminh@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/K.png', 'Chuyên gia tư vấn công nghệ và đầu tư', 'user', 'active'),
 ('lethuy', 'Lê Thùy Linh', 'lethuy@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/L2.png', 'Blogger chuyên về ẩm thực và du lịch', 'user', 'active'),
 ('vuduc', 'Vũ Đức Anh', 'vuduc@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/A2.png', 'Game thủ chuyên nghiệp và streamer', 'user', 'active'),
@@ -54,9 +52,9 @@ INSERT INTO users (username, full_name, email, password, profile_picture, bio, r
 ('minhquang', 'Minh Quang', 'minhquang@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/MQ.png', 'Chuyên gia real estate và property investment', 'user', 'active'),
 ('thuhuong', 'Nguyễn Thu Hương', 'thuhuong@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/H.png', 'Người dùng thử nghiệm số 44', 'user', 'active'),
 ('huonglien', 'Trần Hương Liên', 'huonglien@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/L.png', 'Người dùng thử nghiệm số 45', 'user', 'active');
+
 -- Insert 50 categories
 INSERT INTO categories (name, description, parent_id, image, status) VALUES
--- Existing categories from youtalk_database.sql (11 categories)
 ('Công nghệ', 'Sản phẩm và dịch vụ công nghệ', NULL, 'images/categories/technology.png', 'active'),
 ('Thời trang', 'Quần áo, phụ kiện và xu hướng thời trang', NULL, 'images/categories/fashion.png', 'active'),
 ('Du lịch', 'Địa điểm du lịch, dịch vụ lưu trú và trải nghiệm', NULL, 'images/categories/travel.png', 'active'),
@@ -68,8 +66,6 @@ INSERT INTO categories (name, description, parent_id, image, status) VALUES
 ('Làm đẹp', 'Mỹ phẩm và dịch vụ làm đẹp', NULL, 'images/categories/beauty.png', 'active'),
 ('Điện thoại', 'Điện thoại di động và phụ kiện', 1, 'images/categories/phones.png', 'active'),
 ('Laptop', 'Máy tính xách tay và phụ kiện', 1, 'images/categories/laptops.png', 'active'),
-
--- Existing categories from youtalk_sample_data.sql (39 categories)
 ('Tablet', 'Máy tính bảng và phụ kiện', 1, 'images/categories/tablets.png', 'active'),
 ('Tai nghe', 'Tai nghe, loa và phụ kiện âm thanh', 1, 'images/categories/headphones.png', 'active'),
 ('Smart Watch', 'Đồng hồ thông minh và wearable devices', 1, 'images/categories/smartwatch.png', 'active'),
@@ -109,9 +105,9 @@ INSERT INTO categories (name, description, parent_id, image, status) VALUES
 ('Vật liệu xây dựng', 'Vật liệu và công cụ xây dựng', NULL, 'images/categories/construction.png', 'active'),
 ('Nông nghiệp', 'Sản phẩm nông nghiệp và làm vườn', NULL, 'images/categories/agriculture.png', 'active'),
 ('Bảo hiểm', 'Dịch vụ bảo hiểm các loại', NULL, 'images/categories/insurance.png', 'active');
+
 -- Insert 50 products
 INSERT INTO products (name, description, price, category_id, creator_id, brand, location, images, specs, is_featured, view_count, status) VALUES
--- Existing products from youtalk_database.sql (8 products)
 ('iPhone 13 Pro', 'iPhone 13 Pro với màn hình Super Retina XDR 6.1 inch, camera chuyên nghiệp và pin dài lâu.', 24990000, 10, 1, 'Apple', 'Hà Nội', '["images/products/iphone13pro_1.png", "images/products/iphone13pro_2.png", "images/products/iphone13pro_3.png"]', '{"Màn hình": "6.1 inch Super Retina XDR", "CPU": "A15 Bionic", "RAM": "6GB", "Bộ nhớ": "128GB", "Camera": "12MP (3 camera)", "Pin": "3095mAh"}', TRUE, 156, 'active'),
 ('Samsung Galaxy S21', 'Samsung Galaxy S21 với màn hình Dynamic AMOLED 2X, camera 64MP và pin 4000mAh.', 18990000, 10, 2, 'Samsung', 'TP. Hồ Chí Minh', '["images/products/galaxys21_1.png", "images/products/galaxys21_2.png"]', '{"Màn hình": "6.2 inch Dynamic AMOLED 2X", "CPU": "Exynos 2100", "RAM": "8GB", "Bộ nhớ": "128GB", "Camera": "64MP", "Pin": "4000mAh"}', TRUE, 145, 'active'),
 ('MacBook Pro M1', 'MacBook Pro với chip M1, màn hình Retina và thời lượng pin lên đến 20 giờ.', 32990000, 11, 1, 'Apple', 'Hà Nội', '["images/products/macbookpro_1.png", "images/products/macbookpro_2.png"]', '{"Màn hình": "13.3 inch Retina", "CPU": "Apple M1", "RAM": "8GB", "Bộ nhớ": "256GB SSD", "Pin": "20 giờ"}', TRUE, 178, 'active'),
@@ -120,17 +116,14 @@ INSERT INTO products (name, description, price, category_id, creator_id, brand, 
 ('Khóa học tiếng Anh online', 'Khóa học tiếng Anh trực tuyến với giáo viên bản ngữ, phù hợp mọi trình độ.', 2500000, 27, 5, 'English Center', 'Online', '["images/products/english_course.png"]', '{"Thời lượng": "3 tháng", "Số buổi": "36 buổi", "Trình độ": "Sơ cấp đến cao cấp", "Chứng chỉ": "Có"}', TRUE, 210, 'active'),
 ('Resort Phú Quốc', 'Khu nghỉ dưỡng 5 sao tại Phú Quốc với bãi biển riêng và nhiều tiện ích cao cấp.', 3500000, 22, 4, 'Vinpearl', 'Phú Quốc', '["images/products/resort_1.png", "images/products/resort_2.png", "images/products/resort_3.png"]', '{"Hạng phòng": "Deluxe, Suite, Villa", "Diện tích": "45-200m2", "Tiện ích": "Hồ bơi, Spa, Nhà hàng, Bar"}', TRUE, 245, 'active'),
 ('Kem dưỡng da', 'Kem dưỡng da chống lão hóa, cung cấp độ ẩm và làm sáng da.', 850000, 30, 4, 'Innisfree', 'Hàn Quốc', '["images/products/cream_1.png", "images/products/cream_2.png"]', '{"Dung tích": "50ml", "Loại da": "Mọi loại da", "Công dụng": "Dưỡng ẩm, Chống lão hóa, Làm sáng da"}', FALSE, 123, 'active'),
-('Samsung Galaxy S21 5G', 'Điện thoại thông minh cao cấp với chip Exynos 2100, camera 64MP telephoto và màn hình Dynamic AMOLED 2X 6.2 inch. Hỗ trợ 5G và sạc nhanh 25W.', 18990000, 10, 2, 'Samsung', 'Hà Nội', '["images/products/samsung_s21_1.jpg", "images/products/samsung_s21_2.jpg", "images/products/samsung_s21_3.jpg"]', '{"screen": "6.2 inch Dynamic AMOLED 2X", "processor": "Exynos 2100", "ram": "8GB", "storage": "128GB", "camera": "64MP Triple Camera", "battery": "4000mAh", "os": "Android 11"}', 1, 145, 'active'),
-('Apple AirPods Pro (2nd Gen)', 'Tai nghe không dây cao cấp với công nghệ chống ồn chủ động, âm thanh Spatial Audio và thời lượng pin lên đến 30 giờ với case sạc.', 5990000, 13, 3, 'Apple', 'TP.HCM', '["images/products/airpods_pro_1.jpg", "images/products/airpods_pro_2.jpg"]', '{"connectivity": "Bluetooth 5.3", "battery": "6h + 24h (case)", "features": "Active Noise Cancellation, Spatial Audio", "water_resistance": "IPX4", "compatibility": "iPhone, iPad, Mac"}', 1, 89, 'active'),
-('Apple Watch Series 8', 'Đồng hồ thông minh với tính năng theo dõi sức khỏe toàn diện, GPS tích hợp và khả năng chống nước. Màn hình Retina Always-On 45mm.', 8990000, 14, 4, 'Apple', 'Đà Nẵng', '["images/products/apple_watch_s8_1.jpg", "images/products/apple_watch_s8_2.jpg"]', '{"screen": "45mm Retina Always-On", "processor": "S8 SiP", "connectivity": "GPS + Cellular", "sensors": "Blood Oxygen, ECG, Temperature", "battery": "18 hours", "water_resistance": "50m"}', 0, 67, 'active'),
-('ASUS ROG Strix RTX 3080', 'Card đồ họa gaming cao cấp với 10GB GDDR6X, hỗ trợ Ray Tracing và DLSS. Thiết kế tản nhiệt 3 quạt hiệu suất cao cho game thủ chuyên nghiệp.', 25990000, 15, 5, 'ASUS', 'Hà Nội', '["images/products/rtx_3080_1.jpg", "images/products/rtx_3080_2.jpg", "images/products/rtx_3080_3.jpg"]', '{"memory": "10GB GDDR6X", "base_clock": "1440 MHz", "boost_clock": "1935 MHz", "cooling": "Triple Fan", "power": "320W", "ports": "3x DisplayPort, 2x HDMI"}', 1, 234, 'active'),
-('Adidas Ultraboost 22', 'Giày chạy bộ cao cấp với công nghệ đệm Boost, upper Primeknit+ và đế ngoài Continental Rubber. Thiết kế hiện đại, thoải mái cho mọi hoạt động.', 4290000, 18, 6, 'Adidas', 'TP.HCM', '["images/products/ultraboost_22_1.jpg", "images/products/ultraboost_22_2.jpg", "images/products/ultraboost_22_3.jpg"]', '{"upper": "Primeknit+", "midsole": "Boost Technology", "outsole": "Continental Rubber", "weight": "326g", "drop": "10mm", "support": "Neutral"}', 0, 156, 'active');
-
-
--- Additional products to reach 50 total
+('Samsung Galaxy S21 5G', 'Điện thoại thông minh cao cấp với chip Exynos 2100, camera 64MP telephoto và màn hình Dynamic AMOLED 2X 6.2 inch. Hỗ trợ 5G và sạc nhanh 25W.', 18990000, 10, 2, 'Samsung', 'Hà Nội', '["images/products/samsung_s21_1.jpg", "images/products/samsung_s21_2.jpg", "images/products/samsung_s21_3.jpg"]', '{"screen": "6.2 inch Dynamic AMOLED 2X", "processor": "Exynos 2100", "ram": "8GB", "storage": "128GB", "camera": "64MP Triple Camera", "battery": "4000mAh", "os": "Android 11"}', TRUE, 145, 'active'),
+('Apple AirPods Pro (2nd Gen)', 'Tai nghe không dây cao cấp với công nghệ chống ồn chủ động, âm thanh Spatial Audio và thời lượng pin lên đến 30 giờ với case sạc.', 5990000, 13, 3, 'Apple', 'TP.HCM', '["images/products/airpods_pro_1.jpg", "images/products/airpods_pro_2.jpg"]', '{"connectivity": "Bluetooth 5.3", "battery": "6h + 24h (case)", "features": "Active Noise Cancellation, Spatial Audio", "water_resistance": "IPX4", "compatibility": "iPhone, iPad, Mac"}', TRUE, 89, 'active'),
+('Apple Watch Series 8', 'Đồng hồ thông minh với tính năng theo dõi sức khỏe toàn diện, GPS tích hợp và khả năng chống nước. Màn hình Retina Always-On 45mm.', 8990000, 14, 4, 'Apple', 'Đà Nẵng', '["images/products/apple_watch_s8_1.jpg", "images/products/apple_watch_s8_2.jpg"]', '{"screen": "45mm Retina Always-On", "processor": "S8 SiP", "connectivity": "GPS + Cellular", "sensors": "Blood Oxygen, ECG, Temperature", "battery": "18 hours", "water_resistance": "50m"}', FALSE, 67, 'active'),
+('ASUS ROG Strix RTX 3080', 'Card đồ họa gaming cao cấp với 10GB GDDR6X, hỗ trợ Ray Tracing và DLSS. Thiết kế tản nhiệt 3 quạt hiệu suất cao cho game thủ chuyên nghiệp.', 25990000, 15, 5, 'ASUS', 'Hà Nội', '["images/products/rtx_3080_1.jpg", "images/products/rtx_3080_2.jpg", "images/products/rtx_3080_3.jpg"]', '{"memory": "10GB GDDR6X", "base_clock": "1440 MHz", "boost_clock": "1935 MHz", "cooling": "Triple Fan", "power": "320W", "ports": "3x DisplayPort, 2x HDMI"}', TRUE, 234, 'active'),
+('Adidas Ultraboost 22', 'Giày chạy bộ cao cấp với công nghệ đệm Boost, upper Primeknit+ và đế ngoài Continental Rubber. Thiết kế hiện đại, thoải mái cho mọi hoạt động.', 4290000, 18, 6, 'Adidas', 'TP.HCM', '["images/products/ultraboost_22_1.jpg", "images/products/ultraboost_22_2.jpg", "images/products/ultraboost_22_3.jpg"]', '{"upper": "Primeknit+", "midsole": "Boost Technology", "outsole": "Continental Rubber", "weight": "326g", "drop": "10mm", "support": "Neutral"}', FALSE, 156, 'active'),
 ('iPad Air', 'iPad Air với chip M1, màn hình Liquid Retina 10.9 inch và hiệu năng mạnh mẽ.', 15990000, 12, 6, 'Apple', 'Hà Nội', '["images/products/ipad_air_1.png", "images/products/ipad_air_2.png"]', '{"Màn hình": "10.9 inch Liquid Retina", "CPU": "Apple M1", "RAM": "8GB", "Bộ nhớ": "64GB", "Camera": "12MP", "Pin": "10 giờ"}', TRUE, 125, 'active'),
 ('AirPods Pro', 'Tai nghe không dây cao cấp với chống ồn chủ động và chất lượng âm thanh vượt trội.', 5990000, 13, 7, 'Apple', 'TP. Hồ Chí Minh', '["images/products/airpods_pro_1.png", "images/products/airpods_pro_2.png"]', '{"Loại": "True Wireless", "Chống ồn": "Có", "Pin": "6 giờ", "Kết nối": "Bluetooth 5.0"}', TRUE, 89, 'active'),
-('Apple Watch Series 8', 'Đồng hồ thông minh với tính năng theo dõi sức khỏe toàn diện và thiết kế sang trọng.', 9990000, 14, 8, 'Apple', 'Đà Nẵng', '["images/products/apple_watch_1.png", "images/products/apple_watch_2.png"]', '{"Màn hình": "45mm Retina", "GPS": "Có", "Pin": "18 giờ", "Chống nước": "50m"}', FALSE, 67, 'active'),
+('Apple Watch Series 8 GPS', 'Đồng hồ thông minh với tính năng theo dõi sức khỏe toàn diện và thiết kế sang trọng.', 9990000, 14, 8, 'Apple', 'Đà Nẵng', '["images/products/apple_watch_1.png", "images/products/apple_watch_2.png"]', '{"Màn hình": "45mm Retina", "GPS": "Có", "Pin": "18 giờ", "Chống nước": "50m"}', FALSE, 67, 'active'),
 ('Gaming PC RTX 3080', 'Máy tính gaming hiệu năng cao với RTX 3080, phù hợp cho game thủ chuyên nghiệp.', 45000000, 15, 9, 'Custom Build', 'Hà Nội', '["images/products/gaming_pc_1.png", "images/products/gaming_pc_2.png"]', '{"CPU": "Intel i7-12700K", "GPU": "RTX 3080", "RAM": "32GB", "SSD": "1TB", "Tản nhiệt": "Nước"}', TRUE, 201, 'active'),
 ('Áo khoác nam', 'Áo khoác nam thời trang, chất liệu cao cấp, phù hợp cho mùa đông.', 1200000, 16, 10, 'Canifa', 'Hải Phòng', '["images/products/jacket_men_1.png", "images/products/jacket_men_2.png"]', '{"Chất liệu": "Polyester", "Màu sắc": "Đen, Xanh, Nâu", "Size": "M-XXL", "Mùa": "Thu Đông"}', FALSE, 34, 'active'),
 ('Váy công sở', 'Váy công sở thanh lịch cho phái đẹp, phù hợp cho môi trường làm việc chuyên nghiệp.', 750000, 17, 11, 'Elise', 'TP. Hồ Chí Minh', '["images/products/office_dress_1.png", "images/products/office_dress_2.png"]', '{"Chất liệu": "Vải tằm", "Màu sắc": "Đen, Xanh navy", "Size": "S-XL", "Kiểu dáng": "Chữ A"}', FALSE, 56, 'active'),
@@ -167,16 +160,14 @@ INSERT INTO products (name, description, price, category_id, creator_id, brand, 
 ('Xi măng Hà Tiên', 'Xi măng Hà Tiên PCB40, chất lượng cao, độ bền vượt trội.', 95000, 48, 42, 'Hà Tiên', 'Việt Nam', '["images/products/cement_1.png"]', '{"Loại": "PCB40", "Khối lượng": "50kg/bao", "Đóng gói": "Bao giấy Kraft", "Xuất xứ": "Việt Nam"}', FALSE, 34, 'active'),
 ('Hạt giống rau muống', 'Hạt giống rau muống sạch, tỷ lệ nảy mầm cao, dễ trồng.', 25000, 49, 43, 'Rạng Đông', 'Việt Nam', '["images/products/seed_1.png"]', '{"Loại": "Rau muống", "Khối lượng": "50g", "Xuất xứ": "Việt Nam", "Hạn sử dụng": "12 tháng"}', FALSE, 23, 'active'),
 ('Bảo hiểm nhân thọ', 'Gói bảo hiểm nhân thọ toàn diện, bảo vệ bạn và gia đình.', 10000000, 50, 44, 'Prudential', 'Toàn quốc', '["images/products/insurance_1.png"]', '{"Loại": "Nhân thọ", "Thời hạn": "20 năm", "Quyền lợi": "Tử vong, Thương tật, Bệnh hiểm nghèo", "Đơn vị": "Prudential Việt Nam"}', TRUE, 89, 'active');
+
 -- Insert 50 posts
 INSERT INTO posts (title, content, user_id, category_id, post_type, product_id, media, tags, view_count, status) VALUES
--- Existing posts from youtalk_database.sql (5 posts)
 ('Review iPhone 13 Pro sau 1 tháng sử dụng', 'Sau 1 tháng sử dụng iPhone 13 Pro, tôi rất hài lòng với hiệu năng và thời lượng pin của máy. Camera chụp ảnh rất đẹp, đặc biệt là chế độ chụp đêm. Tuy nhiên, giá thành khá cao và sạc riêng phải mua thêm. Tổng thể là một chiếc điện thoại đáng mua nếu bạn có điều kiện.', 2, 10, 'review', 1, '["images/posts/iphone_review_1.jpg", "images/posts/iphone_review_2.jpg"]', '["iphone", "apple", "smartphone", "review"]', 156, 'active'),
 ('So sánh MacBook Pro M1 và Dell XPS 13', 'Bài viết này sẽ so sánh chi tiết giữa MacBook Pro M1 và Dell XPS 13 về hiệu năng, thời lượng pin, màn hình và giá cả. Cả hai đều là những laptop cao cấp nhưng phù hợp với những đối tượng người dùng khác nhau.', 3, 11, 'discussion', NULL, '["images/posts/laptop_compare_1.jpg", "images/posts/laptop_compare_2.jpg"]', '["laptop", "macbook", "dell", "so sánh"]', 89, 'active'),
 ('Hỏi về khóa học tiếng Anh online', 'Tôi đang tìm kiếm một khóa học tiếng Anh online hiệu quả để cải thiện kỹ năng giao tiếp. Khóa học tiếng Anh của English Center có tốt không? Mọi người có kinh nghiệm nào chia sẻ không?', 4, 5, 'question', 6, NULL, '["tiếng anh", "học online", "khóa học"]', 42, 'active'),
 ('Chia sẻ kinh nghiệm du lịch Phú Quốc', 'Vừa có chuyến đi Phú Quốc 5 ngày 4 đêm, tôi muốn chia sẻ kinh nghiệm về chỗ ở, đi lại, ăn uống và các địa điểm tham quan đẹp nhất. Resort Vinpearl là lựa chọn tuyệt vời nếu bạn muốn nghỉ dưỡng cao cấp.', 4, 3, 'discussion', 7, '["images/posts/phuquoc_1.jpg", "images/posts/phuquoc_2.jpg", "images/posts/phuquoc_3.jpg"]', '["du lịch", "phú quốc", "kinh nghiệm", "resort"]', 215, 'active'),
 ('Tư vấn mua laptop cho sinh viên IT', 'Mình là sinh viên năm nhất ngành CNTT, đang cần tư vấn mua laptop phù hợp với ngành học và ngân sách khoảng 20 triệu. Mọi người có gợi ý gì không?', 2, 11, 'question', NULL, NULL, '["laptop", "sinh viên", "CNTT", "tư vấn"]', 78, 'active'),
-
--- Additional posts to reach 50 total
 ('Đánh giá Samsung Galaxy S21 sau 6 tháng', 'Sau 6 tháng sử dụng Samsung Galaxy S21, tôi vẫn rất hài lòng với hiệu năng và camera của máy. Pin trâu, chụp ảnh đẹp và chơi game mượt. Tuy nhiên, máy hơi nóng khi sử dụng lâu và chơi game nặng.', 6, 10, 'review', 2, '["images/posts/samsung_review_1.jpg", "images/posts/samsung_review_2.jpg"]', '["samsung", "galaxy", "smartphone", "review"]', 132, 'active'),
 ('Trải nghiệm iPad Air M1 cho công việc thiết kế', 'Tôi đã sử dụng iPad Air M1 cho công việc thiết kế đồ họa được 3 tháng và đây là những trải nghiệm của tôi. Máy mạnh mẽ, màn hình đẹp và Apple Pencil 2 hoạt động rất mượt mà. Tuy nhiên, vẫn có một số hạn chế so với máy tính.', 7, 12, 'review', 9, '["images/posts/ipad_design_1.jpg", "images/posts/ipad_design_2.jpg"]', '["ipad", "apple", "thiết kế", "m1"]', 98, 'active'),
 ('AirPods Pro có đáng mua không?', 'Tôi đang phân vân có nên mua AirPods Pro không? Mọi người đánh giá thế nào về chất lượng âm thanh và tính năng chống ồn? Có đáng để đầu tư với mức giá gần 6 triệu không?', 8, 13, 'question', 10, NULL, '["airpods", "apple", "tai nghe", "chống ồn"]', 67, 'active'),
@@ -222,9 +213,9 @@ INSERT INTO posts (title, content, user_id, category_id, post_type, product_id, 
 ('Kinh nghiệm chọn trường mầm non chất lượng', 'Tôi xin chia sẻ kinh nghiệm chọn trường mầm non chất lượng cho con, những tiêu chí quan trọng cần lưu ý và cách đánh giá một trường mầm non tốt.', 48, 5, 'discussion', NULL, '["images/posts/kindergarten_guide.jpg"]', '["giáo dục", "mầm non", "trẻ em", "kinh nghiệm"]', 78, 'active'),
 ('Tư vấn chọn kem chống nắng', 'Mùa hè đang đến, tôi đang tìm một loại kem chống nắng tốt, không gây nhờn rít và phù hợp với da dầu mụn. Mọi người có gợi ý gì không?', 49, 9, 'question', NULL, NULL, '["làm đẹp", "kem chống nắng", "da dầu", "tư vấn"]', 98, 'active'),
 ('Kinh nghiệm du lịch Đà Lạt tự túc', 'Tôi vừa có chuyến đi Đà Lạt tự túc 4 ngày 3 đêm và muốn chia sẻ kinh nghiệm về lịch trình, chỗ ở, đi lại và các địa điểm tham quan đẹp nhất.', 50, 3, 'discussion', NULL, '["images/posts/dalat_guide_1.jpg", "images/posts/dalat_guide_2.jpg"]', '["du lịch", "đà lạt", "tự túc", "kinh nghiệm"]', 167, 'active');
+
 -- Insert 50 reviews
 INSERT INTO reviews (product_id, user_id, rating, comment, media, helpful_count, status) VALUES
--- Reviews for existing products (product_id 1-50)
 (1, 2, 5, 'iPhone 13 Pro là chiếc điện thoại tốt nhất mình từng dùng. Camera chụp ảnh cực đẹp, pin trâu và hiệu năng mượt mà.', '["images/reviews/iphone_review_1.png", "images/reviews/iphone_review_2.png"]', 24, 'active'),
 (1, 3, 4, 'Máy chạy rất mượt, camera chụp đẹp. Trừ 1 sao vì giá hơi cao và không kèm sạc.', NULL, 18, 'active'),
 (2, 4, 5, 'Galaxy S21 là một chiếc điện thoại Android hoàn hảo. Màn hình đẹp, chụp ảnh tốt và pin trâu.', '["images/reviews/galaxy_review.png"]', 15, 'active'),
@@ -277,9 +268,9 @@ INSERT INTO reviews (product_id, user_id, rating, comment, media, helpful_count,
 (48, 49, 5, 'Khóa học tiếng Anh online rất hiệu quả, giáo viên tận tâm và phương pháp giảng dạy dễ hiểu.', '["images/reviews/english_review.png"]', 17, 'active'),
 (49, 50, 4, 'Hạt giống rau muống nảy mầm tốt, cây phát triển khỏe mạnh. Trừ 1 sao vì tỷ lệ nảy mầm không đạt 100%.', '["images/reviews/seed_review_2.png"]', 23, 'active'),
 (50, 1, 5, 'Bảo hiểm nhân thọ của Prudential rất tốt, quyền lợi đầy đủ và thủ tục bồi thường nhanh chóng.', NULL, 10, 'active');
+
 -- Insert 50 comments
 INSERT INTO comments (post_id, user_id, content, parent_id, status) VALUES
--- Existing comments from youtalk_database.sql (10 comments)
 (1, 3, 'Bài review rất chi tiết và khách quan. Cảm ơn bạn đã chia sẻ!', NULL, 'active'),
 (1, 4, 'Mình đang phân vân giữa iPhone 13 Pro và Galaxy S21, bài viết này giúp mình quyết định rồi.', NULL, 'active'),
 (1, 2, 'Cảm ơn bạn đã đọc bài viết. Nếu bạn cần tư vấn thêm, có thể hỏi mình.', 2, 'active'),
@@ -290,8 +281,6 @@ INSERT INTO comments (post_id, user_id, content, parent_id, status) VALUES
 (4, 3, 'Bạn có thể chia sẻ thêm về chi phí cho chuyến đi không?', NULL, 'active'),
 (4, 4, 'Tổng chi phí cho 2 người khoảng 15 triệu, bao gồm vé máy bay, resort 4 đêm và các hoạt động tham quan.', 8, 'active'),
 (5, 3, 'Với ngân sách 20 triệu, bạn có thể xem xét Dell Inspiron 15 hoặc Acer Nitro 5, đều đáp ứng tốt nhu cầu học tập và lập trình.', NULL, 'active'),
-
--- Additional comments to reach 50 total
 (6, 7, 'Mình cũng đang dùng Galaxy S21 và rất hài lòng với camera và hiệu năng.', NULL, 'active'),
 (6, 8, 'Bạn có gặp vấn đề gì về pin không? Máy mình dùng 1 ngày phải sạc 2 lần.', NULL, 'active'),
 (6, 6, 'Pin của mình dùng được cả ngày nếu không chơi game nặng. Có thể bạn nên kiểm tra các ứng dụng ngầm.', 12, 'active'),
@@ -343,9 +332,9 @@ INSERT INTO comments (post_id, user_id, content, parent_id, status) VALUES
 (33, 33, 'Mình mua ở Nhà Xinh, chất lượng tốt và dịch vụ giao hàng, lắp đặt chuyên nghiệp.', 58, 'active'),
 (34, 42, 'Đèn trang trí này có điều chỉnh được độ sáng không bạn?', NULL, 'active'),
 (34, 34, 'Có bạn, có thể điều chỉnh 3 mức độ sáng khác nhau bằng remote.', 60, 'active');
+
 -- Insert 50 followers
 INSERT INTO followers (follower_user_id, following_user_id, created_at) VALUES
--- User relationships with meaningful connections based on interests and expertise
 (2, 1, '2023-01-15 10:30:00'),  -- Nguyễn Văn A follows Admin
 (3, 1, '2023-01-16 11:20:00'),  -- Trần Thanh Hà follows Admin
 (4, 1, '2023-01-17 09:45:00'),  -- Nguyễn Minh Tuấn follows Admin
@@ -395,4 +384,3 @@ INSERT INTO followers (follower_user_id, following_user_id, created_at) VALUES
 (48, 40, '2023-05-08 16:15:00'), -- Thùy Duyên follows Hoa Mai (e-learning interest)
 (49, 41, '2023-05-10 10:50:00'), -- Minh Quang follows Thành Long (sports interest)
 (50, 42, '2023-05-12 13:30:00'); -- Thu Hương follows Mỹ Hoa (nail art interest)
-
