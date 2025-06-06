@@ -446,36 +446,5 @@ class Post {
             return 0; // Trả về 0 khi có lỗi
         }
     }
-
-    /**
-     * Lấy tất cả bài viết của một người dùng theo ID
-     * 
-     * @param int $userId ID người dùng
-     * @return array Danh sách bài viết của người dùng
-     */
-    public function getPostsByUserId($userId) {
-        try {
-            $stmt = $this->conn->prepare("
-                SELECT p.*, c.name as category_name, 
-                       u.username, u.full_name,
-                       COUNT(DISTINCT cm.id) as comment_count 
-                FROM posts p
-                LEFT JOIN categories c ON p.category_id = c.id
-                LEFT JOIN users u ON p.user_id = u.id
-                LEFT JOIN comments cm ON p.id = cm.post_id
-                WHERE p.user_id = :user_id AND p.status = 'active'
-                GROUP BY p.id
-                ORDER BY p.created_at DESC
-            ");
-            
-            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-            $stmt->execute();
-            
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Error getting posts by user ID: " . $e->getMessage());
-            return [];
-        }
-    }
 }
 ?>

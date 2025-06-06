@@ -386,7 +386,7 @@ function switchToTab(tabType) {
 }
 
 /**
- * ✅ FIXED: Load content for profile tabs - Sửa lỗi posts không hiển thị
+ * ✅ FIXED: Load content for profile tabs - Sửa lỗi "Đang tải..." vẫn hiển thị
  */
 async function loadProfileTabContent(tabType, userId) {
     const contentContainer = document.querySelector(`#tab-${tabType}`);
@@ -412,20 +412,23 @@ async function loadProfileTabContent(tabType, userId) {
                     const response = await window.api.loadUserPosts(userId);
                     console.log('Profile tab posts response:', response); // Debug log
                     
+                    // ✅ FIXED: Always clear loading state first
+                    listContainer.innerHTML = '';
+                    
                     if (response?.success && response?.data?.posts && Array.isArray(response.data.posts)) {
                         if (response.data.posts.length > 0) {
                             renderPostsList(response.data.posts, listContainer);
                         } else {
-                            listContainer.innerHTML = `<p>${getEmptyStateMessage("posts")}</p>`;
+                            listContainer.innerHTML = `<p class="empty-state">${getEmptyStateMessage("posts")}</p>`;
                         }
                     } else {
                         console.warn('Invalid posts response structure:', response);
-                        listContainer.innerHTML = `<p>${getEmptyStateMessage("posts")}</p>`;
+                        listContainer.innerHTML = `<p class="empty-state">${getEmptyStateMessage("posts")}</p>`;
                     }
                     return;
                 } catch (error) {
                     console.error("Error loading user posts:", error);
-                    listContainer.innerHTML = '<p>Lỗi khi tải bài đăng.</p>';
+                    listContainer.innerHTML = '<p class="error-message">Lỗi khi tải bài đăng.</p>';
                     return;
                 }
                 break;
@@ -453,20 +456,23 @@ async function loadProfileTabContent(tabType, userId) {
         const response = await fetchApi(apiUrl);
         console.log(`Tab ${tabType} API response:`, response);
 
+        // ✅ FIXED: Always clear loading state before processing response
+        listContainer.innerHTML = '';
+
         if (response && (response.success === true || response.success === 200)) {
             let responseData = extractDataFromResponse(response, dataKey);
 
             if (responseData && responseData.length > 0) {
                 renderTabContent(tabType, responseData, listContainer);
             } else {
-                listContainer.innerHTML = `<p>${getEmptyStateMessage(tabType)}</p>`;
+                listContainer.innerHTML = `<p class="empty-state">${getEmptyStateMessage(tabType)}</p>`;
             }
         } else {
-            listContainer.innerHTML = `<p>Lỗi khi tải dữ liệu.</p>`;
+            listContainer.innerHTML = `<p class="error-message">Lỗi khi tải dữ liệu.</p>`;
         }
     } catch (error) {
         console.error("Error loading tab content:", error);
-        listContainer.innerHTML = `<p>Lỗi khi tải dữ liệu.</p>`;
+        listContainer.innerHTML = `<p class="error-message">Lỗi khi tải dữ liệu.</p>`;
     }
 }
 
@@ -506,7 +512,7 @@ function getEmptyStateMessage(tabType) {
         following: "Chưa theo dõi ai."
     };
     
-    return `<p class="empty-state">${messages[tabType] || "Không có dữ liệu."}</p>`;
+    return messages[tabType] || "Không có dữ liệu.";
 }
 
 /**
@@ -515,7 +521,10 @@ function getEmptyStateMessage(tabType) {
 function renderTabContent(tabType, data, container) {
     if (!container) return;
     
-    container.innerHTML = '';
+    // ✅ FIXED: Ensure container is clean before rendering
+    if (container.innerHTML.includes('Đang tải...')) {
+        container.innerHTML = '';
+    }
     
     switch (tabType) {
         case "posts":
@@ -535,9 +544,19 @@ function renderTabContent(tabType, data, container) {
 }
 
 /**
- * Render posts list
+ * ✅ FIXED: Render posts list - Ensure loading state is cleared
  */
 function renderPostsList(posts, container) {
+    // ✅ Ensure container is empty before adding posts
+    if (container.innerHTML.includes('Đang tải...') || container.innerHTML.includes('loading')) {
+        container.innerHTML = '';
+    }
+    
+    if (!Array.isArray(posts) || posts.length === 0) {
+        container.innerHTML = `<p class="empty-state">${getEmptyStateMessage("posts")}</p>`;
+        return;
+    }
+    
     posts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'discussion-item';
@@ -564,6 +583,11 @@ function renderPostsList(posts, container) {
  * Render reviews list
  */
 function renderReviewsList(reviews, container) {
+    if (!Array.isArray(reviews) || reviews.length === 0) {
+        container.innerHTML = `<p class="empty-state">${getEmptyStateMessage("reviews")}</p>`;
+        return;
+    }
+    
     reviews.forEach(review => {
         const reviewElement = document.createElement('div');
         reviewElement.className = 'review-item';
@@ -595,6 +619,11 @@ function renderReviewsList(reviews, container) {
  * Render comments list
  */
 function renderCommentsList(comments, container) {
+    if (!Array.isArray(comments) || comments.length === 0) {
+        container.innerHTML = `<p class="empty-state">${getEmptyStateMessage("comments")}</p>`;
+        return;
+    }
+    
     comments.forEach(comment => {
         const commentElement = document.createElement('div');
         commentElement.className = 'comment-item';
@@ -629,6 +658,12 @@ function renderCommentsList(comments, container) {
  * Render users list (followers/following)
  */
 function renderUsersList(users, container) {
+    if (!Array.isArray(users) || users.length === 0) {
+        const tabType = container.id.includes('followers') ? 'followers' : 'following';
+        container.innerHTML = `<p class="empty-state">${getEmptyStateMessage(tabType)}</p>`;
+        return;
+    }
+    
     users.forEach(user => {
         const userElement = document.createElement('div');
         userElement.className = 'user-grid-item';
@@ -897,7 +932,7 @@ function initializeAccountManagement() {
         deactivateButton.addEventListener('click', () => {
             if (accountActionModal && accountActionTitle && accountActionMessage && accountActionType) {
                 accountActionTitle.textContent = 'Xác nhận vô hiệu hóa tài khoản';
-                accountActionMessage.textContent = 'Bạn có chắc chắn muốn vô hiệu hóa tài khoản? Tài khoản của bạn sẽ bị ẩn và không thể truy cập cho đến khi bạn đăng nhập lại.';
+                accountActionMessage.textContent = 'Bạn có chắc chắn muốn vô hiệu hóa tài khoản? Tài khoản của bạn sẽ bị ẩn và không thể truy cập cho đến khi bạn kích hoạt lại.';
                 accountActionType.value = 'deactivate_account';
                 accountActionModal.style.display = 'block';
             }

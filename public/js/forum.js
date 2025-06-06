@@ -263,7 +263,7 @@ async function loadHotTopics() {
             hotTopic.className = `hot-topic ${postTypeClass}`;
             
             hotTopic.innerHTML = `
-                <a href="post-detail.html?id=${topic.id}">#${index + 1} ${truncateText(topic.title, 40)}</a>
+                <a href="post-detail.html?id=${topic.id}">${truncateText(topic.title, 40)}</a>
             `;
             
             hotTopicsList.appendChild(hotTopic);
@@ -278,7 +278,7 @@ async function loadHotTopics() {
 }
 
 /**
- * ✅ FIXED: Tải thành viên tích cực cho sidebar - Sửa lỗi hiển thị
+ * ✅ FIXED: Tải thành viên tích cực cho sidebar - Sửa lỗi hiển thị và avatar
  */
 async function loadActiveUsers() {
     try {
@@ -311,7 +311,7 @@ async function loadActiveUsers() {
 }
 
 /**
- * ✅ FIXED: Render danh sách thành viên tích cực - Sửa lỗi ID và field mapping
+ * ✅ FIXED: Render danh sách thành viên tích cực - Cập nhật avatar logic và loại bỏ rank badge
  */
 function renderActiveUsers(users, container) {
     container.innerHTML = '';
@@ -344,22 +344,38 @@ function renderActiveUsers(users, container) {
                         <span class="post-count">${postCount} bài viết</span>
                     </div>
                 </div>
-                <div class="rank-badge">#${index + 1}</div>
             </a>
         `;
 
         container.appendChild(activeUser);
         
-        // ✅ FIXED: Tạo avatar sau khi thêm vào DOM với error handling
+        // ✅ FIXED: Avatar logic - chỉ sử dụng 2 cách: ảnh thật hoặc fallback
         setTimeout(() => {
             const avatarContainer = activeUser.querySelector(`#${avatarId}`);
-            if (avatarContainer && window.Avatar) {
-                try {
-                    avatarContainer.innerHTML = window.Avatar.createFallbackHTML(fullName, '40px');
-                } catch (error) {
-                    console.warn('Error creating avatar for user:', fullName, error);
-                    // Fallback avatar nếu Avatar class không khả dụng
-                    avatarContainer.innerHTML = `<div style="width: 40px; height: 40px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${fullName.charAt(0).toUpperCase()}</div>`;
+            if (avatarContainer) {
+                // Kiểm tra nếu user có profile_picture
+                if (user.profile_picture && user.profile_picture.trim() !== '') {
+                    // Tạo img element cho ảnh thật
+                    const img = document.createElement('img');
+                    img.src = user.profile_picture;
+                    img.alt = `Avatar của ${fullName}`;
+                    img.style.cssText = `
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 50%;
+                        object-fit: cover;
+                    `;
+                    
+                    // Xử lý lỗi load ảnh
+                    img.onerror = () => {
+                        console.warn(`Avatar image failed to load for user: ${fullName}. Using fallback.`);
+                        avatarContainer.innerHTML = Avatar.createFallbackHTML(fullName, '40px');
+                    };
+                    
+                    avatarContainer.appendChild(img);
+                } else {
+                    // Không có ảnh, sử dụng fallback
+                    avatarContainer.innerHTML = Avatar.createFallbackHTML(fullName, '40px');
                 }
             }
         }, 0);

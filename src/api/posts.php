@@ -59,19 +59,6 @@ switch ($action) {
     case 'search':
         handleSearchPosts($post, $_GET);
         break;
-    case 'list_by_user':
-        if (!isset($_GET['user_id'])) {
-            sendResponse(400, ['message' => 'Missing user_id parameter']);
-            exit;
-        }
-        $userId = intval($_GET['user_id']);
-        $posts = $post->getPostsByUserId($userId);
-        sendResponse(200, [
-            'success' => true,
-            'message' => 'Lấy danh sách bài viết thành công',
-            'data' => ['posts' => $posts]
-        ]);
-        break;
     default:
         sendResponse(false, 'Action không hợp lệ hoặc không được hỗ trợ', null, 404);
 }

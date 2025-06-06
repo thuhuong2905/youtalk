@@ -139,17 +139,11 @@ if ($requestMethod === 'GET') {
         try {
             $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
             $result = $userHandler->getActiveUsers($limit);
-            
-            // Format response to match expected structure
-            if ($result['success']) {
-                sendResponse(200, ['users' => $result['users']]);
-            } else {
-                sendResponse(500, ['message' => $result['message'] ?? 'Failed to get active users']);
-            }
+            sendResponse($result['success'] ? 200 : 500, $result);
             exit;
         } catch (Exception $e) {
             error_log("Error fetching active users: " . $e->getMessage());
-            sendResponse(500, ['message' => 'Internal Server Error']);
+            sendResponse(500, ['success' => false, 'message' => 'Internal Server Error']);
             exit;
         }
     } else if ($action === 'get_profile_details') {
