@@ -441,6 +441,79 @@ class User {
             return 0;
         }
     }
+
+    /**
+     * Get active users list based on their activity scores
+     * Activity score is calculated from:
+     * - Posts (10 points each)
+     * - Comments (5 points each)  
+     * - Reviews (8 points each)
+     * - Followers (2 points each)
+     * 
+     * @param int $limit Number of users to return
+     * @return array List of active users with activity scores
+     */
+    public function getActiveUsers($limit = 5) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT 
+                    u.id,
+                    u.username,
+                    u.full_name,
+                    u.profile_picture,
+                    COALESCE(pc.post_count, 0) as post_count,
+                    COALESCE(cc.comment_count, 0) as comment_count,
+                    COALESCE(rc.review_count, 0) as review_count,
+                    COALESCE(fc.follower_count, 0) as follower_count,
+                    (COALESCE(pc.post_count, 0) * 10 + 
+                     COALESCE(cc.comment_count, 0) * 5 + 
+                     COALESCE(rc.review_count, 0) * 8 + 
+                     COALESCE(fc.follower_count, 0) * 2) as activity_score
+                FROM users u
+                LEFT JOIN (
+                    SELECT user_id, COUNT(*) as post_count 
+                    FROM posts 
+                    WHERE status = 'active'
+                    GROUP BY user_id
+                ) pc ON u.id = pc.user_id
+                LEFT JOIN (
+                    SELECT user_id, COUNT(*) as comment_count 
+                    FROM comments 
+                    WHERE status = 'active'
+                    GROUP BY user_id
+                ) cc ON u.id = cc.user_id
+                LEFT JOIN (
+                    SELECT user_id, COUNT(*) as review_count 
+                    FROM reviews 
+                    WHERE status = 'active'
+                    GROUP BY user_id
+                ) rc ON u.id = rc.user_id
+                LEFT JOIN (
+                    SELECT following_user_id, COUNT(*) as follower_count 
+                    FROM followers 
+                    GROUP BY following_user_id
+                ) fc ON u.id = fc.following_user_id
+                WHERE u.status = 'active'
+                HAVING activity_score > 0
+                ORDER BY activity_score DESC
+                LIMIT :limit
+            ");
+            
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return [
+                'success' => true,
+                'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)
+            ];
+        } catch (PDOException $e) {
+            error_log("Error in getActiveUsers: " . $e->getMessage());
+            return [
+                'success' => false, 
+                'message' => 'Lỗi khi lấy danh sách người dùng tích cực'
+            ];
+        }
+    }
 }
 ?>
 

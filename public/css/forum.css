@@ -173,12 +173,12 @@
 }
 
 .topic-content h3 a {
-    color: var(--color-accent1);
+    color: var(--color-primary);
     text-decoration: none;
 }
 
 .topic-content h3 a:hover {
-    text-decoration: underline;
+    color: var(--color-primary-dark);
 }
 
 .topic-meta {
@@ -349,38 +349,74 @@
 }
 
 /* Active Users */
+/* Active Users Section */
 .active-users-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.active-users-list .loading,
+.active-users-list .error,
+.active-users-list .no-data {
+    padding: 10px;
+    text-align: center;
+    color: #666;
+}
+
+.active-users-list .error {
+    color: #e74c3c;
 }
 
 .active-user {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
 }
 
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    background-color: var(--color-accent1);
-    color: #fff;
-    border-radius: 50%;
+.active-user:last-child {
+    border-bottom: none;
+}
+
+.active-user-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-weight: 600;
+    text-decoration: none;
+    color: inherit;
+    gap: 10px;
+}
+
+.user-avatar-container {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+}
+
+.user-info {
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .user-name {
-    font-weight: 600;
-    color: var(--color-text);
+    font-weight: 500;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .user-stats {
-    font-size: 0.9rem;
-    color: var(--color-text-light);
+    font-size: 0.8em;
+    color: #666;
+    display: flex;
+    gap: 8px;
+}
+
+.rank-badge {
+    font-weight: bold;
+    color: #e67e22;
 }
 
 /* Responsive Styles */

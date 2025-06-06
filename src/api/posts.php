@@ -30,22 +30,19 @@ $conn = $db->getConnection();
 // Tạo instance Post
 $post = new Post($conn);
 
-// Lấy dữ liệu request (chủ yếu cho POST/PUT, nhưng cũng có thể kiểm tra GET param)
+// Lấy dữ liệu request
 $requestData = getRequestData();
 
 // Xử lý request dựa trên method và action
 switch ($action) {
-    case 'list_hot': // Thêm action cho chủ đề nổi bật
+    case 'get_topics': // New action for forum topics
+        handleGetTopics($post, $_GET);
+        break;
+    case 'list_hot':
         handleGetHotTopics($post, $requestData);
         break;
     case 'list':
         handleListPosts($post, $_GET);
-        break;
-    case 'get_recent': // Bài viết gần đây từ phiên bản cũ
-        handleGetRecentPosts($post, $_GET);
-        break;
-    case 'get_by_category': // Bài viết theo danh mục từ phiên bản cũ
-        handleGetPostsByCategory($post, $requestData);
         break;
     case 'get':
         handleGetPost($post, $_GET);
@@ -54,11 +51,6 @@ switch ($action) {
         handleCreatePost($post);
         break;
     case 'update':
-        // Lấy dữ liệu từ request body cho PUT/POST
-        // $requestData = json_decode(file_get_contents('php://input'), true);
-        // if (!$requestData) {
-        //     $requestData = $_POST;
-        // } Bỏ phần này nữa
         handleUpdatePost($post, $requestData, $_GET);
         break;
     case 'delete':
@@ -67,46 +59,21 @@ switch ($action) {
     case 'search':
         handleSearchPosts($post, $_GET);
         break;
-    case 'help': // Endpoint trợ giúp từ phiên bản cũ
-        handleShowHelp();
-        break;
-    case 'list_by_user': // Thêm action mới để lấy bài đăng theo user_id (tối ưu cho trang cá nhân)
-        handleListPostsByUser($post, $_GET);
-        break;
-    case 'list_post_types': // Thêm endpoint trả về danh sách loại bài viết từ ENUM posts.post_type
-        handleListPostTypes();
-        break;
-    case 'get_comments':
-        // Lấy bình luận cho một bài viết (dùng cho post-detail)
-        $post_id = isset($_GET['post_id']) ? intval($_GET['post_id']) : null;
-        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-        $limit = 10;
-        $offset = ($page - 1) * $limit;
-        global $conn;
-        $stmtCount = $conn->prepare("SELECT COUNT(*) as total FROM comments WHERE post_id = :post_id AND status = 'active'");
-        $stmtCount->bindParam(':post_id', $post_id, PDO::PARAM_INT);
-        $stmtCount->execute();
-        $total = (int)$stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
-        $stmt = $conn->prepare("SELECT c.*, u.full_name, u.profile_picture FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.post_id = :post_id AND c.status = 'active' ORDER BY c.created_at ASC LIMIT :limit OFFSET :offset");
-        $stmt->bindParam(':post_id', $post_id, PDO::PARAM_INT);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $total_pages = ceil($total / $limit);
-        sendResponse(true, 'Lấy bình luận thành công', [
-            'comments' => $comments,
-            'total' => $total,
-            'total_pages' => $total_pages
+    case 'list_by_user':
+        if (!isset($_GET['user_id'])) {
+            sendResponse(400, ['message' => 'Missing user_id parameter']);
+            exit;
+        }
+        $userId = intval($_GET['user_id']);
+        $posts = $post->getPostsByUserId($userId);
+        sendResponse(200, [
+            'success' => true,
+            'message' => 'Lấy danh sách bài viết thành công',
+            'data' => ['posts' => $posts]
         ]);
         break;
-    case 'get_related':
-        handleGetRelatedPosts($post, $_GET);
-        break;
     default:
-        // Nếu action không hợp lệ, trả về lỗi rõ ràng thay vì trả về trợ giúp API
         sendResponse(false, 'Action không hợp lệ hoặc không được hỗ trợ', null, 404);
-        break;
 }
 
 /**
@@ -192,10 +159,12 @@ function handleShowHelp() {
 }
 
 /**
- * Xử lý việc lấy các chủ đề nổi bật (từ phiên bản cũ)
+ * Xử lý việc lấy các chủ đề nổi bật
  */
 function handleGetHotTopics($post, $params) {
-    $limit = isset($params['limit']) ? (int)$params['limit'] : 3; // Lấy giới hạn từ tham số truy vấn
+    // Lấy và validate limit parameter từ query string
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5; // Default to 5 instead of 3
+    $limit = max(1, min($limit, 10)); // Giới hạn từ 1-10 bài
 
     try {
         global $conn;
@@ -207,8 +176,9 @@ function handleGetHotTopics($post, $params) {
             LEFT JOIN users u ON p.user_id = u.id
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.status = 'active' AND u.status = 'active'
-            ORDER BY p.view_count DESC, comment_count DESC, p.created_at DESC
+            ORDER BY (p.view_count * 0.7 + comment_count * 0.3) DESC, p.created_at DESC
             LIMIT :limit";
+        
         $stmt = $conn->prepare($queryHot);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
@@ -217,19 +187,19 @@ function handleGetHotTopics($post, $params) {
         // Nếu không tìm thấy bài viết nổi bật, chuyển sang lấy bài viết gần đây
         if (empty($posts)) {
              $queryRecent = "SELECT 
-                            p.id, p.title, p.content, p.user_id, p.category_id, p.view_count, p.created_at,
+                            p.*, 
                             u.full_name,
                             c.name as category_name,
                             (SELECT COUNT(*) FROM comments cm WHERE cm.post_id = p.id AND cm.status = 'active') as comment_count
                           FROM posts p
                           JOIN users u ON p.user_id = u.id
                           LEFT JOIN categories c ON p.category_id = c.id
-                          WHERE p.status = 'active' AND u.status = 'active' AND (c.status = 'active' OR c.status IS NULL)
+                          WHERE p.status = 'active' AND u.status = 'active' 
                           ORDER BY p.created_at DESC
                           LIMIT :limit";
             
-            $stmtRecent = $post->conn->prepare($queryRecent);
-            $stmtRecent->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmtRecent = $conn->prepare($queryRecent);
+            $stmtRecent->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmtRecent->execute();
             $posts = $stmtRecent->fetchAll(PDO::FETCH_ASSOC);
             $message = 'Không tìm thấy chủ đề nổi bật, đã lấy các chủ đề gần đây thay thế.';
@@ -756,5 +726,47 @@ function handleGetRelatedPosts($post, $params) {
     $stmt2->execute();
     $posts = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     sendResponse(true, 'Lấy bài viết liên quan thành công', ['posts' => $posts]);
+}
+
+/**
+ * Xử lý lấy danh sách topics cho trang forum
+ */
+function handleGetTopics($post, $params) {
+    $page = isset($params['page']) ? (int)$params['page'] : 1;
+    $limit = isset($params['limit']) ? (int)$params['limit'] : 10;
+    $sort = isset($params['sort']) ? $params['sort'] : 'newest';
+    $post_type = isset($params['post_type']) && $params['post_type'] !== 'all' ? $params['post_type'] : null;
+    $search = isset($params['search']) ? $params['search'] : null;
+
+    try {
+        $result = $post->getPosts(
+            null, // category_id
+            null, // user_id 
+            null, // product_id
+            $post_type,
+            $search,
+            $sort,
+            $page,
+            $limit
+        );
+
+        if ($result['success']) {
+            $responseData = [
+                'topics' => $result['data']['posts'],
+                'pagination' => [
+                    'current_page' => $page,
+                    'total_pages' => ceil($result['data']['total'] / $limit),
+                    'total' => $result['data']['total'],
+                    'per_page' => $limit
+                ]
+            ];
+            sendResponse(true, 'Lấy danh sách topics thành công', $responseData);
+        } else {
+            sendResponse(false, $result['message']);
+        }
+    } catch (Exception $e) {
+        error_log('Lỗi khi lấy danh sách topics: ' . $e->getMessage());
+        sendResponse(false, 'Có lỗi xảy ra khi lấy danh sách topics', null, 500);
+    }
 }
 ?>

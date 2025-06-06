@@ -135,7 +135,26 @@ if ($requestMethod === 'GET') {
         exit;
     }
 
-    if ($action === 'get_profile_details') {
+    if ($action === 'get_active_users') {
+        try {
+            $userHandler = new User($db);
+            $result = $userHandler->getActiveUsers(10); // Limit to 10 users
+            if ($result['success']) {
+                sendResponse(200, [
+                    'success' => true,
+                    'message' => $result['message'],
+                    'data' => $result['data']
+                ]);
+            } else {
+                sendResponse(500, [
+                    'success' => false,
+                    'message' => $result['message']
+                ]);
+            }
+        } catch (Exception $e) {
+            sendResponse(500, ['message' => 'Lỗi server: ' . $e->getMessage()]);
+        }
+    } else if ($action === 'get_profile_details') {
         if (!$userId) {
             sendResponse(400, ['message' => 'User ID parameter is required for get_profile_details']);
             exit;

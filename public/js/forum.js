@@ -3,7 +3,22 @@
  * Xử lý tải các chủ đề thảo luận, lọc, tìm kiếm, sắp xếp và phân trang
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+// Đảm bảo window.api đã được load
+function waitForApi() {
+    return new Promise((resolve) => {
+        const checkApi = () => {
+            if (window.api) {
+                resolve();
+            } else {
+                setTimeout(checkApi, 50);
+            }
+        };
+        checkApi();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await waitForApi();
     initForumPage();
 });
 
@@ -11,14 +26,13 @@ document.addEventListener('DOMContentLoaded', function() {
  * Khởi tạo chức năng trang diễn đàn
  */
 async function initForumPage() {
-    // Lấy các tham số URL
     const urlParams = new URLSearchParams(window.location.search);
     const postType = urlParams.get('post_type') || 'all';
     const page = parseInt(urlParams.get('page')) || 1;
     const searchQuery = urlParams.get('search') || '';
     const sortBy = urlParams.get('sort') || 'newest';
     
-    // Thiết lập trạng thái bộ lọc ban đầu
+    // Setup initial state
     if (searchQuery) {
         document.getElementById('topic-search').value = searchQuery;
     }
@@ -28,19 +42,19 @@ async function initForumPage() {
         sortSelect.value = sortBy;
     }
     
-    // Đánh dấu tab loại bài đăng đang chọn
     highlightActivePostType(postType);
     
-    // Tải chủ đề từ API
-    await loadTopics(postType, page, searchQuery, sortBy);
-    
-    // Tải chủ đề nổi bật cho sidebar
-    await loadHotTopics();
-    
-    // Tải thành viên tích cực cho sidebar
-    await loadActiveUsers();
-    
-    // Thiết lập các sự kiện tương tác
+    try {
+        // Load all data in parallel
+        await Promise.all([
+            loadTopics(postType, page, searchQuery, sortBy),
+            loadHotTopics(),
+            loadActiveUsers()
+        ]);
+    } catch (error) {
+        console.error('Lỗi khởi tạo trang:', error);
+    }
+
     setupEventListeners();
 }
 
@@ -70,26 +84,20 @@ function highlightActivePostType(postType) {
 
 /**
  * Tải chủ đề theo bộ lọc
- * @param {string} postType - Lọc theo loại bài đăng
- * @param {number} page - Số trang
- * @param {string} searchQuery - Từ khóa tìm kiếm
- * @param {string} sortBy - Kiểu sắp xếp
  */
 async function loadTopics(postType, page, searchQuery, sortBy) {
     try {
-        // Hiển thị trạng thái đang tải
         const topicsList = document.getElementById('topics-list');
         if (!topicsList) return;
         
         topicsList.innerHTML = '<div class="loading">Đang tải chủ đề...</div>';
         
-        // Chuẩn bị tham số truy vấn
         const params = {
-            page: page,
+            page,
             sort: sortBy
         };
         
-        if (postType && postType !== 'all') {
+        if (postType !== 'all') {
             params.post_type = postType;
         }
         
@@ -97,25 +105,29 @@ async function loadTopics(postType, page, searchQuery, sortBy) {
             params.search = searchQuery;
         }
         
-        // Lấy danh sách chủ đề từ API
-        const data = await window.api.loadTopics(params);
+        const response = await fetchApi(`/src/api/posts.php?action=get_topics&${new URLSearchParams(params)}`);
         
-        if (!data.topics || data.topics.length === 0) {
-            topicsList.innerHTML = '<div class="no-results">Không tìm thấy chủ đề nào phù hợp với tiêu chí tìm kiếm.</div>';
+        if (!response.success) {
+            console.error('Failed to load topics:', response.message);
+            topicsList.innerHTML = '<div class="error">Đã xảy ra lỗi. Vui lòng thử lại sau.</div>';
             return;
         }
         
-        // Hiển thị danh sách chủ đề
-        renderTopics(data.topics, topicsList);
+        if (!response.data?.topics?.length) {
+            topicsList.innerHTML = '<div class="no-results">Không tìm thấy chủ đề nào phù hợp.</div>';
+            return;
+        }
         
-        // Hiển thị phân trang
-        renderPagination(data.pagination, postType, searchQuery, sortBy);
+        renderTopics(response.data.topics, topicsList);
+        if (response.data.pagination) {
+            renderPagination(response.data.pagination, postType, searchQuery, sortBy);
+        }
         
     } catch (error) {
         console.error('Lỗi khi tải chủ đề:', error);
         const topicsList = document.getElementById('topics-list');
         if (topicsList) {
-            topicsList.innerHTML = '<div class="error">Đã xảy ra lỗi khi tải chủ đề. Vui lòng thử lại sau.</div>';
+            topicsList.innerHTML = '<div class="error">Đã xảy ra lỗi. Vui lòng thử lại sau.</div>';
         }
     }
 }
@@ -234,27 +246,28 @@ async function loadHotTopics() {
         const hotTopicsList = document.querySelector('.hot-topics-list');
         if (!hotTopicsList) return;
         
-        const data = await window.api.loadTopics({ sort: 'popular', limit: 5 });
+        hotTopicsList.innerHTML = '<div class="loading">Đang tải chủ đề nổi bật...</div>';
         
-        if (!data.topics || data.topics.length === 0) {
+        const response = await window.api.loadHotTopics(5);
+        
+        if (!response?.success || !response.data?.posts?.length) {
             hotTopicsList.innerHTML = '<p class="no-data">Chưa có chủ đề nóng nào.</p>';
             return;
         }
         
         hotTopicsList.innerHTML = '';
         
-        data.topics.forEach((topic, index) => {
+        response.data.posts.forEach((topic, index) => {
             const postTypeClass = getPostTypeClass(topic.post_type);
             const hotTopic = document.createElement('li');
             hotTopic.className = `hot-topic ${postTypeClass}`;
             
             hotTopic.innerHTML = `
-                <a href="topic.html?id=${topic.id}">#${index + 1} ${truncateText(topic.title, 40)}</a>
+                <a href="post-detail.html?id=${topic.id}">#${index + 1} ${truncateText(topic.title, 40)}</a>
             `;
             
             hotTopicsList.appendChild(hotTopic);
         });
-        
     } catch (error) {
         console.error('Lỗi khi tải chủ đề nổi bật:', error);
         const hotTopicsList = document.querySelector('.hot-topics-list');
@@ -268,45 +281,75 @@ async function loadHotTopics() {
  * Tải thành viên tích cực cho sidebar
  */
 async function loadActiveUsers() {
+    const activeUsersList = document.querySelector('.active-users-list');
+    if (!activeUsersList) return;
+
     try {
-        const activeUsersList = document.querySelector('.active-users-list');
-        if (!activeUsersList) return;
+        activeUsersList.innerHTML = '<div class="loading">Đang tải danh sách thành viên tích cực...</div>';
         
-        const users = await window.api.loadActiveUsers();
-        
-        if (!users || users.length === 0) {
-            activeUsersList.innerHTML = '<p class="no-data">Chưa có thành viên tích cực nào.</p>';
+        const response = await fetchApi('/src/api/users.php?action=get_active_users');
+        console.log('Active users response:', response); // For debugging
+
+        if (!response || !response.success) {
+            throw new Error(response?.message || 'Không thể tải danh sách thành viên');
+        }
+
+        const users = response.data || [];
+        if (!users.length) {
+            activeUsersList.innerHTML = '<div class="no-data">Chưa có thành viên tích cực.</div>';
             return;
         }
-        
-        activeUsersList.innerHTML = '';
-        
-        users.forEach(user => {
-            const activeUser = document.createElement('li');
-            activeUser.className = 'active-user';
-            activeUser.innerHTML = `
-                <div class="avatar-container" id="user-avatar-${user.id || Math.random().toString(36).substring(7)}"></div>
-                <div class="user-info">
-                    <div class="user-name">${getDisplayName(user)}</div>
-                    <div class="user-stats">${user.post_count} bài viết</div>
-                </div>
-            `;
 
-            // Gán avatar sử dụng class Avatar
-            const avatarContainer = activeUser.querySelector(`.avatar-container`);
-            if (avatarContainer) {
-                avatarContainer.innerHTML = Avatar.createFallbackHTML(getDisplayName(user), '40px');
-            }
-            activeUsersList.appendChild(activeUser);
-        });
+        renderActiveUsers(users, activeUsersList);
 
     } catch (error) {
         console.error('Lỗi khi tải thành viên tích cực:', error);
-        const activeUsersList = document.querySelector('.active-users-list');
-        if (activeUsersList) {
-            activeUsersList.innerHTML = '<p class="error">Không thể tải thành viên tích cực. Vui lòng thử lại sau.</p>';
-        }
+        activeUsersList.innerHTML = '<div class="error">Không thể tải danh sách thành viên.</div>';
     }
+}
+
+/**
+ * Render danh sách thành viên tích cực
+ * Sử dụng lại logic từ profile.js để hiển thị avatar
+ */
+function renderActiveUsers(users, container) {
+    if (!container) return;
+    container.innerHTML = '';
+    
+    users.forEach((user, index) => {
+        const activeUser = document.createElement('li');
+        activeUser.className = 'active-user';
+        
+        const activityScore = parseInt(user.activity_score) || 0;
+        const postCount = parseInt(user.post_count) || 0;
+        const commentCount = parseInt(user.comment_count) || 0;
+        const reviewCount = parseInt(user.review_count) || 0;
+        
+        // Use getUserAvatarHtml from main.js for consistent avatar rendering
+        const avatarHtml = window.getUserAvatarHtml(user, 'user-avatar-small');
+        
+        activeUser.innerHTML = `
+            <a href="profile.html?id=${user.id}" class="active-user-link" 
+               title="Điểm hoạt động: ${activityScore}
+Bài viết: ${postCount}
+Bình luận: ${commentCount}
+Đánh giá: ${reviewCount}">
+                <div class="user-avatar-container">
+                    ${avatarHtml}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">${user.full_name || 'Ẩn danh'}</div>
+                    <div class="user-stats">
+                        <span class="activity-score">${activityScore} điểm</span>
+                        <span class="post-count">${postCount} bài viết</span>
+                    </div>
+                </div>
+                <div class="rank-badge">#${index + 1}</div>
+            </a>
+        `;
+        
+        container.appendChild(activeUser);
+    });
 }
 
 /**

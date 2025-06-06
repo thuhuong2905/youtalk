@@ -4,7 +4,7 @@
 /**
  * Base API URL - Change this to match your backend API endpoint
  */
-const API_BASE_URL = '/src/api/'; // ✅ FIXED: Thêm dấu / cuối
+const API_BASE_URL = '/src/api/';
 
 /**
  * Make an API request to the backend
@@ -15,14 +15,7 @@ const API_BASE_URL = '/src/api/'; // ✅ FIXED: Thêm dấu / cuối
  */
 async function fetchApi(endpoint, options = {}) {
     // ✅ FIXED: Logic xử lý endpoint đơn giản hơn và an toàn hơn
-    let cleanEndpoint = endpoint;
-    
-    // Loại bỏ dấu / đầu nếu có để tránh double slash
-    if (cleanEndpoint.startsWith('/')) {
-        cleanEndpoint = cleanEndpoint.slice(1);
-    }
-    
-    // Loại bỏ base path nếu endpoint đã chứa nó (tránh trùng lặp)
+    let cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
     if (cleanEndpoint.startsWith('src/api/')) {
         cleanEndpoint = cleanEndpoint.replace('src/api/', '');
     }
@@ -102,9 +95,44 @@ async function fetchApi(endpoint, options = {}) {
     }
 }
 
-// Export function để sử dụng ở các file khác
+// API Interface
+const api = {
+    // Forum related APIs
+    loadTopics: async function(params) {
+        return await fetchApi(`posts.php?action=get_topics`, {
+            method: 'GET',
+            body: params
+        });
+    },
+    
+    loadHotTopics: async function(limit = 5) {
+        return await fetchApi(`posts.php?action=list_hot&limit=${limit}`);
+    },
+    
+    loadActiveUsers: async function() {
+        return await fetchApi('users.php?action=get_active_users');
+    },
+    
+    // Category related APIs
+    loadCategories: async function() {
+        return await fetchApi('categories.php?action=get_all');
+    },
+    
+    // Post related APIs
+    createPost: async function(postData) {
+        return await fetchApi('posts.php?action=create', {
+            method: 'POST',
+            body: postData
+        });
+    }
+};
+
+// Export API interface to global scope
+if (typeof window !== 'undefined') {
+    window.api = api;
+}
+
+// Export fetchApi as well for direct use if needed
 if (typeof window !== 'undefined') {
     window.fetchApi = fetchApi;
 }
-
-// Removed the getMockData function entirely to ensure all data comes from the API.

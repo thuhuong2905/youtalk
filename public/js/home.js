@@ -204,19 +204,15 @@ async function loadHotTopics() {
         // Show loading state
         topicsList.innerHTML = '<div class="loading">Đang tải chủ đề nóng...</div>';
 
-        // Fetch hot topics from API (adjust API endpoint/params if needed)
-        // Assuming posts API can fetch hot topics based on views/comments
-        const response = await fetchApi("/posts.php?action=list_hot&limit=3"); // Corrected endpoint path
-
-         if (!response || !response.success || !response.data || !response.data.posts) { // Reverted key back to posts to match PHP API
-             console.error("API Error loading hot topics:", response?.message || "Invalid API response structure. Expected data.posts. Using mock data?"); // Updated log detail
-             console.log("Full API/Mock Response for Hot Topics:", response); // Log full response for debugging
-            topicsList.innerHTML = 
-                '<div class="no-data">Không có chủ đề nóng nào.</div>';
+        const response = await window.api.loadHotTopics(5); // Request 5 topics consistently
+        
+        if (!response || !response.success || !response.data || !response.data.posts) {
+            console.error("API Error loading hot topics:", response?.message || "Invalid API response structure");
+            topicsList.innerHTML = '<div class="no-data">Không có chủ đề nóng nào.</div>';
             return;
         }
-        console.log("Hot topics loaded from API/Mock:", response.data.posts); // Log loaded posts (using correct key 'posts')
-        const topics = response.data.posts; // Reverted key back to posts
+
+        const topics = response.data.posts;
 
         if (topics.length === 0) {
             topicsList.innerHTML = '<div class="no-data">Không có chủ đề nóng nào.</div>';
@@ -250,7 +246,7 @@ async function loadHotTopics() {
                     <a href="post-detail.html?id=${topic.id}" class="topic-link">Xem chi tiết</a>
                 </div>
             `;
-
+            
             // Add avatar using Avatar class
             const avatarContainer = topicCard.querySelector(`#topic-avatar-${topic.id || Math.random().toString(36).substring(7)}`);
             if (avatarContainer) {
