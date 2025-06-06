@@ -109,8 +109,35 @@ const api = {
         return await fetchApi(`posts.php?action=list_hot&limit=${limit}`);
     },
     
-    loadActiveUsers: async function() {
-        return await fetchApi('users.php?action=get_active_users');
+    loadActiveUsers: async function(limit = 5) {
+        const response = await fetchApi(`users.php?action=get_active_users&limit=${limit}`);
+        // Normalize response structure
+        if (response.success) {
+            const normalizedData = {
+                success: true,
+                data: {}
+            };
+            
+            // Case 1: Data in response.data.users
+            if (response.data?.users) {
+                normalizedData.data.users = response.data.users;
+            }
+            // Case 2: Data in response.message.users
+            else if (response.message?.users) {
+                normalizedData.data.users = response.message.users;
+            }
+            // Case 3: Data directly in response.users
+            else if (response.users) {
+                normalizedData.data.users = response.users;
+            }
+            // Case 4: Data in response.message array
+            else if (Array.isArray(response.message)) {
+                normalizedData.data.users = response.message;
+            }
+            
+            return normalizedData;
+        }
+        return response;
     },
     
     // Category related APIs
@@ -124,7 +151,39 @@ const api = {
             method: 'POST',
             body: postData
         });
-    }
+    },
+    
+    // User Posts API
+    loadUserPosts: async function(userId) {
+        const response = await fetchApi(`posts.php?action=list_by_user&user_id=${userId}`);
+        // Normalize response structure
+        if (response.success) {
+            const normalizedData = {
+                success: true,
+                data: {}
+            };
+            
+            // Case 1: Data in response.data.posts
+            if (response.data?.posts) {
+                normalizedData.data.posts = response.data.posts;
+            }
+            // Case 2: Data in response.message.data.posts
+            else if (response.message?.data?.posts) {
+                normalizedData.data.posts = response.message.data.posts;
+            }
+            // Case 3: Data in response.message.posts
+            else if (response.message?.posts) {
+                normalizedData.data.posts = response.message.posts;
+            }
+            // Case 4: Data array directly in response.message
+            else if (Array.isArray(response.message)) {
+                normalizedData.data.posts = response.message;
+            }
+            
+            return normalizedData;
+        }
+        return response;
+    },
 };
 
 // Export API interface to global scope

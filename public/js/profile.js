@@ -529,8 +529,19 @@ async function loadProfileTabContent(tabType, userId) {
         
         switch (tabType) {
             case "posts":
-                apiUrl = `/src/api/posts.php?action=list_by_user&user_id=${userId}`;
-                dataKey = "posts";
+                try {
+                    const response = await window.api.loadUserPosts(userId);
+                    if (response?.success && response?.data?.posts) {
+                        renderPostsList(response.data.posts, listContainer);
+                    } else {
+                        listContainer.innerHTML = `<p>${getEmptyStateMessage("posts")}</p>`;
+                    }
+                    return;
+                } catch (error) {
+                    console.error("Error loading user posts:", error);
+                    listContainer.innerHTML = '<p>Lỗi khi tải bài đăng.</p>';
+                    return;
+                }
                 break;
             case "reviews":
                 apiUrl = `/src/api/reviews.php?action=get_by_user&user_id=${userId}`;

@@ -137,22 +137,20 @@ if ($requestMethod === 'GET') {
 
     if ($action === 'get_active_users') {
         try {
-            $userHandler = new User($db);
-            $result = $userHandler->getActiveUsers(10); // Limit to 10 users
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
+            $result = $userHandler->getActiveUsers($limit);
+            
+            // Format response to match expected structure
             if ($result['success']) {
-                sendResponse(200, [
-                    'success' => true,
-                    'message' => $result['message'],
-                    'data' => $result['data']
-                ]);
+                sendResponse(200, ['users' => $result['users']]);
             } else {
-                sendResponse(500, [
-                    'success' => false,
-                    'message' => $result['message']
-                ]);
+                sendResponse(500, ['message' => $result['message'] ?? 'Failed to get active users']);
             }
+            exit;
         } catch (Exception $e) {
-            sendResponse(500, ['message' => 'Lỗi server: ' . $e->getMessage()]);
+            error_log("Error fetching active users: " . $e->getMessage());
+            sendResponse(500, ['message' => 'Internal Server Error']);
+            exit;
         }
     } else if ($action === 'get_profile_details') {
         if (!$userId) {

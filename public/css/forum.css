@@ -356,67 +356,105 @@
     list-style: none;
 }
 
-.active-users-list .loading,
-.active-users-list .error,
-.active-users-list .no-data {
-    padding: 10px;
-    text-align: center;
-    color: #666;
-}
-
-.active-users-list .error {
-    color: #e74c3c;
-}
-
 .active-user {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
 }
 
-.active-user:last-child {
-    border-bottom: none;
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-accent1);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.user-stats {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
 }
 
 .active-user-link {
     display: flex;
     align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: var(--color-bg-light);
     text-decoration: none;
-    color: inherit;
-    gap: 10px;
+    color: var(--color-text);
+    position: relative;
+    transition: all 0.2s ease;
 }
 
-.user-avatar-container {
-    flex-shrink: 0;
+.active-user-link:hover {
+    background-color: var(--color-bg-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.active-user .avatar-container {
     width: 40px;
     height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 2px solid var(--color-primary);
 }
 
-.user-info {
-    flex-grow: 1;
+.active-user .user-info {
+    flex: 1;
     min-width: 0;
 }
 
-.user-name {
-    font-weight: 500;
-    margin-bottom: 4px;
+.active-user .user-name {
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    margin-bottom: 2px;
+    color: var(--color-text-dark);
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.user-stats {
-    font-size: 0.8em;
-    color: #666;
+.active-user .user-stats {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    font-size: var(--text-xs);
+    color: var(--color-text-light);
 }
 
-.rank-badge {
-    font-weight: bold;
-    color: #e67e22;
+.active-user .activity-score {
+    color: var(--color-primary);
+    font-weight: var(--font-medium);
+}
+
+.active-user .rank-badge {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background-color: var(--color-primary);
+    color: white;
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    padding: 4px 8px;
+    border-radius: 12px;
+    opacity: 0.8;
+}
+
+.active-user:hover .rank-badge {
+    opacity: 1;
 }
 
 /* Responsive Styles */

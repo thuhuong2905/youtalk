@@ -455,6 +455,7 @@ class User {
      */
     public function getActiveUsers($limit = 5) {
         try {
+            // Tối ưu câu truy vấn bằng cách tách thành các subquery
             $stmt = $this->db->prepare("
                 SELECT 
                     u.id,
@@ -473,19 +474,19 @@ class User {
                 LEFT JOIN (
                     SELECT user_id, COUNT(*) as post_count 
                     FROM posts 
-                    WHERE status = 'active'
+                    WHERE status = 'active' 
                     GROUP BY user_id
                 ) pc ON u.id = pc.user_id
                 LEFT JOIN (
                     SELECT user_id, COUNT(*) as comment_count 
                     FROM comments 
-                    WHERE status = 'active'
+                    WHERE status = 'active' 
                     GROUP BY user_id
                 ) cc ON u.id = cc.user_id
                 LEFT JOIN (
                     SELECT user_id, COUNT(*) as review_count 
                     FROM reviews 
-                    WHERE status = 'active'
+                    WHERE status = 'active' 
                     GROUP BY user_id
                 ) rc ON u.id = rc.user_id
                 LEFT JOIN (
@@ -495,23 +496,34 @@ class User {
                 ) fc ON u.id = fc.following_user_id
                 WHERE u.status = 'active'
                 HAVING activity_score > 0
-                ORDER BY activity_score DESC
+                ORDER BY activity_score DESC, post_count DESC
                 LIMIT :limit
             ");
             
             $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             
+            $activeUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
             return [
                 'success' => true,
-                'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)
+                'users' => array_map(function($user) {
+                    return [
+                        'id' => (int)$user['id'],
+                        'username' => $user['username'],
+                        'full_name' => $user['full_name'] ?: $user['username'],
+                        'profile_picture' => $user['profile_picture'],
+                        'post_count' => (int)$user['post_count'],
+                        'comment_count' => (int)$user['comment_count'],
+                        'review_count' => (int)$user['review_count'],
+                        'follower_count' => (int)$user['follower_count'],
+                        'activity_score' => (int)$user['activity_score']
+                    ];
+                }, $activeUsers)
             ];
         } catch (PDOException $e) {
-            error_log("Error in getActiveUsers: " . $e->getMessage());
-            return [
-                'success' => false, 
-                'message' => 'Lỗi khi lấy danh sách người dùng tích cực'
-            ];
+            error_log('Error getting active users: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Database error'];
         }
     }
 }

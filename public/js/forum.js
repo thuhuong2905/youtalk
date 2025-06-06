@@ -281,74 +281,74 @@ async function loadHotTopics() {
  * Tải thành viên tích cực cho sidebar
  */
 async function loadActiveUsers() {
-    const activeUsersList = document.querySelector('.active-users-list');
-    if (!activeUsersList) return;
-
     try {
-        activeUsersList.innerHTML = '<div class="loading">Đang tải danh sách thành viên tích cực...</div>';
+        const activeUsersList = document.querySelector('.active-users-list');
+        if (!activeUsersList) return;
         
-        const response = await fetchApi('/src/api/users.php?action=get_active_users');
-        console.log('Active users response:', response); // For debugging
-
-        if (!response || !response.success) {
-            throw new Error(response?.message || 'Không thể tải danh sách thành viên');
-        }
-
-        const users = response.data || [];
-        if (!users.length) {
+        activeUsersList.innerHTML = '<div class="loading-indicator">Đang tải thành viên tích cực...</div>';
+        
+        const response = await window.api.loadActiveUsers(5);
+        console.log('Active users response:', response);
+        
+        // Extract users from normalized response
+        const users = response?.data?.users || [];
+        
+        if (users.length === 0) {
             activeUsersList.innerHTML = '<div class="no-data">Chưa có thành viên tích cực.</div>';
             return;
         }
-
+        
         renderActiveUsers(users, activeUsersList);
-
+        
     } catch (error) {
         console.error('Lỗi khi tải thành viên tích cực:', error);
-        activeUsersList.innerHTML = '<div class="error">Không thể tải danh sách thành viên.</div>';
+        const activeUsersList = document.querySelector('.active-users-list');
+        if (activeUsersList) {
+            activeUsersList.innerHTML = '<div class="error">Không thể tải danh sách thành viên.</div>';
+        }
     }
 }
 
 /**
  * Render danh sách thành viên tích cực
- * Sử dụng lại logic từ profile.js để hiển thị avatar
  */
 function renderActiveUsers(users, container) {
-    if (!container) return;
     container.innerHTML = '';
-    
     users.forEach((user, index) => {
         const activeUser = document.createElement('li');
         activeUser.className = 'active-user';
+        const avatarId = `user-avatar-${user.id || Math.random().toString(36).substring(7)}`;
         
-        const activityScore = parseInt(user.activity_score) || 0;
-        const postCount = parseInt(user.post_count) || 0;
-        const commentCount = parseInt(user.comment_count) || 0;
-        const reviewCount = parseInt(user.review_count) || 0;
-        
-        // Use getUserAvatarHtml from main.js for consistent avatar rendering
-        const avatarHtml = window.getUserAvatarHtml(user, 'user-avatar-small');
+        // Thêm tooltip hiển thị thông tin chi tiết về hoạt động
+        const activityDetails = `
+            ${user.post_count} bài viết
+            ${user.comment_count} bình luận
+            ${user.review_count} đánh giá
+            ${user.follower_count} người theo dõi
+            Điểm hoạt động: ${user.activity_score}
+        `.replace(/\s+/g, ' ').trim();
         
         activeUser.innerHTML = `
-            <a href="profile.html?id=${user.id}" class="active-user-link" 
-               title="Điểm hoạt động: ${activityScore}
-Bài viết: ${postCount}
-Bình luận: ${commentCount}
-Đánh giá: ${reviewCount}">
-                <div class="user-avatar-container">
-                    ${avatarHtml}
-                </div>
+            <a href="profile.html?id=${user.id}" class="active-user-link" title="${activityDetails}">
+                <div class="avatar-container" id="${avatarId}"></div>
                 <div class="user-info">
-                    <div class="user-name">${user.full_name || 'Ẩn danh'}</div>
+                    <div class="user-name">${user.full_name}</div>
                     <div class="user-stats">
-                        <span class="activity-score">${activityScore} điểm</span>
-                        <span class="post-count">${postCount} bài viết</span>
+                        <span class="activity-score">${user.activity_score} điểm</span>
+                        <span class="post-count">${user.post_count} bài viết</span>
                     </div>
                 </div>
                 <div class="rank-badge">#${index + 1}</div>
             </a>
         `;
-        
+
         container.appendChild(activeUser);
+        
+        // Tạo avatar sau khi thêm vào DOM
+        const avatarContainer = activeUser.querySelector(`#${avatarId}`);
+        if (avatarContainer && window.Avatar) {
+            avatarContainer.innerHTML = window.Avatar.createFallbackHTML(user.full_name, '40px');
+        }
     });
 }
 
