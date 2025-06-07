@@ -324,8 +324,11 @@ function handleGetPostsByCategory($post, $params) {
     
     if ($sort === 'oldest') {
         $sort_order = 'ASC';
-    } elseif ($sort === 'popular') {
+    } elseif ($sort === 'views') {
         $sort_by = 'view_count';
+        $sort_order = 'DESC';
+    } elseif ($sort === 'comments') {
+        $sort_by = 'comment_count';
         $sort_order = 'DESC';
     }
 

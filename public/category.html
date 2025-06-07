@@ -45,8 +45,14 @@
         <!-- Category Banner Section -->
         <section id="category-banner" class="category-banner">
             <div class="container">
-                <h1>Khám phá danh mục</h1>
-                <p>Chọn danh mục bạn quan tâm để khám phá sản phẩm và dịch vụ tuyệt vời</p>
+                <h1 id="category-title">Khám phá danh mục</h1>
+                <p id="category-description">Chọn danh mục bạn quan tâm để khám phá sản phẩm và dịch vụ tuyệt vời</p>
+                
+                <!-- Subcategory tabs (hidden by default, shown in detail view) -->
+                <div id="subcategory-tabs" class="subcategory-tabs" style="display: none;">
+                    <button class="filter-btn active" data-filter="all">Tất cả</button>
+                    <!-- Subcategory tabs will be loaded dynamically -->
+                </div>
             </div>
         </section>
 
@@ -60,6 +66,68 @@
                             <i class="fas fa-spinner fa-spin"></i>
                         </div>
                         <p>Đang tải danh mục...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Category Detail Section (Hidden by default) -->
+        <section id="category-detail-section" class="category-detail-section" style="display: none;">
+
+            <!-- Filter Section -->
+            <div id="filter-section" class="filter-section">
+                <div class="container">
+                    <div class="filter-controls">
+                        <div class="sort-group">
+                            <label>Sắp xếp theo:</label>
+                            <select id="sort-filter" class="sort-dropdown">
+                                <option value="newest">Mới nhất</option>
+                                <option value="oldest">Cũ nhất</option>
+                                <option value="rating">Đánh giá cao</option>
+                                <option value="views">Lượt xem nhiều</option>
+                            </select>
+                        </div>
+                        <div class="breadcrumb">
+                            <a href="category.html">Danh mục</a>
+                            <span> / </span>
+                            <span id="category-name-breadcrumb">Chi tiết</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Section -->
+            <div id="products-section" class="products-section">
+                <div class="container">
+                    <div class="products-grid" id="products-grid">
+                        <!-- Products will be loaded here dynamically -->
+                        <div class="loading-container">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <p>Đang tải sản phẩm...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="pagination-container" id="pagination-container">
+                        <!-- Pagination will be generated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Categories Section -->
+            <div id="related-categories" class="related-categories">
+                <div class="container">
+                    <h2>Danh mục liên quan</h2>
+                    <div class="related-categories-grid" id="related-categories-grid">
+                        <!-- Related categories will be loaded dynamically -->
+                        <div class="loading-container">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <p>Đang tải danh mục liên quan...</p>
+                        </div>
                     </div>
                 </div>
             </div>

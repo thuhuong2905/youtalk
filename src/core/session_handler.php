@@ -15,17 +15,13 @@ session_name('YOUTALK_SESSION');
 // Start or resume the session if not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
-    // DEBUG LOG: Log session status and ID after starting
-    error_log('[Session Handler] Session started. Path: ' . session_save_path() . ', Status: ' . session_status() . ', ID: ' . session_id());
-} else {
-    // DEBUG LOG: Log if session was already active
-    error_log('[Session Handler] Session already active. Path: ' . session_save_path() . ', Status: ' . session_status() . ', ID: ' . session_id());
+    // Only log session details in debug mode or first time
+    if (defined('DEBUG_SESSION') && ('DEBUG_SESSION')) {
+        error_log('[Session Handler] Session started. Path: ' . session_save_path() . ', Status: ' . session_status() . ', ID: ' . session_id());
+        error_log('[Session Handler] Current Session Data: ' . print_r($_SESSION, true));
+        error_log('[Session Handler] Current Cookie Data: ' . print_r($_COOKIE, true));
+    }
 }
-
-// DEBUG LOG: Log current session data
-error_log('[Session Handler] Current Session Data: ' . print_r($_SESSION, true));
-// DEBUG LOG: Log current cookie data
-error_log('[Session Handler] Current Cookie Data: ' . print_r($_COOKIE, true));
 
 
 /**
@@ -35,8 +31,9 @@ error_log('[Session Handler] Current Cookie Data: ' . print_r($_COOKIE, true));
 function regenerateSessionId() {
     if (session_status() == PHP_SESSION_ACTIVE) {
         session_regenerate_id(true);
-        // DEBUG LOG: Log after regenerating ID
-        error_log('[Session Handler] Session ID regenerated. New ID: ' . session_id());
+        if (defined('DEBUG_SESSION') && ('DEBUG_SESSION')) {
+            error_log('[Session Handler] Session ID regenerated. New ID: ' . session_id());
+        }
     }
 }
 
@@ -46,9 +43,11 @@ function regenerateSessionId() {
  * @return bool True if user is logged in, false otherwise.
  */
 function isUserLoggedIn() {
-    // DEBUG LOG: Check session variable for login status
+    // Only log login check in debug mode to reduce spam
     $isLoggedIn = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
-    error_log('[Session Handler] Checking login status. User ID set: ' . (isset($_SESSION['user_id']) ? 'Yes' : 'No') . ', Not empty: ' . (!empty($_SESSION['user_id']) ? 'Yes' : 'No') . ', Result: ' . ($isLoggedIn ? 'Logged In' : 'Not Logged In'));
+    if (defined('DEBUG_SESSION') && ('DEBUG_SESSION')) {
+        error_log('[Session Handler] Checking login status. User ID set: ' . (isset($_SESSION['user_id']) ? 'Yes' : 'No') . ', Not empty: ' . (!empty($_SESSION['user_id']) ? 'Yes' : 'No') . ', Result: ' . ($isLoggedIn ? 'Logged In' : 'Not Logged In'));
+    }
     return $isLoggedIn;
 }
 

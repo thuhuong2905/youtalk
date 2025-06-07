@@ -72,7 +72,7 @@ class Post {
     * @param int|null $productId Lọc theo ID sản phẩm
     * @param string|null $postType Lọc theo loại bài viết
     * @param string|null $search Tìm kiếm trong tiêu đề và nội dung
-    * @param string $sort Thứ tự sắp xếp (newest, oldest, popular, views)
+    * @param string $sort Thứ tự sắp xếp (newest, oldest, comments, views)
     * @param int $page Số trang cho phân trang
     * @param int $limit Số bài viết mỗi trang
     * @return array Phản hồi với trạng thái thành công và dữ liệu
@@ -126,9 +126,6 @@ class Post {
             switch ($sort) {
                 case 'oldest':
                     $orderBy = 'p.created_at ASC';
-                    break;
-                case 'popular': // Dựa trên điểm tổng hợp (views + comments)
-                    $orderBy = '(p.view_count * 0.7 + comment_count * 0.3) DESC, p.created_at DESC';
                     break;
                 case 'comments': // Sắp xếp theo số lượng bình luận
                     $orderBy = 'comment_count DESC, p.created_at DESC';

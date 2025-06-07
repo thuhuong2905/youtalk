@@ -76,11 +76,12 @@ async function fetchApi(endpoint, options = {}) {
                 console.error(`API request failed with status ${response.status}. Could not read response body:`, e);
             }
             
-            // Return error object instead of throwing
+            // Return error object instead of throwing for better error handling
             return {
                 success: false,
                 status: response.status,
-                message: `API request failed: ${response.status} ${response.statusText}`
+                message: `API request failed: ${response.status} ${response.statusText}`,
+                data: null
             };
         }
 

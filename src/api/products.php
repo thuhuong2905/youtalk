@@ -35,7 +35,7 @@ $conn = $db->getConnection();
 $product = new Product($conn);
 
 // Get the request data
-$requestData = getRequestData();
+$requestData = array_merge($_GET, getRequestData('GET'));
 
 // Process based on the requested action
 switch ($action) {
@@ -490,19 +490,19 @@ function handleGetProductsByCategoryNew($product, $requestData) {
         
         $offset = ($page - 1) * $limit;
         
-        // Map sort options
+        // Map sort options - Special handling for calculated fields
         $sortMapping = [
-            'newest' => ['created_at', 'DESC'],
-            'popular' => ['view_count', 'DESC'],
-            'rating_high' => ['rating', 'DESC'],
-            'rating_low' => ['rating', 'ASC'],
-            'price_high' => ['price', 'DESC'],
-            'price_low' => ['price', 'ASC'],
-            'name_asc' => ['name', 'ASC'],
-            'name_desc' => ['name', 'DESC']
+            'newest' => ['p.created_at', 'DESC'],
+            'oldest' => ['p.created_at', 'ASC'], 
+            'rating' => ['AVG(r.rating)', 'DESC'],
+            'views' => ['p.view_count', 'DESC'],
+            'price_high' => ['p.price', 'DESC'],
+            'price_low' => ['p.price', 'ASC'],
+            'name_asc' => ['p.name', 'ASC'],
+            'name_desc' => ['p.name', 'DESC']
         ];
         
-        $sortBy = 'created_at';
+        $sortBy = 'p.created_at';
         $sortOrder = 'DESC';
         
         if (isset($sortMapping[$sort])) {
@@ -543,20 +543,38 @@ function handleGetProductsByCategoryNew($product, $requestData) {
         $totalCount = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
         
         // Get products with pagination
-        $query = "
-            SELECT 
-                p.id, p.name, p.description, p.price, p.images, p.view_count, p.created_at,
-                c.name as category_name,
-                COALESCE(AVG(r.rating), 0) as rating,
-                COUNT(r.id) as review_count
-            FROM products p
-            LEFT JOIN categories c ON p.category_id = c.id
-            LEFT JOIN reviews r ON p.id = r.product_id AND r.status = 'active'
-            WHERE $whereClause
-            GROUP BY p.id
-            ORDER BY p.$sortBy $sortOrder
-            LIMIT ? OFFSET ?
-        ";
+        // Special handling for rating sort which uses aggregate function
+        if ($sort === 'rating') {
+            $query = "
+                SELECT 
+                    p.id, p.name, p.description, p.price, p.images, p.view_count, p.created_at,
+                    c.name as category_name,
+                    COALESCE(AVG(r.rating), 0) as rating,
+                    COUNT(r.id) as review_count
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN reviews r ON p.id = r.product_id AND r.status = 'active'
+                WHERE $whereClause
+                GROUP BY p.id
+                ORDER BY rating $sortOrder, p.created_at DESC
+                LIMIT ? OFFSET ?
+            ";
+        } else {
+            $query = "
+                SELECT 
+                    p.id, p.name, p.description, p.price, p.images, p.view_count, p.created_at,
+                    c.name as category_name,
+                    COALESCE(AVG(r.rating), 0) as rating,
+                    COUNT(r.id) as review_count
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN reviews r ON p.id = r.product_id AND r.status = 'active'
+                WHERE $whereClause
+                GROUP BY p.id
+                ORDER BY $sortBy $sortOrder
+                LIMIT ? OFFSET ?
+            ";
+        }
         
         $stmt = $product->conn->prepare($query);
         foreach ($params as $index => $param) {
@@ -582,11 +600,11 @@ function handleGetProductsByCategoryNew($product, $requestData) {
         }
         
         sendResponse(true, 'Products retrieved successfully', [
-            'data' => $products,
+            'products' => $products,
             'total' => (int)$totalCount,
-            'page' => $page,
-            'limit' => $limit,
-            'total_pages' => ceil($totalCount / $limit)
+            'current_page' => $page,
+            'total_pages' => ceil($totalCount / $limit),
+            'limit' => $limit
         ]);
         
     } catch (PDOException $e) {
