@@ -1172,6 +1172,17 @@
     font-size: 1.1em;
 }
 
+/* Centered message for logged out state */
+.profile-logged-out-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  gap: 18px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     :root {

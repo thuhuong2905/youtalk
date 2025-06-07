@@ -2,7 +2,7 @@
 // Handles login and registration form interactions
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Initialize auth page
+    console.log('YouTalk Auth JS Loaded');
     initAuthPage();
 });
 
@@ -133,7 +133,7 @@ function setupFormValidation() {
             
             // Validate username/email
             if (!emailInput.value.trim()) {
-                showFormError(errorContainer, "Vui lòng nhập tên đăng nhập hoặc email");
+                showError("Vui lòng nhập tên đăng nhập hoặc email");
                 emailInput.focus();
                 return;
             }
@@ -142,7 +142,7 @@ function setupFormValidation() {
             if (value.includes("@")) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(value)) {
-                    showFormError(errorContainer, "Vui lòng nhập email hợp lệ");
+                    showError("Vui lòng nhập email hợp lệ");
                     emailInput.focus();
                     return;
                 }
@@ -150,7 +150,7 @@ function setupFormValidation() {
             
             // Validate password
             if (!passwordInput.value.trim()) {
-                showFormError(errorContainer, "Vui lòng nhập mật khẩu");
+                showError("Vui lòng nhập mật khẩu");
                 passwordInput.focus();
                 return;
             }
@@ -183,65 +183,65 @@ function setupFormValidation() {
 
             // Kiểm tra họ và tên
             if (!fullnameInput.value.trim()) {
-                showFormError(errorContainer, "Vui lòng nhập họ và tên");
+                showError("Vui lòng nhập họ và tên");
                 fullnameInput.focus();
                 return;
             }
 
             // Kiểm tra tên đăng nhập
             if (!usernameInput.value.trim()) {
-                showFormError(errorContainer, "Vui lòng nhập tên đăng nhập");
+                showError("Vui lòng nhập tên đăng nhập");
                 usernameInput.focus();
                 return;
             }
             const usernameRegex = /^[a-zA-Z0-9_]+$/;
             if (!usernameRegex.test(usernameInput.value.trim())) {
-                showFormError(errorContainer, "Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới");
+                showError("Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới");
                 usernameInput.focus();
                 return;
             }
 
             // Kiểm tra email
             if (!emailInput.value.trim()) {
-                showFormError(errorContainer, "Vui lòng nhập email");
+                showError("Vui lòng nhập email");
                 emailInput.focus();
                 return;
             }
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(emailInput.value.trim())) {
-                showFormError(errorContainer, "Vui lòng nhập email hợp lệ");
+                showError("Vui lòng nhập email hợp lệ");
                 emailInput.focus();
                 return;
             }
 
             // Kiểm tra mật khẩu
             if (!passwordInput.value.trim()) {
-                showFormError(errorContainer, "Vui lòng nhập mật khẩu");
+                showError("Vui lòng nhập mật khẩu");
                 passwordInput.focus();
                 return;
             }
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             if (!passwordRegex.test(passwordInput.value.trim())) {
-                showFormError(errorContainer, "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số");
+                showError("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số");
                 passwordInput.focus();
                 return;
             }
 
             // Kiểm tra xác nhận mật khẩu
             if (!confirmPasswordInput.value.trim()) {
-                showFormError(errorContainer, "Vui lòng xác nhận mật khẩu");
+                showError("Vui lòng xác nhận mật khẩu");
                 confirmPasswordInput.focus();
                 return;
             }
             if (passwordInput.value.trim() !== confirmPasswordInput.value.trim()) {
-                showFormError(errorContainer, "Mật khẩu xác nhận không khớp");
+                showError("Mật khẩu xác nhận không khớp");
                 confirmPasswordInput.focus();
                 return;
             }
 
             // Kiểm tra đồng ý điều khoản
             if (!termsCheckbox.checked) {
-                showFormError(errorContainer, "Vui lòng đồng ý với Điều khoản sử dụng và Chính sách quyền riêng tư");
+                showError("Vui lòng đồng ý với Điều khoản sử dụng và Chính sách quyền riêng tư");
                 termsCheckbox.focus();
                 return;
             }
@@ -253,23 +253,6 @@ function setupFormValidation() {
 }
 
 /**
- * Show error message in form error container
- * 
- * @param {HTMLElement} container - The error container element
- * @param {string} message - The error message to display
- */
-function showFormError(container, message) {
-    // Use toast notification instead of form container
-    showError(message);
-    
-    // Still update container for fallback
-    if (container) {
-        container.textContent = message;
-        container.style.display = "block";
-    }
-}
-
-/**
  * Handle login form submission
  */
 async function handleLogin() {
@@ -277,22 +260,24 @@ async function handleLogin() {
     const emailInput = document.getElementById("login-email");
     const passwordInput = document.getElementById("login-password");
     const rememberMeCheckbox = document.getElementById("remember-me");
-    const errorContainer = document.querySelector("#login-form .form-error-container");
     
     // Get input values
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
     const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
     
+    // Get submit button
+    const submitButton = document.querySelector("#login-form .auth-submit-btn");
+    const originalButtonText = submitButton ? submitButton.textContent : "Đăng nhập";
+    
     try {
         // Disable form submission
-        const submitButton = document.querySelector("#login-form .auth-submit-btn");
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = "Đăng nhập thành công!";
+            submitButton.textContent = "Đang đăng nhập...";
         }
         
-        // Make API request - Corrected endpoint path (removed /src/api prefix)
+        // Make API request
         const response = await fetchApi("/auth.php?action=login", {
             method: "POST",
             body: { email, password, remember_me: rememberMe }
@@ -300,6 +285,12 @@ async function handleLogin() {
 
         // Handle response
         if (response.success) {
+            // Update button text for success
+            if (submitButton) {
+                submitButton.textContent = "Đăng nhập thành công!";
+            }
+            
+            // Show success notification
             showSuccess('Đăng nhập thành công! Đang chuyển hướng...');
             
             // Get redirect URL from query parameter or default to homepage
@@ -311,26 +302,27 @@ async function handleLogin() {
                 window.location.href = redirectUrl;
             }, 1000);
         } else {
-            // Show error message
-            showError(response.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.");
+            // Show error notification
+            const errorMessage = response.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.";
+            showError(errorMessage);
+            
             // Re-enable form submission
             if (submitButton) {
                 submitButton.disabled = false;
-                submitButton.textContent = "Đăng nhập";
+                submitButton.textContent = originalButtonText;
             }
         }
 
     } catch (error) {
         console.error("Login error:", error);
         
-        // Show error message
-        showError("Tên đăng nhập/email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.");
+        // Show error notification
+        showError("Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
         
         // Re-enable form submission
-        const submitButton = document.querySelector("#login-form .auth-submit-btn");
         if (submitButton) {
             submitButton.disabled = false;
-            submitButton.textContent = "Đăng nhập";
+            submitButton.textContent = originalButtonText;
         }
     }
 }
@@ -344,7 +336,6 @@ async function handleRegister() {
     const fullnameInput = document.getElementById("register-fullname");
     const emailInput = document.getElementById("register-email");
     const passwordInput = document.getElementById("register-password");
-    const errorContainer = document.querySelector("#register-form .form-error-container");
     
     // Get input values
     const username = usernameInput.value.trim();
@@ -352,15 +343,17 @@ async function handleRegister() {
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
     
+    // Get submit button
+    const submitButton = document.querySelector("#register-form .auth-submit-btn");
+    
     try {
         // Disable form submission
-        const submitButton = document.querySelector("#register-form .auth-submit-btn");
         if (submitButton) {
             submitButton.disabled = true;
             submitButton.textContent = "Đang đăng ký...";
         }
         
-        // Make API request - Corrected endpoint path (removed /src/api prefix)
+        // Make API request
         const response = await fetchApi("/auth.php?action=register", {
             method: "POST",
             body: {
@@ -373,6 +366,7 @@ async function handleRegister() {
 
         // Handle response
         if (response.success) {
+            // Show success notification
             showSuccess('Đăng ký thành công! Đang chuyển hướng...');
             
             // Get redirect URL from query parameter or default to homepage
@@ -384,7 +378,7 @@ async function handleRegister() {
                 window.location.href = redirectUrl;
             }, 1000);
         } else {
-            // Xử lý lỗi 409: tên đăng nhập hoặc email đã tồn tại
+            // Handle specific error cases
             if (response.status === 409 && response.message) {
                 if (response.message.includes('Username')) {
                     showError("Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.");
@@ -394,7 +388,7 @@ async function handleRegister() {
                     showError(response.message);
                 }
             } else {
-                // Show error message mặc định
+                // Show generic error message
                 showError(response.message || "Đăng ký thất bại. Vui lòng thử lại.");
             }
 
@@ -407,11 +401,10 @@ async function handleRegister() {
     } catch (error) {
         console.error("Registration error:", error);
         
-        // Show error message
+        // Show error notification
         showError("Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại sau.");
         
         // Re-enable form submission
-        const submitButton = document.querySelector("#register-form .auth-submit-btn");
         if (submitButton) {
             submitButton.disabled = false;
             submitButton.textContent = "Đăng ký";
@@ -491,28 +484,28 @@ function setupForgotPasswordModal() {
             
             // Basic validation
             if (!email || !newPassword || !confirmPassword) {
-                showError('Vui lòng điền đầy đủ thông tin.');
+                if (window.showError) window.showError('Vui lòng điền đầy đủ thông tin.');
                 return;
             }
             
             if (!/^\S+@\S+\.\S+$/.test(email)) {
-                showError('Email không hợp lệ.');
+                if (window.showError) window.showError('Email không hợp lệ.');
                 return;
             }
             
             if (newPassword !== confirmPassword) {
-                showError('Mật khẩu mới và xác nhận mật khẩu không khớp.');
+                if (window.showError) window.showError('Mật khẩu mới và xác nhận mật khẩu không khớp.');
                 return;
             }
             
             if (newPassword.length < 8) {
-                showError('Mật khẩu mới phải có ít nhất 8 ký tự.');
+                if (window.showError) window.showError('Mật khẩu mới phải có ít nhất 8 ký tự.');
                 return;
             }
             
             // Enhanced password validation
             if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-                showError('Mật khẩu mới phải có chữ hoa, chữ thường và số.');
+                if (window.showError) window.showError('Mật khẩu mới phải có chữ hoa, chữ thường và số.');
                 return;
             }
             
@@ -532,7 +525,9 @@ function setupForgotPasswordModal() {
                 const result = await response.json();
                 
                 if (result && result.success) {
-                    showSuccess('Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.');
+                    if (window.showSuccess) {
+                        window.showSuccess('Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.');
+                    }
                     setTimeout(() => {
                         forgotPasswordModal.style.display = 'none';
                         document.body.style.overflow = ''; // Restore scrolling
@@ -540,11 +535,11 @@ function setupForgotPasswordModal() {
                         clearMessages('forgot-password');
                     }, 2000);
                 } else {
-                    showError(result.message || 'Không thể đặt lại mật khẩu.');
+                    if (window.showError) window.showError(result.message || 'Không thể đặt lại mật khẩu.');
                 }
             } catch (error) {
                 console.error('Error resetting password:', error);
-                showError('Đã xảy ra lỗi khi đặt lại mật khẩu.');
+                if (window.showError) window.showError('Đã xảy ra lỗi khi đặt lại mật khẩu.');
             }
         });
     }
@@ -770,21 +765,5 @@ function clearMessages(prefix) {
     const successDiv = document.getElementById(`${prefix}-success`);
     if (errorDiv) errorDiv.textContent = '';
     if (successDiv) successDiv.textContent = '';
-}
-
-/**
- * Helper function to show error message
- */
-function showError(prefix, message) {
-    const errorDiv = document.getElementById(`${prefix}-error`);
-    if (errorDiv) errorDiv.textContent = message;
-}
-
-/**
- * Helper function to show success message
- */
-function showSuccess(prefix, message) {
-    const successDiv = document.getElementById(`${prefix}-success`);
-    if (successDiv) successDiv.textContent = message;
 }
 

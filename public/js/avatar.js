@@ -88,6 +88,137 @@ class Avatar {
     const fallback = this.createFallback(fullName);
     parentElement.replaceChild(fallback, imgElement);
   }
+
+  // Helper function to truncate text for product names
+  static _truncateText(text, maxLength = 30) {
+    if (!text || typeof text !== 'string') return 'Product';
+    text = text.trim();
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
+  }
+
+  // Extract first image from product images JSON/text
+  static _getFirstProductImage(images) {
+    if (!images) return null;
+    
+    try {
+      // If it's a JSON string, parse it
+      if (typeof images === 'string') {
+        if (images.startsWith('[') || images.startsWith('{')) {
+          const parsed = JSON.parse(images);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed[0];
+          }
+          if (parsed.main) return parsed.main;
+        } else {
+          // If it's a simple string path
+          return images.trim();
+        }
+      }
+      // If it's already an array
+      if (Array.isArray(images) && images.length > 0) {
+        return images[0];
+      }
+    } catch (e) {
+      console.warn('Error parsing product images:', e);
+    }
+    return null;
+  }
+
+  // Tạo product fallback DOM element (rectangular)
+  static createProductFallback(productName, size = '100px') {
+    const text = this._truncateText(productName || 'Product');
+    const initial = this._getInitial(productName);
+    const bgColor = this._getBackgroundColor(initial);
+
+    const fallback = document.createElement('div');
+    fallback.className = 'product-fallback';
+    fallback.style.cssText = `
+      width: ${size}; 
+      height: ${size}; 
+      border-radius: 8px; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      background-color: ${bgColor}; 
+      color: white; 
+      font-weight: 600; 
+      font-size: 14px;
+      line-height: 1.2; 
+      text-align: center; 
+      box-sizing: border-box;
+      padding: 8px;
+      word-wrap: break-word;
+      overflow: hidden;
+    `;
+    fallback.textContent = text;
+    return fallback;
+  }
+
+  // Tạo HTML string cho product fallback
+  static createProductFallbackHTML(productName, size = '100px') {
+    const text = this._truncateText(productName || 'Product');
+    const initial = this._getInitial(productName);
+    const bgColor = this._getBackgroundColor(initial);
+
+    return `
+      <div class="product-fallback" style="
+        width: ${size}; 
+        height: ${size}; 
+        border-radius: 8px; 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        background-color: ${bgColor}; 
+        color: white; 
+        font-weight: 600; 
+        font-size: 14px;
+        line-height: 1.2; 
+        text-align: center; 
+        box-sizing: border-box;
+        padding: 8px;
+        word-wrap: break-word;
+        overflow: hidden;
+      ">
+        ${text}
+      </div>
+    `;
+  }
+
+  // Xử lý lỗi ảnh sản phẩm với fallback 
+  static handleProductImageError(imgElement, productName, size = '100px') {
+    if (!imgElement) {
+      console.error("Cannot handle product image error: Invalid image element.");
+      return;
+    }
+
+    try {
+      // Ẩn ảnh lỗi
+      imgElement.style.display = 'none';
+      
+      // Tìm container để thêm fallback
+      const container = imgElement.parentElement;
+      if (!container) {
+        console.error("Cannot find container for product image fallback.");
+        return;
+      }
+
+      // Tìm placeholder container hoặc tạo mới
+      let placeholder = container.querySelector('.product-fallback-placeholder');
+      if (!placeholder) {
+        placeholder = document.createElement('div');
+        placeholder.className = 'product-fallback-placeholder';
+        placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;';
+        container.appendChild(placeholder);
+      }
+
+      // Hiển thị placeholder và thêm fallback
+      placeholder.style.display = 'flex';
+      placeholder.innerHTML = this.createProductFallbackHTML(productName, size);
+    } catch (error) {
+      console.error("Error handling product image error:", error);
+    }
+  }
 }
 
 // Export cho môi trường ES6 modules (nếu cần)

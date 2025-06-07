@@ -139,6 +139,104 @@ function normalizeCategories($categories) {
 
 // Xử lý các action khác nhau
 switch ($action) {
+    case 'get_all':
+        // Lấy tất cả danh mục (root và subcategories) để hỗ trợ cấu trúc mới
+        try {
+            $query = "SELECT 
+                c.id,
+                c.name,
+                c.description,
+                c.image,
+                c.status,
+                c.parent_id,
+                c.icon,
+                COALESCE(product_count.count, 0) as product_count
+            FROM categories c
+            LEFT JOIN (
+                SELECT category_id, COUNT(*) as count 
+                FROM products 
+                WHERE status = 'active' 
+                GROUP BY category_id
+            ) product_count ON c.id = product_count.category_id
+            WHERE c.status = 'active'
+            ORDER BY c.parent_id ASC, c.name ASC";
+            
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+            $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Normalize data
+            foreach ($categories as &$category) {
+                $category['id'] = (int)$category['id'];
+                $category['parent_id'] = $category['parent_id'] ? (int)$category['parent_id'] : null;
+                $category['product_count'] = (int)$category['product_count'];
+                $category['icon'] = $category['icon'] ?: 'fas fa-folder';
+            }
+            
+            sendResponse(true, 'Lấy tất cả danh mục thành công', $categories);
+            
+        } catch (PDOException $e) {
+            sendResponse(false, 'Lỗi khi lấy danh mục: ' . $e->getMessage());
+        }
+        break;
+
+    case 'get_category':
+        // Lấy thông tin chi tiết của một danh mục
+        $category_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        
+        if (!$category_id) {
+            sendResponse(false, 'ID danh mục là bắt buộc');
+            break;
+        }
+        
+        try {
+            $query = "SELECT 
+                c.id,
+                c.name,
+                c.description,
+                c.image,
+                c.status,
+                c.parent_id,
+                c.icon,
+                COALESCE(product_count.count, 0) as product_count,
+                COALESCE(subcategory_count.count, 0) as subcategory_count
+            FROM categories c
+            LEFT JOIN (
+                SELECT category_id, COUNT(*) as count 
+                FROM products 
+                WHERE status = 'active' 
+                GROUP BY category_id
+            ) product_count ON c.id = product_count.category_id
+            LEFT JOIN (
+                SELECT parent_id, COUNT(*) as count 
+                FROM categories 
+                WHERE status = 'active' AND parent_id IS NOT NULL
+                GROUP BY parent_id
+            ) subcategory_count ON c.id = subcategory_count.parent_id
+            WHERE c.id = ? AND c.status = 'active'";
+            
+            $stmt = $conn->prepare($query);
+            $stmt->execute([$category_id]);
+            $category = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($category) {
+                // Normalize data
+                $category['id'] = (int)$category['id'];
+                $category['parent_id'] = $category['parent_id'] ? (int)$category['parent_id'] : null;
+                $category['product_count'] = (int)$category['product_count'];
+                $category['subcategory_count'] = (int)$category['subcategory_count'];
+                $category['icon'] = $category['icon'] ?: 'fas fa-folder';
+                
+                sendResponse(true, 'Lấy thông tin danh mục thành công', $category);
+            } else {
+                sendResponse(false, 'Không tìm thấy danh mục', null, 404);
+            }
+            
+        } catch (PDOException $e) {
+            sendResponse(false, 'Lỗi khi lấy thông tin danh mục: ' . $e->getMessage());
+        }
+        break;
+
     case 'list':
         // Lấy tham số từ request
         $parent_id = isset($_GET['parent_id']) ? intval($_GET['parent_id']) : null;

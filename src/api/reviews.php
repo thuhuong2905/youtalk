@@ -126,7 +126,8 @@ function handleGetFeaturedReviews($review, $requestData) {
         $query = "WITH RankedReviews AS (
                     SELECT 
                         r.*, 
-                        p.name AS product_name, 
+                        p.name AS product_name,
+                        p.images AS product_images, 
                         u.full_name,
                         ROW_NUMBER() OVER(PARTITION BY r.product_id ORDER BY r.helpful_count DESC, r.created_at DESC) as rn
                     FROM reviews r

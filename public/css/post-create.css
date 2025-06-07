@@ -74,6 +74,36 @@
     line-height: var(--leading-normal);
 }
 
+/* Form validation states */
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.form-group.error label {
+    color: #dc3545;
+}
+
+.form-group.success input,
+.form-group.success select,
+.form-group.success textarea {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: var(--text-xs);
+    margin-top: 5px;
+    display: none;
+}
+
+.error-message.show {
+    display: block;
+}
+
 /* Radio Group */
 .radio-group {
     display: flex;
@@ -422,18 +452,7 @@
     border-top: 1px solid var(--color-border);
 }
 
-.preview-button {
-    background-color: #27ae60;
-    border: none;
-    border-radius: var(--border-radius);
-    color: white;
-    cursor: pointer;
-    font-size: var(--text-base);
-    padding: 12px 24px;
-    transition: all 0.3s ease;
-    font-family: var(--font-primary);
-    font-weight: var(--font-medium);
-}
+
 
 .submit-button {
     background-color: var(--color-primary);
@@ -448,11 +467,7 @@
     font-weight: var(--font-medium);
 }
 
-.preview-button:hover {
-    background-color: #229954;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+
 
 .submit-button:hover {
     background-color: var(--color-secondary);
@@ -460,30 +475,9 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Preview Container */
-#post-preview-container {
-    background-color: var(--color-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    margin-top: 20px;
-    padding: 30px;
-    border: 1px solid var(--color-border);
-}
 
-.preview-content {
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius);
-    margin: 20px 0;
-    padding: 20px;
-    background-color: var(--color-background-alt);
-}
 
-.preview-content h3 {
-    color: var(--color-primary);
-    font-size: var(--text-xl);
-    font-weight: var(--font-semibold);
-    margin-bottom: 15px;
-}
+
 
 /* Post Guidelines */
 .post-guidelines {

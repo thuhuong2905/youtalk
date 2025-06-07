@@ -145,7 +145,7 @@ function renderTopics(topics, container) {
         topicCard.className = 'topic-card';
         topicCard.innerHTML = `
                 <div class="topic-content">
-                    <h3><a href="topic.html?id=${topic.id}">${topic.title}</a></h3>
+                    <h3><a href="post-detail.html?id=${topic.id}">${topic.title}</a></h3>
                     <div class="topic-meta">
                         <span class="topic-category">${getPostTypeLabel(topic.post_type)}</span>
                         <span class="topic-views"><i class="fas fa-eye"></i> ${formatCount(topic.view_count)}</span>
@@ -159,7 +159,7 @@ function renderTopics(topics, container) {
                         <div class="avatar-container" id="avatar-${topic.id}"></div>
                         <span>${getDisplayName(topic)}</span>
                     </div>
-                    <a href="topic.html?id=${topic.id}" class="topic-link">Xem chi tiết</a>
+                    <a href="post-detail.html?id=${topic.id}" class="topic-link">Xem chi tiết</a>
                 </div>
             `;
             

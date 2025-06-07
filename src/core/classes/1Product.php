@@ -5,11 +5,9 @@ require_once __DIR__ . '/../../core/db_connect.php';
 
 class Product {
     private $db;
-    public $conn; // Make conn public for API access
     
-    public function __construct($dbConnection = null) {
-        $this->conn = $dbConnection ?: getDbConnection();
-        $this->db = $this->conn; // Keep backward compatibility
+    public function __construct() {
+        $this->db = getDbConnection();
     }
     
     /**

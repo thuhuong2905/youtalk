@@ -144,15 +144,33 @@ async function loadFeaturedReviews() {
         // Clear loading state
         reviewsGrid.innerHTML = "";
 
-        // Render reviews
+        // Render reviews with product image support
         reviews.forEach((review) => {
             const reviewCard = document.createElement("div");
             reviewCard.className = "review-card";
 
-            // Structure based on the provided image
+            // Extract first image from product images
+            const productImage = Avatar._getFirstProductImage(review.product_images);
+            const hasImage = productImage && productImage.trim();
+
+            // Structure with product image display
             reviewCard.innerHTML = `
-                <div class="review-card-top">
-                    <h3 class="review-product-name-prominent">${review.product_name || 'Sản phẩm'}</h3>
+                <div class="review-card-top ${hasImage ? 'has-image' : ''}">
+                    <div class="product-image-container">
+                        ${hasImage ? 
+                            `<img src="${productImage}" 
+                                 alt="${review.product_name || 'Sản phẩm'}" 
+                                 class="review-product-image"
+                                 onerror="Avatar.handleProductImageError(this, '${review.product_name || 'Sản phẩm'}', '120px')"
+                                 style="display: block">
+                             <div class="product-fallback-placeholder" style="display: none;"></div>` 
+                            :
+                            `<img style="display: none">
+                             <div class="product-fallback-placeholder" style="display: flex;">
+                                 ${Avatar.createProductFallbackHTML(review.product_name || 'Sản phẩm', '120px')}
+                             </div>`
+                        }
+                    </div>
                 </div>
                 <div class="review-card-bottom">
                     <div class="review-header">
@@ -162,7 +180,7 @@ async function loadFeaturedReviews() {
                         </div>
                     </div>
                     <div class="review-content">
-                        <p>${truncateText(review.comment, 120)}</p> <!-- Slightly shorter truncation -->
+                        <p>${truncateText(review.comment, 120)}</p>
                     </div>
                     <div class="review-footer">
                         <div class="reviewer">
@@ -418,15 +436,60 @@ function getCategoryIcon(categoryName) {
     if (!categoryName) return "fas fa-folder"; // Default icon
 
     const name = categoryName.toLowerCase().trim();
-    if (name.includes("công nghệ")) return "fas fa-laptop-code"; // More specific tech icon
-    if (name.includes("thời trang")) return "fas fa-tshirt";
-    if (name.includes("du lịch")) return "fas fa-map-marked-alt"; // More specific travel icon
-    if (name.includes("ẩm thực")) return "fas fa-utensils";
-    if (name.includes("giáo dục")) return "fas fa-graduation-cap";
-    if (name.includes("sức khỏe")) return "fas fa-heartbeat";
-    if (name.includes("giải trí")) return "fas fa-film"; // Example entertainment icon
-    if (name.includes("nội thất")) return "fas fa-couch"; // Example furniture icon
-    if (name.includes("làm đẹp")) return "fas fa-spa"; // Example beauty icon
+    
+    // Technology/Tech
+    if (name.includes("công nghệ") || name.includes("technology") || name.includes("tech")) {
+        return "fas fa-laptop-code";
+    }
+    // Fashion
+    if (name.includes("thời trang") || name.includes("fashion")) {
+        return "fas fa-tshirt";
+    }
+    // Travel
+    if (name.includes("du lịch") || name.includes("travel")) {
+        return "fas fa-map-marked-alt";
+    }
+    // Food
+    if (name.includes("ẩm thực") || name.includes("đồ ăn") || name.includes("food")) {
+        return "fas fa-utensils";
+    }
+    // Education
+    if (name.includes("giáo dục") || name.includes("education")) {
+        return "fas fa-graduation-cap";
+    }
+    // Health
+    if (name.includes("sức khỏe") || name.includes("health")) {
+        return "fas fa-heartbeat";
+    }
+    // Entertainment
+    if (name.includes("giải trí") || name.includes("entertainment")) {
+        return "fas fa-film";
+    }
+    // Furniture
+    if (name.includes("nội thất") || name.includes("furniture")) {
+        return "fas fa-couch";
+    }
+    // Beauty
+    if (name.includes("làm đẹp") || name.includes("beauty")) {
+        return "fas fa-spa";
+    }
+    // Sports
+    if (name.includes("thể thao") || name.includes("sports")) {
+        return "fas fa-dumbbell";
+    }
+    // Automotive
+    if (name.includes("ô tô") || name.includes("automotive") || name.includes("xe")) {
+        return "fas fa-car";
+    }
+    // Books
+    if (name.includes("sách") || name.includes("books")) {
+        return "fas fa-book";
+    }
+    // Music
+    if (name.includes("âm nhạc") || name.includes("music")) {
+        return "fas fa-music";
+    }
+    
     return "fas fa-tag"; // Default fallback icon
 }
 

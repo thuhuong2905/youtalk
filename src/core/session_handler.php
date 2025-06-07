@@ -1,8 +1,7 @@
 <?php
 // Session Handler - Secure session management
 
-// Force session save path (based on user's phpinfo)
-// CORRECTED SYNTAX: Use single quotes for the path string
+// Force session save path for Windows XAMPP
 ini_set('session.save_path', 'C:/xampp/tmp');
 
 // Set secure session parameters

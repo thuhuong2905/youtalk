@@ -7,32 +7,37 @@
  * @param {number} duration - Thời gian hiển thị (ms), mặc định 4000ms
  */
 function showNotification(message, type = 'info', duration = 4000) {
-    // Tạo hoặc cập nhật notification
-    let notification = document.getElementById('app-notification');
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'app-notification';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            font-size: 14px;
-            z-index: 10000;
-            min-width: 300px;
-            max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateX(100%);
-            word-wrap: break-word;
-            line-height: 1.5;
-        `;
-        document.body.appendChild(notification);
+    console.log('showNotification được gọi:', { message, type, duration });
+    
+    // Xóa notification cũ nếu có
+    const oldNotification = document.getElementById('app-notification');
+    if (oldNotification) {
+        oldNotification.remove();
     }
+    
+    // Tạo notification mới
+    const notification = document.createElement('div');
+    notification.id = 'app-notification';
+    
+    // Đặt style trực tiếp để đảm bảo hiển thị
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.padding = '16px 24px';
+    notification.style.borderRadius = '8px';
+    notification.style.color = 'white';
+    notification.style.fontWeight = '500';
+    notification.style.fontSize = '14px';
+    notification.style.zIndex = '99999';
+    notification.style.minWidth = '300px';
+    notification.style.maxWidth = '500px';
+    notification.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
+    notification.style.transition = 'all 0.3s ease';
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateX(100%)';
+    notification.style.wordWrap = 'break-word';
+    notification.style.lineHeight = '1.5';
+    notification.style.fontFamily = 'Arial, sans-serif';
     
     // Đặt nội dung và kiểu dựa trên loại thông báo
     notification.textContent = message;
@@ -53,19 +58,32 @@ function showNotification(message, type = 'info', duration = 4000) {
             notification.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
     }
     
+    // Thêm vào body
+    document.body.appendChild(notification);
+    console.log('Notification added to DOM:', notification);
+    
+    // Force reflow để đảm bảo element được render
+    notification.offsetHeight;
+    
     // Hiển thị notification với animation
-    notification.style.opacity = '1';
-    notification.style.transform = 'translateX(0)';
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+        console.log('Notification should be visible now');
+    }, 50);
     
     // Ẩn sau khoảng thời gian được chỉ định
     setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            if (notification && notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
+        if (notification && notification.parentNode) {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification && notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                    console.log('Notification removed from DOM');
+                }
+            }, 300);
+        }
     }, duration);
 }
 
@@ -84,7 +102,59 @@ function showSuccess(message, duration = 4000) {
  * @param {number} duration - Thời gian hiển thị (ms)
  */
 function showError(message, duration = 4000) {
-    showNotification(message, 'error', duration);
+    console.log('showError được gọi với message:', message);
+    
+    // Thử showNotification trước
+    try {
+        showNotification(message, 'error', duration);
+    } catch (error) {
+        console.error('Lỗi khi hiển thị notification:', error);
+        // Fallback: tạo thông báo đơn giản
+        showSimpleErrorNotification(message, duration);
+    }
+}
+
+/**
+ * Fallback notification đơn giản đảm bảo luôn hiển thị
+ */
+function showSimpleErrorNotification(message, duration = 4000) {
+    console.log('Sử dụng fallback notification cho:', message);
+    
+    // Xóa notification cũ
+    const oldNotif = document.getElementById('simple-error-notification');
+    if (oldNotif) oldNotif.remove();
+    
+    // Tạo notification đơn giản
+    const notif = document.createElement('div');
+    notif.id = 'simple-error-notification';
+    notif.innerHTML = `
+        <div style="
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            background: #dc2626 !important;
+            color: white !important;
+            padding: 15px 20px !important;
+            border-radius: 5px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+            z-index: 999999 !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 14px !important;
+            max-width: 400px !important;
+            border: 2px solid #b91c1c !important;
+        ">
+            ${message}
+        </div>
+    `;
+    
+    document.body.appendChild(notif);
+    
+    // Xóa sau thời gian quy định
+    setTimeout(() => {
+        if (notif && notif.parentNode) {
+            notif.remove();
+        }
+    }, duration);
 }
 
 /**

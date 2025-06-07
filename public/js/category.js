@@ -1,252 +1,208 @@
-// JavaScript cho chức năng trang danh mục
-// Xử lý tải sản phẩm theo danh mục và lọc
+/**
+ * Category Page - Grid Layout
+ * Displays categories in a grid format similar to home page
+ */
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('YouTalk Category JS Loaded');
-    
-    // Lấy category ID từ URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryId = urlParams.get('id');
-    
-    if (categoryId) {
-        // Tải thông tin danh mục
-        loadCategoryDetails(categoryId);
-        
-        // Tải sản phẩm cho danh mục này
-        loadCategoryProducts(categoryId);
-        
-        // Tải thảo luận cho danh mục này
-        loadCategoryDiscussions(categoryId);
-    } else {
-        // Không có category ID, hiển thị lỗi
-        document.getElementById('category-title').textContent = 'Danh mục không hợp lệ';
-        const productList = document.getElementById('products-grid');
-        if (productList) productList.innerHTML = '<p>Vui lòng chọn một danh mục hợp lệ.</p>';
-    }
-    
-    // Thiết lập sự kiện cho filter và sort
-    setupFilterHandlers(categoryId);
+document.addEventListener("DOMContentLoaded", function() {
+    initCategoryPage();
 });
 
-// Tải thông tin danh mục
-async function loadCategoryDetails(categoryId) {
+/**
+ * Initialize the category page
+ */
+async function initCategoryPage() {
     try {
-        const response = await fetchApi('/src/api/products.php?action=get_category', {
-            method: 'POST',
-            body: { id: categoryId }
-        });
-        
-        if (response && response.success) {
-            // Cập nhật tiêu đề trang
-            const categoryName = response.category?.name || response.data?.category?.name || response.name || 'Danh mục';
-            document.getElementById('category-title').textContent = categoryName;
-            document.title = `${categoryName} - YouTalk`;
-            
-            // Cập nhật breadcrumb nếu có
-            const breadcrumbCategory = document.getElementById('breadcrumb-category');
-            if (breadcrumbCategory) {
-                breadcrumbCategory.textContent = categoryName;
-            }
-            // Cập nhật mô tả nếu có
-            const categoryDesc = response.category?.description || response.data?.category?.description || '';
-            document.getElementById('category-description').textContent = categoryDesc;
-        } else {
-            console.error('Không tải được thông tin danh mục:', response?.message || 'Unknown error');
-            document.getElementById('category-title').textContent = 'Không tìm thấy danh mục';
-        }
+        await loadCategories();
     } catch (error) {
-        console.error('Lỗi khi tải thông tin danh mục:', error);
-        document.getElementById('category-title').textContent = 'Lỗi tải danh mục';
+        console.error("Error initializing category page:", error);
+        showError("Không thể tải trang danh mục. Vui lòng thử lại.");
     }
 }
 
-// Tải sản phẩm theo danh mục
-async function loadCategoryProducts(categoryId, filters = {}) {
+/**
+ * Load categories from API and display them in grid
+ */
+async function loadCategories() {
     try {
-        // Lấy options sắp xếp
-        const sortSelect = document.getElementById('sort-options');
-        const sortBy = sortSelect ? sortSelect.value : 'newest';
-        
-        // Map option sắp xếp sang API
-        let sortParams = {};
-        switch (sortBy) {
-            case 'newest': sortParams = { sort_by: 'created_at', sort_order: 'DESC' }; break;
-            case 'popular': sortParams = { sort_by: 'view_count', sort_order: 'DESC' }; break;
-            case 'rating_high': sortParams = { sort_by: 'avg_rating', sort_order: 'DESC' }; break;
-            case 'rating_low': sortParams = { sort_by: 'avg_rating', sort_order: 'ASC' }; break;
-            case 'price_high': sortParams = { sort_by: 'price', sort_order: 'DESC' }; break;
-            case 'price_low': sortParams = { sort_by: 'price', sort_order: 'ASC' }; break;
-            default: sortParams = { sort_by: 'created_at', sort_order: 'DESC' };
+        const categoriesGrid = document.getElementById("categories-grid");
+        if (!categoriesGrid) return;
+
+        // Show loading state
+        categoriesGrid.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <p>Đang tải danh mục...</p>
+            </div>
+        `;
+
+        // Fetch categories from API using same endpoint as home page
+        const response = await fetchApi("/categories.php?action=list&root=true&count=true");
+
+        if (!response || !response.success || !response.data || !response.data.categories) {
+            console.error("API Error loading categories:", response?.message || "Invalid API response");
+            showError("Không thể tải danh mục từ server.");
+            return;
         }
-        
-        // Kết hợp filter và sort
-        const requestData = {
-            category_id: categoryId,
-            limit: 12,
-            offset: 0,
-            ...sortParams,
-            ...filters
-        };
-        
-        const response = await fetchApi('/src/api/products.php?action=get_by_category', {
-            method: 'POST',
-            body: requestData
+
+        const categories = response.data.categories;
+        console.log("Categories loaded:", categories);
+
+        if (categories.length === 0) {
+            showNoData("Không có danh mục nào.");
+            return;
+        }
+
+        // Clear loading state
+        categoriesGrid.innerHTML = "";
+
+        // Define the color palette (matches home.js)
+        const colorPalette = [
+            { bg: "#FEF3C7", text: "#92400E" },
+            { bg: "#DBEAFE", text: "#1E40AF" },
+            { bg: "#FCE7F3", text: "#9D174D" },
+            { bg: "#D1FAE5", text: "#065F46" },
+            { bg: "#EDE4D8", text: "#5C4033" },
+            { bg: "#F5ECE1", text: "#8A4A3C" }
+        ];
+
+        // Render categories
+        categories.forEach((category, index) => {
+            const colorIndex = index % colorPalette.length;
+            
+            const categoryCard = document.createElement("a");
+            categoryCard.href = `category.html?id=${category.id}`;
+            categoryCard.className = `category-card category-color-${colorIndex}`;
+            
+            categoryCard.innerHTML = `
+                <div class="category-icon">
+                    <i class="${getCategoryIcon(category.name)}"></i>
+                </div>
+                <h3>${category.name}</h3>
+                <p>${formatCount(category.item_count || 0)} bài viết</p>
+            `;
+
+            categoriesGrid.appendChild(categoryCard);
         });
-        
-        const productList = document.getElementById('products-grid');
-        if (!productList) return;
-        
-        // Xóa loading
-        productList.innerHTML = '';
-        
-        if (response && response.success) {
-            const products = response.products || response.data?.products || [];
-            
-            if (!Array.isArray(products) || products.length === 0) {
-                productList.innerHTML = '<p>Không tìm thấy sản phẩm nào trong danh mục này.</p>';
-                return;
-            }
-            
-            products.forEach(product => {
-                // Lấy ảnh đầu tiên hoặc ảnh mặc định
-                const imageUrl = product.images && Array.isArray(product.images) && product.images.length > 0 
-                    ? product.images[0] 
-                    : 'images/products/default.png';
-                
-                // Hiển thị giá hoặc "Liên hệ"
-                const priceDisplay = product.price 
-                    ? `${product.price.toLocaleString('vi-VN')} đ` 
-                    : 'Liên hệ để biết giá';
-                
-                // Tính sao đánh giá
-                const rating = product.avg_rating || 0;
-                const stars = '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
-                
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <img src="${imageUrl}" alt="${product.name}" onerror="this.src='images/products/default.png'">
-                    <div class="product-card-content">
-                        <h3>${product.name}</h3>
-                        <div class="rating">${stars} (${product.review_count || 0})</div>
-                        <div class="price">${priceDisplay}</div>
-                        <a href="product-detail.html?id=${product.id}" class="cta-button">Xem chi tiết</a>
-                    </div>
-                `;
-                productList.appendChild(productCard);
-            });
-            
-            // Cập nhật phân trang nếu có
-            if (response.pagination || response.data?.pagination) {
-                updatePagination(response.pagination || response.data?.pagination);
-            }
-        } else {
-            productList.innerHTML = '<p>Không thể tải sản phẩm. Vui lòng thử lại sau.</p>';
-        }
+
     } catch (error) {
-        const productList = document.getElementById('products-grid');
-        if (productList) {
-            productList.innerHTML = '<p>Không thể tải sản phẩm. Vui lòng thử lại sau.</p>';
-        }
+        console.error("Error loading categories:", error);
+        showError("Đã xảy ra lỗi khi tải danh mục.");
     }
 }
 
-// Tải thảo luận theo danh mục
-async function loadCategoryDiscussions(categoryId) {
-    try {
-        const response = await fetchApi('/src/api/posts.php?action=get_by_category', {
-            method: 'POST',
-            body: {
-                category_id: categoryId,
-                limit: 5,
-                sort_by: 'created_at',
-                sort_order: 'DESC'
-            }
-        });
-        
-        const discussionList = document.getElementById('category-discussion-list');
-        if (!discussionList) return;
-        
-        // Xóa loading
-        discussionList.innerHTML = '';
-        
-        if (response && response.success) {
-            const posts = response.posts || response.data?.posts || [];
-            
-            if (!Array.isArray(posts) || posts.length === 0) {
-                discussionList.innerHTML = '<p>Chưa có thảo luận nào trong danh mục này.</p>';
-                return;
-            }
-            
-            posts.forEach(post => {
-                const discussionItem = document.createElement('div');
-                discussionItem.className = 'discussion-item';
-                const postDate = new Date(post.created_at);
-                const formattedDate = postDate.toLocaleDateString('vi-VN');
-                discussionItem.innerHTML = `
-                    <h3><a href="post-detail.html?id=${post.id}">${post.title}</a></h3>
-                    <div class="meta">
-                        <span class="author">Bởi: ${getDisplayName(post) || 'Người dùng ẩn danh'}</span>
-                        <span class="date">${formattedDate}</span>
-                        <span class="comments">${post.comment_count || 0} bình luận</span>
-                    </div>
-                `;
-                discussionList.appendChild(discussionItem);
-            });
-        } else {
-            discussionList.innerHTML = '<p>Không thể tải thảo luận. Vui lòng thử lại sau.</p>';
-        }
-    } catch (error) {
-        const discussionList = document.getElementById('category-discussion-list');
-        if (discussionList) {
-            discussionList.innerHTML = '<p>Không thể tải thảo luận. Vui lòng thử lại sau.</p>';
-        }
+/**
+ * Get appropriate icon for category
+ * @param {string} categoryName - Category name
+ * @returns {string} Font Awesome icon class
+ */
+function getCategoryIcon(categoryName) {
+    if (!categoryName) return "fas fa-folder"; // Default icon
+
+    const name = categoryName.toLowerCase().trim();
+    
+    // Technology/Tech
+    if (name.includes("công nghệ") || name.includes("technology") || name.includes("tech")) {
+        return "fas fa-laptop-code";
     }
-}
-
-// Thiết lập sự kiện filter, sort
-function setupFilterHandlers(categoryId) {
-    // Sort
-    const sortSelect = document.getElementById('sort-options');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', () => {
-            loadCategoryProducts(categoryId, getFilterValues());
-        });
+    // Fashion
+    if (name.includes("thời trang") || name.includes("fashion")) {
+        return "fas fa-tshirt";
     }
-    // (Có thể thêm filter khác như giá, rating...)
-}
-
-// Lấy giá trị filter
-function getFilterValues() {
-    const filters = {};
-    // Có thể bổ sung filter giá, rating, brand...
-    return filters;
-}
-
-// Cập nhật phân trang
-function updatePagination(pagination) {
-    const paginationContainer = document.getElementById('pagination-category');
-    if (!paginationContainer) return;
-    paginationContainer.innerHTML = '';
-    if (pagination && typeof pagination === 'object') {
-        const total = pagination.total || 0;
-        const limit = pagination.limit || 12;
-        if (total > limit) {
-            const loadMoreBtn = document.createElement('button');
-            loadMoreBtn.className = 'cta-button';
-            loadMoreBtn.textContent = 'Tải thêm sản phẩm';
-            loadMoreBtn.addEventListener('click', () => {
-                // Load more logic (paging)
-            });
-            paginationContainer.appendChild(loadMoreBtn);
-        }
+    // Travel
+    if (name.includes("du lịch") || name.includes("travel")) {
+        return "fas fa-map-marked-alt";
     }
+    // Food
+    if (name.includes("ẩm thực") || name.includes("đồ ăn") || name.includes("food")) {
+        return "fas fa-utensils";
+    }
+    // Education
+    if (name.includes("giáo dục") || name.includes("education")) {
+        return "fas fa-graduation-cap";
+    }
+    // Health
+    if (name.includes("sức khỏe") || name.includes("health")) {
+        return "fas fa-heartbeat";
+    }
+    // Entertainment
+    if (name.includes("giải trí") || name.includes("entertainment")) {
+        return "fas fa-film";
+    }
+    // Furniture
+    if (name.includes("nội thất") || name.includes("furniture")) {
+        return "fas fa-couch";
+    }
+    // Beauty
+    if (name.includes("làm đẹp") || name.includes("beauty")) {
+        return "fas fa-spa";
+    }
+    // Sports
+    if (name.includes("thể thao") || name.includes("sports")) {
+        return "fas fa-dumbbell";
+    }
+    // Automotive
+    if (name.includes("ô tô") || name.includes("automotive") || name.includes("xe")) {
+        return "fas fa-car";
+    }
+    // Books
+    if (name.includes("sách") || name.includes("books")) {
+        return "fas fa-book";
+    }
+    // Music
+    if (name.includes("âm nhạc") || name.includes("music")) {
+        return "fas fa-music";
+    }
+    
+    return "fas fa-tag"; // Default fallback icon
 }
 
-// Helper: Lấy tên hiển thị
-function getDisplayName(obj) {
-    if (obj.full_name) return obj.full_name;
-    if (obj.username) return obj.username;
-    if (obj.author_name) return obj.author_name;
-    return 'Ẩn danh';
+/**
+ * Format count numbers
+ * @param {number} count - Number to format
+ * @returns {string} Formatted count string
+ */
+function formatCount(count) {
+    if (count >= 1000000) {
+        return (count / 1000000).toFixed(1) + 'M';
+    }
+    if (count >= 1000) {
+        return (count / 1000).toFixed(1) + 'K';
+    }
+    return count.toString();
+}
+
+/**
+ * Show error message
+ * @param {string} message - Error message to display
+ */
+function showError(message) {
+    const categoriesGrid = document.getElementById("categories-grid");
+    if (!categoriesGrid) return;
+
+    categoriesGrid.innerHTML = `
+        <div class="error-container">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Đã xảy ra lỗi</h3>
+            <p>${message}</p>
+        </div>
+    `;
+}
+
+/**
+ * Show no data message
+ * @param {string} message - No data message to display
+ */
+function showNoData(message) {
+    const categoriesGrid = document.getElementById("categories-grid");
+    if (!categoriesGrid) return;
+
+    categoriesGrid.innerHTML = `
+        <div class="no-data-container">
+            <i class="fas fa-folder-open"></i>
+            <h3>Không có dữ liệu</h3>
+            <p>${message}</p>
+        </div>
+    `;
 }

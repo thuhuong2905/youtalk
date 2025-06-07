@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/header-footer.css">
     <link rel="stylesheet" href="css/category.css">
+    <link rel="stylesheet" href="css/category_colors.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script defer src="js/main.js"></script>
     <script defer src="js/api.js"></script>
@@ -41,60 +42,24 @@
     </header>
 
     <main>
-        <section id="category-hero" class="hero-section">
+        <!-- Category Banner Section -->
+        <section id="category-banner" class="category-banner">
             <div class="container">
-                <h1 id="category-title">Đang tải...</h1>
-                <p id="category-description">Đang tải thông tin danh mục...</p>
+                <h1>Khám phá danh mục</h1>
+                <p>Chọn danh mục bạn quan tâm để khám phá sản phẩm và dịch vụ tuyệt vời</p>
             </div>
         </section>
 
-        <section id="category-content">
+        <!-- Categories Grid Section -->
+        <section id="categories-grid-section" class="categories-grid-section">
             <div class="container">
-                <!-- Category tabs/filters -->
-                <div class="category-tabs" id="category-tabs">
-                    <a href="#" class="tab active" data-subcategory="all">Tất cả</a>
-                    <!-- Subcategories will be loaded dynamically -->
-                </div>
-
-                <!-- Sorting and display options -->
-                <div class="category-toolbar">
-                    <div class="sort-options">
-                        <label for="sort-options">Sắp xếp theo:</label>
-                        <select id="sort-options">
-                            <option value="newest">Mới nhất</option>
-                            <option value="popular">Phổ biến nhất</option>
-                            <option value="rating_high">Đánh giá cao nhất</option>
-                            <option value="rating_low">Đánh giá thấp nhất</option>
-                            <option value="price_high">Giá cao đến thấp</option>
-                            <option value="price_low">Giá thấp đến cao</option>
-                        </select>
-                    </div>
-                    <div class="display-options">
-                        <label>Hiển thị:</label>
-                        <button class="display-btn grid-btn active" data-display="grid"><i class="fas fa-th"></i></button>
-                        <button class="display-btn list-btn" data-display="list"><i class="fas fa-list"></i></button>
-                    </div>
-                </div>
-
-                <!-- Products grid -->
-                <div id="products-grid" class="products-grid">
-                    <!-- Products will be loaded dynamically -->
-                    <div class="loading-indicator">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Đang tải sản phẩm...</p>
-                    </div>
-                </div>
-
-                <!-- Pagination -->
-                <div class="pagination" id="pagination-category">
-                    <!-- Pagination will be generated dynamically -->
-                </div>
-
-                <!-- Related categories -->
-                <div class="related-categories" id="related-categories">
-                    <h2>Danh mục liên quan</h2>
-                    <div class="related-categories-grid">
-                        <!-- Related categories will be loaded dynamically -->
+                <div class="categories-overview-grid" id="categories-grid">
+                    <!-- Categories will be loaded here dynamically -->
+                    <div class="loading-container">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                        <p>Đang tải danh mục...</p>
                     </div>
                 </div>
             </div>

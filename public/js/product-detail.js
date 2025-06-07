@@ -157,44 +157,136 @@ function updateProductSpecs(specs) {
     }
 }
 
-// Update product images
+// Update product images with fallback support
 function updateProductImages(images) {
     const mainImage = document.getElementById('main-product-image');
     const thumbnailList = document.querySelector('.thumbnail-list');
+    const imageContainer = document.querySelector('.product-image-main');
     
-    if (!mainImage || !thumbnailList) return;
-    
-    if (!images || images.length === 0) {
-        mainImage.src = 'images/products/default.png';
-        mainImage.alt = 'No image available';
+    if (!mainImage || !thumbnailList || !imageContainer) {
+        console.error('Product image elements not found');
         return;
     }
     
-    // Set main image to first image
-    mainImage.src = images[0];
-    mainImage.alt = 'Product Image';
+    // Get product name for fallback
+    const productName = document.getElementById('product-name')?.textContent || 'Product';
     
-    // Create thumbnails
+    // Parse images if it's a string
+    let imageArray = [];
+    if (typeof images === 'string' && images.trim()) {
+        try {
+            imageArray = JSON.parse(images);
+        } catch (e) {
+            // If not JSON, treat as single image path
+            imageArray = [images];
+        }
+    } else if (Array.isArray(images)) {
+        imageArray = images;
+    }
+    
+    // Filter out empty/null images
+    imageArray = imageArray.filter(img => img && typeof img === 'string' && img.trim());
+    
+    if (imageArray.length === 0) {
+        // No images available - show fallback
+        mainImage.style.display = 'none';
+        
+        // Create or show fallback container
+        let fallbackContainer = imageContainer.querySelector('.product-main-fallback');
+        if (!fallbackContainer) {
+            fallbackContainer = document.createElement('div');
+            fallbackContainer.className = 'product-main-fallback';
+            imageContainer.appendChild(fallbackContainer);
+        }
+        
+        fallbackContainer.innerHTML = Avatar.createProductFallbackHTML(productName, '300px');
+        fallbackContainer.style.display = 'flex';
+        
+        // Clear thumbnails
+        thumbnailList.innerHTML = '';
+        return;
+    }
+    
+    // Hide fallback if exists
+    const fallbackContainer = imageContainer.querySelector('.product-main-fallback');
+    if (fallbackContainer) {
+        fallbackContainer.style.display = 'none';
+    }
+    
+    // Set main image to first image with error handling
+    mainImage.src = imageArray[0];
+    mainImage.alt = productName;
+    mainImage.style.display = 'block';
+    
+    // Handle main image error
+    mainImage.onerror = function() {
+        this.style.display = 'none';
+        let fallbackContainer = imageContainer.querySelector('.product-main-fallback');
+        if (!fallbackContainer) {
+            fallbackContainer = document.createElement('div');
+            fallbackContainer.className = 'product-main-fallback';
+            imageContainer.appendChild(fallbackContainer);
+        }
+        fallbackContainer.innerHTML = Avatar.createProductFallbackHTML(productName, '300px');
+        fallbackContainer.style.display = 'flex';
+    };
+    
+    // Create thumbnails if multiple images
     thumbnailList.innerHTML = '';
-    images.forEach((image, index) => {
-        const thumbnail = document.createElement('img');
-        thumbnail.src = image;
-        thumbnail.alt = `Thumbnail ${index + 1}`;
-        thumbnail.className = index === 0 ? 'active' : '';
-        
-        thumbnail.addEventListener('click', () => {
-            // Update main image
-            mainImage.src = image;
+    if (imageArray.length > 1) {
+        imageArray.forEach((image, index) => {
+            const thumbnailWrapper = document.createElement('div');
+            thumbnailWrapper.className = 'thumbnail-wrapper';
+            thumbnailWrapper.style.cssText = `
+                position: relative;
+                width: 80px;
+                height: 80px;
+                border-radius: var(--border-radius-sm);
+                overflow: hidden;
+                cursor: pointer;
+                border: 2px solid ${index === 0 ? 'var(--color-primary)' : 'transparent'};
+            `;
             
-            // Update active thumbnail
-            thumbnailList.querySelectorAll('img').forEach(thumb => {
-                thumb.classList.remove('active');
+            const thumbnail = document.createElement('img');
+            thumbnail.src = image;
+            thumbnail.alt = `${productName} ${index + 1}`;
+            thumbnail.style.cssText = `
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            `;
+            
+            // Handle thumbnail error
+            thumbnail.onerror = function() {
+                this.style.display = 'none';
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = `
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: var(--color-background-alt);
+                `;
+                placeholder.innerHTML = Avatar.createProductFallbackHTML(productName, '60px');
+                thumbnailWrapper.appendChild(placeholder);
+            };
+            
+            thumbnail.addEventListener('click', () => {
+                // Update main image
+                mainImage.src = image;
+                
+                // Update active thumbnail
+                thumbnailList.querySelectorAll('.thumbnail-wrapper').forEach(wrapper => {
+                    wrapper.style.borderColor = 'transparent';
+                });
+                thumbnailWrapper.style.borderColor = 'var(--color-primary)';
             });
-            thumbnail.classList.add('active');
+            
+            thumbnailWrapper.appendChild(thumbnail);
+            thumbnailList.appendChild(thumbnailWrapper);
         });
-        
-        thumbnailList.appendChild(thumbnail);
-    });
+    }
 }
 
 // Update product tags

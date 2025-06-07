@@ -371,20 +371,57 @@
 
 .review-card-top {
     background: linear-gradient(135deg, var(--color-accent1) 0%, var(--color-accent2) 100%);
-    padding: 40px 25px;
+    padding: 15px;
     text-align: center;
-    min-height: 150px;
+    min-height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
-.review-product-name-prominent {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--color-primary);
-    margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+/* Remove background when product image is present */
+.review-card-top.has-image {
+    background: transparent !important;
+    padding: 0;
+    min-height: 140px;
+}
+
+.product-image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.review-product-image {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    object-position: center;
+    border-radius: var(--border-radius-sm);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.product-fallback-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.product-fallback-placeholder .product-fallback {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    color: var(--color-primary) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 12px !important;
 }
 
 .review-card-bottom {
@@ -690,6 +727,15 @@
     
     .reviews-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .review-product-image {
+        height: 120px;
+        object-fit: contain;
+    }
+    
+    .review-card-top.has-image {
+        min-height: 120px;
     }
     
     .hero-buttons, .cta-buttons {

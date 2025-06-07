@@ -55,15 +55,33 @@ async function fetchApi(endpoint, options = {}) {
         // Check if the response status indicates success (e.g., 2xx)
         if (!response.ok) {
             // Attempt to read error details from the response body if possible
-            let errorBody = '';
+            let errorData = null;
             try {
-                errorBody = await response.text(); // Read as text first
-                console.error(`API request failed with status ${response.status}. Response body:`, errorBody);
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    errorData = await response.json();
+                    console.error(`API request failed with status ${response.status}. Error response:`, errorData);
+                    // Return the error data with status info for auth handling
+                    return {
+                        success: false,
+                        status: response.status,
+                        message: errorData.message || `${response.status} ${response.statusText}`,
+                        ...errorData
+                    };
+                } else {
+                    const errorBody = await response.text();
+                    console.error(`API request failed with status ${response.status}. Response body:`, errorBody);
+                }
             } catch (e) {
-                console.error(`API request failed with status ${response.status}. Could not read response body.`);
+                console.error(`API request failed with status ${response.status}. Could not read response body:`, e);
             }
-            // Use fullUrl in the error message for clarity
-            throw new Error(`API request failed: ${response.status} ${response.statusText}. Endpoint: ${fullUrl}`);
+            
+            // Return error object instead of throwing
+            return {
+                success: false,
+                status: response.status,
+                message: `API request failed: ${response.status} ${response.statusText}`
+            };
         }
 
         // Check if response is JSON before parsing

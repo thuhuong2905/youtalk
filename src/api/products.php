@@ -47,6 +47,10 @@ switch ($action) {
         handleGetProductsByCategory($product, $requestData);
         break;
         
+    case 'get_products_by_category':
+        handleGetProductsByCategoryNew($product, $requestData);
+        break;
+        
     case 'search':
         handleSearchProducts($product, $requestData);
         break;
@@ -466,5 +470,127 @@ function handleGetRelatedProducts($product, $requestData) {
     } catch (PDOException $e) {
         error_log("Error getting related products: " . $e->getMessage());
         sendResponse(false, 'Failed to get related products', null, 500);
+    }
+}
+
+// New handler for category page with subcategory support
+function handleGetProductsByCategoryNew($product, $requestData) {
+    try {
+        // Validate required parameters
+        if (!isset($requestData['category_id']) || empty($requestData['category_id'])) {
+            sendResponse(false, 'Category ID is required', null, 400);
+            return;
+        }
+        
+        $categoryId = (int)$requestData['category_id'];
+        $subcategoryId = isset($requestData['subcategory_id']) ? (int)$requestData['subcategory_id'] : null;
+        $page = isset($requestData['page']) ? (int)$requestData['page'] : 1;
+        $limit = isset($requestData['limit']) ? (int)$requestData['limit'] : 12;
+        $sort = isset($requestData['sort']) ? $requestData['sort'] : 'newest';
+        
+        $offset = ($page - 1) * $limit;
+        
+        // Map sort options
+        $sortMapping = [
+            'newest' => ['created_at', 'DESC'],
+            'popular' => ['view_count', 'DESC'],
+            'rating_high' => ['rating', 'DESC'],
+            'rating_low' => ['rating', 'ASC'],
+            'price_high' => ['price', 'DESC'],
+            'price_low' => ['price', 'ASC'],
+            'name_asc' => ['name', 'ASC'],
+            'name_desc' => ['name', 'DESC']
+        ];
+        
+        $sortBy = 'created_at';
+        $sortOrder = 'DESC';
+        
+        if (isset($sortMapping[$sort])) {
+            $sortBy = $sortMapping[$sort][0];
+            $sortOrder = $sortMapping[$sort][1];
+        }
+        
+        // Build WHERE condition
+        $whereConditions = ["p.status = 'active'"];
+        $params = [];
+        
+        if ($subcategoryId && $subcategoryId !== 'all') {
+            // Filter by specific subcategory
+            $whereConditions[] = "p.category_id = ?";
+            $params[] = $subcategoryId;
+        } else {
+            // Filter by main category and all its subcategories
+            $whereConditions[] = "(p.category_id = ? OR p.category_id IN (SELECT id FROM categories WHERE parent_id = ?))";
+            $params[] = $categoryId;
+            $params[] = $categoryId;
+        }
+        
+        $whereClause = implode(' AND ', $whereConditions);
+        
+        // Count total products for pagination
+        $countQuery = "
+            SELECT COUNT(*) as total
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE $whereClause
+        ";
+        
+        $countStmt = $product->conn->prepare($countQuery);
+        foreach ($params as $index => $param) {
+            $countStmt->bindValue($index + 1, $param);
+        }
+        $countStmt->execute();
+        $totalCount = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+        
+        // Get products with pagination
+        $query = "
+            SELECT 
+                p.id, p.name, p.description, p.price, p.images, p.view_count, p.created_at,
+                c.name as category_name,
+                COALESCE(AVG(r.rating), 0) as rating,
+                COUNT(r.id) as review_count
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN reviews r ON p.id = r.product_id AND r.status = 'active'
+            WHERE $whereClause
+            GROUP BY p.id
+            ORDER BY p.$sortBy $sortOrder
+            LIMIT ? OFFSET ?
+        ";
+        
+        $stmt = $product->conn->prepare($query);
+        foreach ($params as $index => $param) {
+            $stmt->bindValue($index + 1, $param);
+        }
+        $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(count($params) + 2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Process images for each product
+        foreach ($products as &$productItem) {
+            if (isset($productItem['images']) && !empty($productItem['images'])) {
+                $productItem['images'] = json_decode($productItem['images'], true);
+            } else {
+                $productItem['images'] = [];
+            }
+            
+            // Format rating
+            $productItem['rating'] = round((float)$productItem['rating'], 1);
+            $productItem['review_count'] = (int)$productItem['review_count'];
+        }
+        
+        sendResponse(true, 'Products retrieved successfully', [
+            'data' => $products,
+            'total' => (int)$totalCount,
+            'page' => $page,
+            'limit' => $limit,
+            'total_pages' => ceil($totalCount / $limit)
+        ]);
+        
+    } catch (PDOException $e) {
+        error_log("Error getting products by category: " . $e->getMessage());
+        sendResponse(false, 'Failed to get products', null, 500);
     }
 }

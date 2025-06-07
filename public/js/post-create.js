@@ -27,11 +27,11 @@ function initPostCreatePage() {
     // Initialize media upload
     initMediaUpload();
     
-    // Set up preview functionality
-    setupPreviewFunctionality();
-    
     // Set up form submission
     setupFormSubmission();
+    
+    // Set up realtime validation
+    setupRealtimeValidation();
 }
 
 /**
@@ -77,10 +77,10 @@ async function loadCategories() {
                     res.data.categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
             }
         } else {
-            alert('Không thể tải danh mục.');
+            showError('Không thể tải danh mục.');
         }
     } catch (err) {
-        alert('Lỗi khi tải danh mục.');
+        showError('Lỗi khi tải danh mục.');
     }
 }
 
@@ -90,17 +90,22 @@ async function loadCategories() {
 async function loadPostTypes() {
     const postTypeSelect = document.getElementById('post-type');
     if (!postTypeSelect) return;
+    
+    // Thêm option placeholder
+    postTypeSelect.innerHTML = '<option value="" disabled selected>Chọn loại bài viết</option>';
+    
     // Gọi API backend để lấy danh sách loại bài viết từ ENUM posts.post_type
     try {
         const res = await fetch('/src/api/posts.php?action=list_post_types');
         if (res.ok) {
             const data = await res.json();
             if (data.success && Array.isArray(data.data)) {
-                postTypeSelect.innerHTML = data.data.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
+                postTypeSelect.innerHTML += data.data.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
                 return;
             }
         }
     } catch (e) {}
+    
     // Nếu backend không hỗ trợ, fallback cứng
     const types = [
         { value: 'discussion', label: 'Thảo luận' },
@@ -108,7 +113,7 @@ async function loadPostTypes() {
         { value: 'review', label: 'Đánh giá sản phẩm' },
         { value: 'news', label: 'Tin tức' }
     ];
-    postTypeSelect.innerHTML = types.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
+    postTypeSelect.innerHTML += types.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
 }
 
 /**
@@ -232,7 +237,7 @@ function initMediaUpload() {
         mediaPreview.innerHTML = '';
         const files = Array.from(mediaInput.files);
         if (files.length > 10) {
-            alert('Chỉ cho phép tối đa 10 hình ảnh.');
+            showError('Chỉ cho phép tối đa 10 hình ảnh.');
             mediaInput.value = '';
             return;
         }
@@ -299,57 +304,53 @@ async function fetchApi(url, options = {}) {
 }
 
 /**
- * Set up preview functionality
+ * Set error state for a form field
  */
-function setupPreviewFunctionality() {
-    const previewBtn = document.getElementById('preview-post-btn');
-    const closePreviewBtn = document.getElementById('close-preview-btn');
-    const previewContainer = document.getElementById('post-preview-container');
-    const previewContent = document.querySelector('.preview-content');
-    const form = document.getElementById('post-create-form');
-    
-    if (!previewBtn || !closePreviewBtn || !previewContainer || !previewContent || !form) return;
-    
-    previewBtn.addEventListener('click', () => {
-        // Get form data
-        const title = document.getElementById('post-title').value;
-        const categorySelect = document.getElementById('post-category');
-        const categoryText = categorySelect.options[categorySelect.selectedIndex]?.text || '';
-        // Lấy nội dung từ textarea thay vì editor cũ
-        const content = document.getElementById('post-content').value;
-        
-        // Get tags
-        const tagsValue = document.getElementById('post-tags').value;
-        let tagsHtml = '';
-        if (tagsValue) {
-            try {
-                const tags = JSON.parse(tagsValue);
-                if (tags.length > 0) {
-                    tagsHtml = `<div class="preview-tags">Thẻ: ${tags.map(t => `<span class='tag'>${t}</span>`).join(' ')}</div>`;
-                }
-            } catch (e) {
-                console.error('Error parsing tags:', e);
-            }
+function setFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        const formGroup = field.closest('.form-group');
+        if (formGroup) {
+            formGroup.classList.remove('success');
+            formGroup.classList.add('error');
         }
-        // Build preview HTML
-        const previewHtml = `
-            <h2>${title || 'Tiêu đề bài viết'}</h2>
-            ${categoryText ? `<p class="preview-category">Danh mục: ${categoryText}</p>` : ''}
-            <div class="preview-content-body">
-                ${content ? content.replace(/\n/g, '<br>') : 'Nội dung bài viết'}
-            </div>
-            ${tagsHtml}
-        `;
-        // Update preview content
-        previewContent.innerHTML = previewHtml;
-        // Show preview container
-        form.style.display = 'none';
-        previewContainer.style.display = 'block';
-    });
-    closePreviewBtn.addEventListener('click', () => {
-        // Hide preview container
-        previewContainer.style.display = 'none';
-        form.style.display = 'block';
+    }
+}
+
+/**
+ * Set success state for a form field
+ */
+function setFieldSuccess(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        const formGroup = field.closest('.form-group');
+        if (formGroup) {
+            formGroup.classList.remove('error');
+            formGroup.classList.add('success');
+        }
+    }
+}
+
+/**
+ * Clear validation state for a form field
+ */
+function clearFieldState(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        const formGroup = field.closest('.form-group');
+        if (formGroup) {
+            formGroup.classList.remove('error', 'success');
+        }
+    }
+}
+
+/**
+ * Clear all validation states
+ */
+function clearAllValidationStates() {
+    const formGroups = document.querySelectorAll('.form-group');
+    formGroups.forEach(group => {
+        group.classList.remove('error', 'success');
     });
 }
 
@@ -366,6 +367,9 @@ function setupFormSubmission() {
         await submitPost();
     });
     function validatePostForm() {
+        // Clear all previous error states
+        clearAllValidationStates();
+        
         const title = document.getElementById('post-title').value.trim();
         const category = document.getElementById('post-category').value;
         const postType = document.getElementById('post-type').value;
@@ -375,24 +379,41 @@ function setupFormSubmission() {
         try { tags = JSON.parse(tagsValue); } catch (e) { tags = []; }
         const mediaInput = document.getElementById('post-media');
         const files = mediaInput ? mediaInput.files : [];
+        
         if (!title) {
             showError('Vui lòng nhập tiêu đề bài viết.');
+            setFieldError('post-title');
+            document.getElementById('post-title').focus();
             return false;
         }
         if (title.length > 100) {
             showError('Tiêu đề không được vượt quá 100 ký tự.');
+            setFieldError('post-title');
+            document.getElementById('post-title').focus();
             return false;
         }
         if (!postType) {
             showError('Vui lòng chọn loại bài viết.');
+            setFieldError('post-type');
+            document.getElementById('post-type').focus();
             return false;
         }
         if (!category) {
             showError('Vui lòng chọn danh mục.');
+            setFieldError('post-category');
+            document.getElementById('post-category').focus();
             return false;
         }
         if (!content) {
             showError('Vui lòng nhập nội dung bài viết.');
+            setFieldError('post-content');
+            document.getElementById('post-content').focus();
+            return false;
+        }
+        if (content.length < 10) {
+            showError('Nội dung bài viết phải có ít nhất 10 ký tự.');
+            setFieldError('post-content');
+            document.getElementById('post-content').focus();
             return false;
         }
         if (tags.length > 5) {
@@ -455,4 +476,105 @@ function formatCurrency(amount) {
         style: 'currency',
         currency: 'VND'
     }).format(amount);
+}
+
+/**
+ * Set up realtime validation for required fields
+ */
+function setupRealtimeValidation() {
+    const titleInput = document.getElementById('post-title');
+    const categorySelect = document.getElementById('post-category');
+    const postTypeSelect = document.getElementById('post-type');
+    const contentTextarea = document.getElementById('post-content');
+
+    let lastErrorTime = 0;
+    const debounceTime = 2000; // 2 giây giữa các thông báo lỗi
+
+    function showValidationError(message) {
+        const now = Date.now();
+        if (now - lastErrorTime > debounceTime) {
+            showError(message);
+            lastErrorTime = now;
+        }
+    }
+
+    // Title validation
+    if (titleInput) {
+        titleInput.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (!value) {
+                setFieldError('post-title');
+                showValidationError('Vui lòng nhập tiêu đề bài viết.');
+            } else if (value.length > 100) {
+                setFieldError('post-title');
+                showValidationError('Tiêu đề không được vượt quá 100 ký tự.');
+            } else {
+                setFieldSuccess('post-title');
+            }
+        });
+        
+        titleInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                clearFieldState('post-title');
+            }
+        });
+    }
+
+    // Post type validation
+    if (postTypeSelect) {
+        postTypeSelect.addEventListener('blur', function() {
+            if (!this.value) {
+                setFieldError('post-type');
+                showValidationError('Vui lòng chọn loại bài viết.');
+            } else {
+                setFieldSuccess('post-type');
+            }
+        });
+        
+        postTypeSelect.addEventListener('change', function() {
+            if (this.value) {
+                clearFieldState('post-type');
+            }
+        });
+    }
+
+    // Category validation
+    if (categorySelect) {
+        categorySelect.addEventListener('blur', function() {
+            if (!this.value) {
+                setFieldError('post-category');
+                showValidationError('Vui lòng chọn danh mục.');
+            } else {
+                setFieldSuccess('post-category');
+            }
+        });
+        
+        categorySelect.addEventListener('change', function() {
+            if (this.value) {
+                clearFieldState('post-category');
+            }
+        });
+    }
+
+    // Content validation
+    if (contentTextarea) {
+        contentTextarea.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (!value) {
+                setFieldError('post-content');
+                showValidationError('Vui lòng nhập nội dung bài viết.');
+            } else if (value.length < 10) {
+                setFieldError('post-content');
+                showValidationError('Nội dung bài viết phải có ít nhất 10 ký tự.');
+            } else {
+                setFieldSuccess('post-content');
+            }
+        });
+        
+        contentTextarea.addEventListener('input', function() {
+            if (this.value.trim()) {
+                clearFieldState('post-content');
+            }
+        });
+    }
 }
