@@ -10,23 +10,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     let productName = '';
     
     if (productId) {
-        // Load product details and get product name for related discussions
+        // Load product details
         const product = await loadProductDetails(productId);
         productName = product && product.name ? product.name : '';
         
-        // Load product reviews
-        loadProductReviews(productId);
+        // Initialize review system
+        await initializeReviewSystem(productId);
         
-        // Load related discussions (by product name)
-        loadRelatedDiscussions(productName);
+        // Set up review sorting
+        setupReviewSorting(productId);
         
-        // Set up tab switching
-        setupTabs();
-        
-        // Set up review form
-        setupReviewForm(productId);
-        
-        // Increment view count (use product_id param)
+        // Increment view count
         incrementViewCount(productId);
     } else {
         // No product ID provided, show error or redirect
@@ -64,29 +58,30 @@ async function loadProductDetails(productId) {
                 categoryLink.href = `category.html?id=${product.category_id}`;
             }
             
-            // Update brand/supplier
-            document.getElementById('product-brand').textContent = product.brand || 'Không có thông tin';
-            
             // Update price
             const priceDisplay = product.price 
-                ? `${Number(product.price).toLocaleString('vi-VN')} đ` 
+                ? `${Number(product.price).toLocaleString('vi-VN')} VND` 
                 : 'Liên hệ để biết giá';
             document.getElementById('product-price').textContent = priceDisplay;
             
-            // Update description
-            document.getElementById('product-description-content').innerHTML = product.description || 'Không có mô tả chi tiết.';
+            // Update description in product summary
+            const productDescElement = document.getElementById('product-description');
+            if (productDescElement) {
+                productDescElement.innerHTML = product.description || 'Không có mô tả chi tiết.';
+            }
             
-            // Update specs/details
+            // Update specs/details in product summary
             updateProductSpecs(product.specs);
             
             // Update images
             updateProductImages(product.images);
             
-            // Update tags
-            updateProductTags(product.tags);
+            // Update rating and review count
+            updateProductRating(product.avg_rating || 0, product.review_count || 0);
             
-            // Set up action buttons
-            setupProductActions(product);
+            // Set up purchase links
+            setupPurchaseLinks(product);
+            
             return product;
         } else {
             console.error('Failed to load product details:', response.message);
@@ -133,8 +128,18 @@ function updateProductSpecs(specs) {
     if (!specsList) return;
     
     if (!specs || Object.keys(specs).length === 0) {
-        specsList.innerHTML = '<li>Không có thông số kỹ thuật.</li>';
+        // Hide the specs section if no specs available
+        const specsContainer = document.getElementById('product-specs');
+        if (specsContainer) {
+            specsContainer.style.display = 'none';
+        }
         return;
+    }
+    
+    // Show the specs section
+    const specsContainer = document.getElementById('product-specs');
+    if (specsContainer) {
+        specsContainer.style.display = 'block';
     }
     
     specsList.innerHTML = '';
@@ -143,7 +148,7 @@ function updateProductSpecs(specs) {
     if (Array.isArray(specs)) {
         specs.forEach(spec => {
             const li = document.createElement('li');
-            li.innerHTML = `<strong>${spec.name}:</strong> ${spec.value}`;
+            li.innerHTML = `• <strong>${spec.name}:</strong> ${spec.value}`;
             specsList.appendChild(li);
         });
     } 
@@ -151,7 +156,7 @@ function updateProductSpecs(specs) {
     else {
         for (const [key, value] of Object.entries(specs)) {
             const li = document.createElement('li');
-            li.innerHTML = `<strong>${key}:</strong> ${value}`;
+            li.innerHTML = `• <strong>${key}:</strong> ${value}`;
             specsList.appendChild(li);
         }
     }
@@ -310,6 +315,89 @@ function updateProductTags(tags) {
     });
 }
 
+// Setup purchase links for e-commerce platforms
+function setupPurchaseLinks(product) {
+    // Get purchase link elements
+    const shopeeLink = document.getElementById('shopee-link');
+    const lazadaLink = document.getElementById('lazada-link');
+    const tikiLink = document.getElementById('tiki-link');
+    
+    // Reset all links to hidden state
+    if (shopeeLink) shopeeLink.style.display = 'none';
+    if (lazadaLink) lazadaLink.style.display = 'none';
+    if (tikiLink) tikiLink.style.display = 'none';
+    
+    if (!product) return;
+    
+    // Check if product has purchase_links data (JSON field)
+    let purchaseLinks = null;
+    if (product.purchase_links) {
+        try {
+            purchaseLinks = typeof product.purchase_links === 'string' 
+                ? JSON.parse(product.purchase_links) 
+                : product.purchase_links;
+        } catch (e) {
+            console.warn('Invalid purchase_links JSON:', e);
+        }
+    }
+    
+    // Setup Shopee link
+    if (purchaseLinks && purchaseLinks.shopee) {
+        if (shopeeLink) {
+            shopeeLink.href = purchaseLinks.shopee;
+            shopeeLink.style.display = 'inline-flex';
+        }
+    } else if (product.name) {
+        // Generate search link if no direct link available - convert to lowercase
+        const searchQuery = encodeURIComponent(product.name.toLowerCase());
+        if (shopeeLink) {
+            shopeeLink.href = `https://shopee.vn/search?keyword=${searchQuery}`;
+            shopeeLink.style.display = 'inline-flex';
+        }
+    }
+    
+    // Setup Lazada link
+    if (purchaseLinks && purchaseLinks.lazada) {
+        if (lazadaLink) {
+            lazadaLink.href = purchaseLinks.lazada;
+            lazadaLink.style.display = 'inline-flex';
+        }
+    } else if (product.name) {
+        // Generate search link if no direct link available - convert to lowercase
+        const searchQuery = encodeURIComponent(product.name.toLowerCase());
+        if (lazadaLink) {
+            lazadaLink.href = `https://www.lazada.vn/catalog/?q=${searchQuery}`;
+            lazadaLink.style.display = 'inline-flex';
+        }
+    }
+    
+    // Setup Tiki link
+    if (purchaseLinks && purchaseLinks.tiki) {
+        if (tikiLink) {
+            tikiLink.href = purchaseLinks.tiki;
+            tikiLink.style.display = 'inline-flex';
+        }
+    } else if (product.name) {
+        // Generate search link if no direct link available - convert to lowercase
+        const searchQuery = encodeURIComponent(product.name.toLowerCase());
+        if (tikiLink) {
+            tikiLink.href = `https://tiki.vn/search?q=${searchQuery}`;
+            tikiLink.style.display = 'inline-flex';
+        }
+    }
+    
+    // Add click tracking for analytics (optional)
+    [shopeeLink, lazadaLink, tikiLink].forEach(link => {
+        if (link && link.style.display !== 'none') {
+            link.addEventListener('click', (e) => {
+                const platform = link.id.replace('-link', '');
+                console.log(`User clicked ${platform} link for product: ${product.name}`);
+                // Could add analytics tracking here
+            });
+        }
+    });
+}
+
 // Set up product action buttons
 function setupProductActions(product) {    
     // Share button
@@ -341,7 +429,8 @@ function setupProductActions(product) {
 }
 
 // Load product reviews
-async function loadProductReviews(productId, sortBy = 'newest') {
+// Load product reviews with pagination and sorting
+async function loadProductReviews(productId, page = 1, sortBy = 'newest') {
     try {
         // Map sort option to API parameters
         let sortParams = {};
@@ -352,27 +441,31 @@ async function loadProductReviews(productId, sortBy = 'newest') {
             case 'helpful':
                 sortParams = { sort_by: 'helpful_count', sort_order: 'DESC' };
                 break;
-            case 'rating_high':
+            case 'highest':
                 sortParams = { sort_by: 'rating', sort_order: 'DESC' };
                 break;
-            case 'rating_low':
+            case 'lowest':
                 sortParams = { sort_by: 'rating', sort_order: 'ASC' };
                 break;
         }
+        
         // Use GET and query params for backend compatibility
         const query = new URLSearchParams({
             product_id: productId,
-            limit: 10,
-            offset: 0,
+            limit: 3, // 3 reviews per page as per requirement
+            offset: (page - 1) * 3,
             ...sortParams
         }).toString();
+        
         const reviewsResponse = await fetchApi(`/src/api/reviews.php?action=get_by_product&${query}`, {
             method: 'GET'
         });
+        
         const statsResponse = await fetchApi(`/src/api/reviews.php?action=get_stats&product_id=${productId}`, {
             method: 'GET'
         });
-        // Sau khi lấy stats, luôn cập nhật số sao và số đánh giá từ API stats
+        
+        // Update rating and review count from stats
         if (statsResponse && statsResponse.success) {
             let stats = null;
             if (statsResponse.data && statsResponse.data.stats) {
@@ -384,269 +477,393 @@ async function loadProductReviews(productId, sortBy = 'newest') {
                 updateProductRating(stats.average_rating, stats.total_reviews);
             }
         }
+        
         const reviewsList = document.getElementById('reviews-list');
         if (!reviewsList) return;
+        
+        // Clear existing reviews
         reviewsList.innerHTML = '';
-        // Sửa: lấy đúng trường reviews từ response.data.reviews hoặc response.reviews
+        
+        // Get reviews from response
         let reviews = [];
         if (reviewsResponse && reviewsResponse.data && Array.isArray(reviewsResponse.data.reviews)) {
             reviews = reviewsResponse.data.reviews;
         } else if (reviewsResponse && Array.isArray(reviewsResponse.reviews)) {
             reviews = reviewsResponse.reviews;
         }
+        
         if (reviewsResponse.success && reviews.length > 0) {
             reviews.forEach(review => {
-                const reviewItem = document.createElement('div');
-                reviewItem.className = 'review-item';
-                // Format date
-                const reviewDate = new Date(review.created_at);
-                const formattedDate = reviewDate.toLocaleDateString('vi-VN');
-                // Create star display (Font Awesome)
-                const stars = generateStars(review.rating);
-                reviewItem.innerHTML = `
-                    <div class="review-header">
-                        <div class="author-info">
-                            ${getUserAvatarHtml(review, 'user-avatar-review')}
-                            <span>${getDisplayName(review)}</span>
-                        </div>
-                        <div class="review-rating">${stars}</div>
-                        <div class="review-date">${formattedDate}</div>
-                    </div>
-                    <div class="review-body">${review.content ? review.content : ''}</div>
-                `;
-                
-                // Add media if available
-                if (review.media && review.media.length > 0) {
-                    const mediaContainer = document.createElement('div');
-                    mediaContainer.className = 'review-media';
-                    
-                    review.media.forEach(mediaUrl => {
-                        // Determine if it's an image or video based on extension
-                        const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaUrl);
-                        
-                        if (isVideo) {
-                            const video = document.createElement('video');
-                            video.controls = true;
-                            video.src = mediaUrl;
-                            mediaContainer.appendChild(video);
-                        } else {
-                            const img = document.createElement('img');
-                            img.src = mediaUrl;
-                            img.alt = 'Review media';
-                            mediaContainer.appendChild(img);
-                        }
-                    });
-                    
-                    reviewItem.querySelector('.review-body').appendChild(mediaContainer);
-                }
-                
-                // Add helpful button
-                const reviewFooter = document.createElement('div');
-                reviewFooter.className = 'review-footer';
-                reviewFooter.innerHTML = `
-                    <div class="helpful-vote">
-                        <span>Đánh giá này có hữu ích? </span>
-                        <button class="helpful-btn">Có (${review.helpful_count || 0})</button>
-                    </div>
-                `;
-                
-                // Add event listener for helpful button
-                reviewFooter.querySelector('.helpful-btn').addEventListener('click', async () => {
-                    const helpfulBtn = reviewFooter.querySelector('.helpful-btn');
-                    // Kiểm tra localStorage để ngăn user bấm nhiều lần
-                    const helpfulKey = `helpful_review_${review.id}`;
-                    if (localStorage.getItem(helpfulKey)) {
-                        alert('Bạn đã đánh giá hữu ích cho nhận xét này!');
-                        return;
-                    }
-                    try {
-                        const res = await fetchApi('/src/api/reviews.php?action=mark_helpful', {
-                            method: 'POST',
-                            body: { review_id: review.id }
-                        });
-                        if (res.success) {
-                            const currentCount = parseInt(helpfulBtn.textContent.match(/\d+/)[0]);
-                            helpfulBtn.textContent = `Có (${currentCount + 1})`;
-                            localStorage.setItem(helpfulKey, '1');
-                        } else {
-                            alert('Không thể ghi nhận đánh giá hữu ích.');
-                        }
-                    } catch (e) {
-                        alert('Có lỗi khi ghi nhận đánh giá hữu ích.');
-                    }
-                });
-                
-                reviewItem.appendChild(reviewFooter);
-                reviewsList.appendChild(reviewItem);
+                const reviewCard = createReviewCard(review);
+                reviewsList.appendChild(reviewCard);
             });
-        } else if (reviewsResponse.success && reviews.length === 0) {
-            reviewsList.innerHTML = '<p>Chưa có đánh giá nào cho sản phẩm này.</p>';
+            
+            // Setup pagination - only show if more than 3 reviews total
+            const totalReviews = reviewsResponse.data?.pagination?.total || reviewsResponse.pagination?.total || 0;
+            if (totalReviews > 3) {
+                const totalPages = Math.ceil(totalReviews / 3);
+                setupReviewsPagination(productId, page, totalPages, sortBy, totalReviews);
+            } else {
+                // Hide pagination if 3 or fewer reviews
+                const paginationContainer = document.getElementById('reviews-pagination');
+                if (paginationContainer) paginationContainer.innerHTML = '';
+            }
         } else {
-            reviewsList.innerHTML = '<p>Không thể tải đánh giá.</p>';
-        
+            reviewsList.innerHTML = '<div class="no-reviews">Chưa có đánh giá nào cho sản phẩm này.</div>';
+            // Hide pagination when no reviews
+            const paginationContainer = document.getElementById('reviews-pagination');
+            if (paginationContainer) paginationContainer.innerHTML = '';
         }
     } catch (error) {
-        console.error('Error loading reviews:', error);
+        console.error('Error loading product reviews:', error);
+        const reviewsList = document.getElementById('reviews-list');
+        if (reviewsList) {
+            reviewsList.innerHTML = '<div class="error-message">Có lỗi xảy ra khi tải đánh giá.</div>';
+        }
     }
 }
 
-// Load related discussions
-async function loadRelatedDiscussions(productName) {
+// Create review card element
+function createReviewCard(review) {
+    const reviewCard = document.createElement('div');
+    reviewCard.className = 'review-card';
+    
+    // Format date
+    const reviewDate = new Date(review.created_at);
+    const formattedDate = reviewDate.toLocaleDateString('vi-VN');
+    
+    // Create star display
+    const stars = generateStars(review.rating);
+    
+    // Get user avatar HTML using existing avatar system
+    const avatarHtml = getUserAvatarHtml(review, 'review-avatar');
+    
+    reviewCard.innerHTML = `
+        <div class="review-header">
+            ${avatarHtml}
+            <div class="review-user-info">
+                <span class="reviewer-name">${getDisplayName(review)}</span>
+                <div class="review-rating">${stars}</div>
+                <div class="review-date">${formattedDate}</div>
+            </div>
+        </div>
+        <div class="review-content">${review.comment || ''}</div>
+        <div class="review-actions">
+            <button class="review-action-btn helpful-btn" data-review-id="${review.id}" data-action="helpful">
+                <i class="fas fa-thumbs-up"></i> Hữu ích (${review.helpful_count || 0})
+            </button>
+        </div>
+    `;
+    
+    // Add event listeners for actions
+    setupReviewActions(reviewCard, review);
+    
+    // Initialize helpful button state (async)
+    initializeHelpfulButtonState(reviewCard, review).catch(console.error);
+    
+    return reviewCard;
+}
+
+// Setup review actions (helpful only)
+function setupReviewActions(reviewCard, review) {
+    const helpfulBtn = reviewCard.querySelector('.helpful-btn');
+    
+    // Helpful button
+    if (helpfulBtn) {
+        helpfulBtn.addEventListener('click', async () => {
+            await handleHelpfulAction(review.id, helpfulBtn);
+        });
+    }
+}
+
+// Handle helpful action
+async function handleHelpfulAction(reviewId, button) {
     try {
-        if (!productName) return;
-        // Use GET and query param for backend compatibility, search by product name
-        const query = new URLSearchParams({
-            query: productName,
-            limit: 5
-        }).toString();
-        const response = await fetchApi(`/src/api/posts.php?action=search&${query}`, {
-            method: 'GET'
-        });
-        const discussionList = document.getElementById('related-discussion-list');
-        if (!discussionList) return;
-        discussionList.innerHTML = '';
-        // Sửa: lấy đúng trường posts từ response.data.posts hoặc response.posts
-        let posts = [];
-        if (response && response.data && Array.isArray(response.data.posts)) {
-            posts = response.data.posts;
-        } else if (response && Array.isArray(response.posts)) {
-            posts = response.posts;
-        }
-        if (response.success && posts.length > 0) {
-            posts.forEach(post => {
-                const discussionItem = document.createElement('div');
-                discussionItem.className = 'discussion-item';
-                
-                // Format date
-                const postDate = new Date(post.created_at);
-                const formattedDate = postDate.toLocaleDateString('vi-VN');
-                
-                discussionItem.innerHTML = `
-                    <h3><a href="post-detail.html?id=${post.id}">${post.title}</a></h3>
-                    <div class="meta">
-                        <span class="author">Bởi: ${getDisplayName(post)}</span>
-                        <span class="date">${formattedDate}</span>
-                        <span class="comments">${post.comment_count || 0} bình luận</span>
-                    </div>
-                `;
-                discussionList.appendChild(discussionItem);
-            });
-        } else if (response.success && posts.length === 0) {
-            discussionList.innerHTML = '<p>Chưa có thảo luận nào liên quan đến sản phẩm này.</p>';
-        } else {
-            discussionList.innerHTML = '<p>Không thể tải thảo luận liên quan.</p>';
-        }
-    } catch (error) {
-        console.error('Error loading related discussions:', error);
-    }
-}
-
-// Set up tab switching
-function setupTabs() {
-    const tabLinks = document.querySelectorAll('.tab-link');
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabLinks.forEach(tabLink => {
-        tabLink.addEventListener('click', () => {
-            tabLinks.forEach(link => link.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            tabLink.classList.add('active');
-            const tabId = tabLink.getAttribute('data-tab');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-        });
-    });
-}
-
-// Set up review form
-// Setup review form (hiển thị avatar, rating, gửi API)
-function setupReviewForm(productId) {
-    const formContainer = document.getElementById('review-form-container');
-    const form = document.getElementById('review-form');
-    if (!formContainer || !form) return;
-
-    // Kiểm tra đăng nhập để hiển thị form
-    if (typeof window.checkLoginStatus === 'function') {
-        window.checkLoginStatus().then(user => {
-            if (user) {
-                formContainer.style.display = '';
-                // Hiển thị avatar và tên
-                const avatarDiv = document.getElementById('reviewer-avatar');
-                if (avatarDiv) {
-                    avatarDiv.innerHTML = getUserAvatarHtml(user, 'reviewer-avatar');
-                }
-                document.getElementById('reviewer-name').textContent = user.full_name || 'Bạn';
-            } else {
-                formContainer.style.display = 'none';
-            }
-        });
-    }
-
-    // Modern star rating logic (Font Awesome)
-    const stars = document.querySelectorAll('#review-rating-stars .star');
-    const ratingInput = document.getElementById('review-rating');
-    let selectedRating = 0;
-
-    function updateStarIcons(val) {
-        stars.forEach((star, idx) => {
-            if (idx < val) {
-                star.classList.remove('far');
-                star.classList.add('fas', 'selected');
-            } else {
-                star.classList.remove('fas', 'selected');
-                star.classList.add('far');
-            }
-        });
-    }
-
-    stars.forEach(star => {
-        star.addEventListener('mouseenter', function() {
-            updateStarIcons(parseInt(this.dataset.value));
-        });
-        star.addEventListener('mouseleave', function() {
-            updateStarIcons(selectedRating);
-        });
-        star.addEventListener('click', function() {
-            selectedRating = parseInt(this.dataset.value);
-            ratingInput.value = selectedRating;
-            updateStarIcons(selectedRating);
-        });
-    });
-    // Khởi tạo trạng thái ban đầu
-    updateStarIcons(0);
-
-    // Gửi form đánh giá
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const content = form.querySelector('#review-content').value.trim();
-        const rating = form.querySelector('#review-rating').value;
-        if (!content || !rating || rating < 1) {
-            alert('Vui lòng nhập nội dung và chọn số sao!');
+        // Check if user is logged in using global function
+        const currentUser = await (window.checkLoginStatus ? window.checkLoginStatus() : null);
+        if (!currentUser || !currentUser.user_id) {
+            showError('Vui lòng đăng nhập để đánh dấu hữu ích');
             return;
         }
-        const formData = new FormData();
-        formData.append('product_id', productId);
-        formData.append('comment', content); // Sửa từ 'content' thành 'comment' để backend nhận đúng
-        formData.append('rating', rating);
-        try {
-            const res = await fetch('/src/api/reviews.php?action=create', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('Đánh giá của bạn đã được gửi!');
-                form.reset();
-                selectedRating = 0;
-                updateStarIcons(0);
-                // Reload reviews
-                loadProductReviews(productId);
-            } else {
-                alert(data.message || 'Gửi đánh giá thất bại!');
+        
+        // Check if user has already marked this review as helpful
+        if (hasUserMarkedHelpful(reviewId, currentUser.user_id)) {
+            showError('Bạn đã đánh dấu hữu ích cho đánh giá này rồi');
+            return;
+        }
+        
+        const response = await fetchApi('/src/api/reviews.php?action=mark_helpful', {
+            method: 'POST',
+            body: { review_id: reviewId }
+        });
+        
+        if (response.success) {
+            // Mark this review as helpful by current user
+            markReviewAsHelpful(reviewId, currentUser.user_id);
+            
+            // Update button text with new count
+            const newCount = response.data?.helpful_count || 0;
+            button.innerHTML = `<i class="fas fa-thumbs-up"></i> Hữu ích (${newCount})`;
+            button.classList.add('active');
+            button.disabled = true; // Disable button after clicking
+            showSuccess('Đã đánh dấu hữu ích');
+        } else {
+            showError(response.message || 'Có lỗi xảy ra');
+        }
+    } catch (error) {
+        console.error('Error marking review as helpful:', error);
+        showError('Có lỗi xảy ra');
+    }
+}
+
+// Setup reviews pagination
+function setupReviewsPagination(productId, currentPage, totalPages, sortBy, totalReviews) {
+    const paginationContainer = document.getElementById('reviews-pagination');
+    if (!paginationContainer) return;
+    
+    // Only show pagination if more than 3 reviews total (similar to forum logic)
+    if (!totalReviews || totalReviews <= 3 || totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '';
+    
+    // Previous button
+    if (currentPage > 1) {
+        paginationHTML += `<button class="pagination-btn" data-page="${currentPage - 1}">←</button>`;
+    } else {
+        paginationHTML += `<button class="pagination-btn" disabled>←</button>`;
+    }
+    
+    // Page numbers (similar to forum pagination logic)
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    if (startPage > 1) {
+        paginationHTML += `<button class="pagination-btn" data-page="1">1</button>`;
+        if (startPage > 2) {
+            paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === currentPage ? 'active' : '';
+        paginationHTML += `<button class="pagination-btn ${activeClass}" data-page="${i}">${i}</button>`;
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += `<span class="pagination-ellipsis">...</span>`;
+        }
+        paginationHTML += `<button class="pagination-btn" data-page="${totalPages}">${totalPages}</button>`;
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+        paginationHTML += `<button class="pagination-btn" data-page="${currentPage + 1}">→</button>`;
+    } else {
+        paginationHTML += `<button class="pagination-btn" disabled>→</button>`;
+    }
+    
+    paginationContainer.innerHTML = paginationHTML;
+    
+    // Add event listeners to pagination buttons
+    paginationContainer.querySelectorAll('.pagination-btn:not([disabled]):not(.pagination-ellipsis)').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = parseInt(btn.getAttribute('data-page'));
+            if (page && page !== currentPage) {
+                loadProductReviews(productId, page, sortBy);
             }
-        } catch (err) {
-            alert('Lỗi gửi đánh giá!');
+        });
+    });
+}
+
+// Initialize review system
+async function initializeReviewSystem(productId) {
+    await checkLoginStatusForReviews();
+    setupReviewForm(productId);
+    loadProductReviews(productId, 1, 'newest');
+}
+
+// Check login status and show appropriate review section
+async function checkLoginStatusForReviews() {
+    const loginPrompt = document.getElementById('login-prompt');
+    const reviewForm = document.getElementById('review-form-container');
+    
+    try {
+        // Use the global checkLoginStatus function from auth.js
+        const userData = await (window.checkLoginStatus ? window.checkLoginStatus() : null);
+        const isLoggedIn = !!userData;
+        
+        if (isLoggedIn) {
+            // User is logged in - show review form
+            if (loginPrompt) loginPrompt.style.display = 'none';
+            if (reviewForm) reviewForm.style.display = 'block';
+            
+            // Setup user info in review form
+            setupCurrentUserInfo(userData);
+        } else {
+            // User is not logged in - show login prompt
+            if (loginPrompt) loginPrompt.style.display = 'block';
+            if (reviewForm) reviewForm.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error checking login status for reviews:', error);
+        // Default to guest state on error
+        if (loginPrompt) loginPrompt.style.display = 'block';
+        if (reviewForm) reviewForm.style.display = 'none';
+    }
+}
+
+// Setup current user info in review form
+function setupCurrentUserInfo(userData = null) {
+    try {
+        // Use userData parameter if provided, otherwise try to get from localStorage/sessionStorage as fallback
+        const user = userData || JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+        
+        const avatarElement = document.getElementById('current-user-avatar');
+        const nameElement = document.getElementById('current-user-name');
+        
+        // Use the display name from auth system
+        const displayName = user.full_name || user.username || 'Người dùng';
+        
+        if (nameElement) {
+            nameElement.textContent = displayName;
+        }
+        
+        if (avatarElement) {
+            // Use the existing avatar system from main.js
+            const avatarHtml = getUserAvatarHtml(user, 'current-user-avatar');
+            if (avatarHtml) {
+                // Replace the image element with the proper avatar HTML
+                avatarElement.outerHTML = avatarHtml;
+            } else {
+                // Fallback to simple display
+                avatarElement.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error setting up user info:', error);
+        // Set fallback display
+        const nameElement = document.getElementById('current-user-name');
+        if (nameElement) {
+            nameElement.textContent = 'Người dùng';
+        }
+    }
+}
+
+// Setup review sorting
+function setupReviewSorting(productId) {
+    const sortSelect = document.getElementById('review-sort');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+            const sortBy = e.target.value;
+            loadProductReviews(productId, 1, sortBy);
+        });
+    }
+}
+
+// Setup review form with star rating
+function setupReviewForm(productId) {
+    const stars = document.querySelectorAll('#user-rating-stars .star');
+    const ratingValue = document.getElementById('user-rating-value');
+    const submitBtn = document.getElementById('submit-review-btn');
+    const contentTextarea = document.getElementById('review-content');
+    
+    // Setup star rating interaction
+    stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+            const rating = index + 1;
+            ratingValue.value = rating;
+            updateStarDisplay(stars, rating);
+        });
+        
+        star.addEventListener('mouseover', () => {
+            updateStarDisplay(stars, index + 1);
+        });
+    });
+    
+    // Reset stars on mouse leave
+    const starContainer = document.getElementById('user-rating-stars');
+    if (starContainer) {
+        starContainer.addEventListener('mouseleave', () => {
+            updateStarDisplay(stars, parseInt(ratingValue.value || '0'));
+        });
+    }
+    
+    // Setup submit button
+    if (submitBtn) {
+        submitBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await submitReview(productId);
+        });
+    }
+}
+
+// Update star display
+function updateStarDisplay(stars, rating) {
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+            star.classList.add('active');
+        } else {
+            star.classList.remove('fas');
+            star.classList.add('far');
+            star.classList.remove('active');
         }
     });
+}
+
+// Submit review
+async function submitReview(productId) {
+    const rating = document.getElementById('user-rating-value').value;
+    const content = document.getElementById('review-content').value.trim();
+    
+    if (!rating || rating === '0') {
+        showError('Vui lòng chọn số sao đánh giá');
+        return;
+    }
+    
+    if (!content) {
+        showError('Vui lòng nhập nội dung đánh giá');
+        return;
+    }
+    
+    try {
+        // Use the correct endpoint 'create' instead of 'add'
+        const response = await fetchApi('/src/api/reviews.php?action=create', {
+            method: 'POST',
+            body: {
+                product_id: productId,
+                rating: parseInt(rating),
+                comment: content
+            }
+        });
+        
+        if (response.success) {
+            showSuccess('Đánh giá của bạn đã được gửi thành công!');
+            
+            // Reset form
+            document.getElementById('user-rating-value').value = '0';
+            document.getElementById('review-content').value = '';
+            const stars = document.querySelectorAll('#user-rating-stars .star');
+            updateStarDisplay(stars, 0);
+            
+            // Reload reviews
+            loadProductReviews(productId, 1, document.getElementById('review-sort').value);
+        } else {
+            showError(response.message || 'Có lỗi xảy ra khi gửi đánh giá');
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        showError('Có lỗi xảy ra khi gửi đánh giá');
+    }
 }
 
 // Increment view count
@@ -669,5 +886,149 @@ async function checkAuthStatus() {
     } catch (error) {
         console.error('Error checking auth status:', error);
         return { authenticated: false };
+    }
+}
+
+// Helper functions for review display (ensure compatibility if main.js functions aren't available)
+if (typeof getDisplayName === 'undefined') {
+    function getDisplayName(user) {
+        if (!user) return "Ẩn danh";
+        if (user.full_name && user.full_name.trim()) return user.full_name;
+        if (user.username && user.username.trim()) return user.username;
+        return "Ẩn danh";
+    }
+}
+
+if (typeof getUserAvatarHtml === 'undefined') {
+    function getUserAvatarHtml(user, sizeClass = '', altText = '') {
+        const fullName = (user && user.full_name && user.full_name.trim()) ? user.full_name : 'Ẩn danh';
+        const firstInitial = getInitials(fullName);
+        const colors = ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085", "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#ecf0f1", "#95a5a6", "#f39c12", "#d35400", "#c0392b", "#03417F", "#7f8c8d"];
+        const colorIndex = firstInitial.charCodeAt(0) % colors.length;
+        const bgColor = colors[colorIndex];
+        
+        if (user && user.profile_picture && user.profile_picture.trim() !== '') {
+            const escapedAlt = altText || fullName.replace(/"/g, '&quot;');
+            return `<img src="${encodeURI(user.profile_picture)}" alt="${escapedAlt}" class="user-avatar ${sizeClass}" onerror="displayFallbackAvatar(this, '${firstInitial}', '${bgColor}')">`;
+        } else {
+            return `<div class="user-avatar-fallback ${sizeClass}" style="background-color: ${bgColor};">${firstInitial}</div>`;
+        }
+    }
+}
+
+if (typeof getInitials === 'undefined') {
+    function getInitials(name) {
+        if (!name || typeof name !== 'string') return '?';
+        const parts = name.trim().split(' ');
+        if (parts.length === 0 || parts[0].length === 0) return '?';
+        return parts[0].charAt(0).toUpperCase();
+    }
+}
+
+if (typeof displayFallbackAvatar === 'undefined') {
+    function displayFallbackAvatar(imageElement, initial, bgColor) {
+        try {
+            if (!imageElement || !imageElement.parentNode) {
+                console.error("Cannot display fallback avatar: Invalid image element or parent.");
+                return;
+            }
+
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.className = 'user-avatar-fallback user-avatar-header';
+            fallbackDiv.style.backgroundColor = bgColor;
+            fallbackDiv.textContent = initial;
+
+            imageElement.parentNode.replaceChild(fallbackDiv, imageElement);
+            console.log("Replaced broken avatar with fallback initial.");
+
+        } catch (error) {
+            console.error("Error in displayFallbackAvatar:", error);
+            if (imageElement && imageElement.parentNode) {
+                const fallbackText = document.createTextNode(initial || '?');
+                imageElement.parentNode.replaceChild(fallbackText, imageElement);
+            }
+        }
+    }
+}
+
+// Helper functions for managing helpful review state (để tránh user ấn helpful nhiều lần)
+/**
+ * Check if current user has marked a review as helpful
+ * @param {number} reviewId - ID của review
+ * @param {number} userId - ID của user (optional, will get from checkLoginStatus if not provided)
+ * @returns {boolean} - True nếu user đã ấn helpful, false nếu chưa
+ */
+function hasUserMarkedHelpful(reviewId, userId = null) {
+    try {
+        if (!userId) {
+            // Get current user ID for user-specific storage
+            const currentUser = JSON.parse(localStorage.getItem('userData') || sessionStorage.getItem('userData') || '{}');
+            userId = currentUser.user_id || currentUser.id; // Try both for compatibility
+        }
+        
+        if (!userId) {
+            return false; // User not logged in
+        }
+        
+        // Create user-specific key
+        const storageKey = `helpful_reviews_${userId}`;
+        const helpfulReviews = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        return helpfulReviews.includes(parseInt(reviewId));
+    } catch (error) {
+        console.error('Error checking helpful status:', error);
+        return false;
+    }
+}
+
+/**
+ * Mark a review as helpful by current user
+ * @param {number} reviewId - ID của review
+ * @param {number} userId - ID của user (optional, will get from storage if not provided)
+ */
+function markReviewAsHelpful(reviewId, userId = null) {
+    try {
+        if (!userId) {
+            // Get current user ID for user-specific storage
+            const currentUser = JSON.parse(localStorage.getItem('userData') || sessionStorage.getItem('userData') || '{}');
+            userId = currentUser.user_id || currentUser.id; // Try both for compatibility
+        }
+        
+        if (!userId) {
+            console.warn('Cannot mark helpful: User not logged in');
+            return;
+        }
+        
+        // Create user-specific key
+        const storageKey = `helpful_reviews_${userId}`;
+        const helpfulReviews = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        
+        if (!helpfulReviews.includes(parseInt(reviewId))) {
+            helpfulReviews.push(parseInt(reviewId));
+            localStorage.setItem(storageKey, JSON.stringify(helpfulReviews));
+        }
+    } catch (error) {
+        console.error('Error marking review as helpful:', error);
+    }
+}
+
+/**
+ * Initialize helpful buttons state when loading reviews
+ * @param {HTMLElement} reviewCard - Review card element
+ * @param {Object} review - Review data object
+ */
+async function initializeHelpfulButtonState(reviewCard, review) {
+    try {
+        // Get current user to check helpful status
+        const currentUser = await (window.checkLoginStatus ? window.checkLoginStatus() : null);
+        if (currentUser && currentUser.user_id) {
+            const helpfulBtn = reviewCard.querySelector('.helpful-btn');
+            if (helpfulBtn && hasUserMarkedHelpful(review.id, currentUser.user_id)) {
+                helpfulBtn.classList.add('active');
+                helpfulBtn.disabled = true;
+                helpfulBtn.innerHTML = `<i class="fas fa-thumbs-up"></i> Hữu ích (${review.helpful_count || 0})`;
+            }
+        }
+    } catch (error) {
+        console.error('Error initializing helpful button state:', error);
     }
 }

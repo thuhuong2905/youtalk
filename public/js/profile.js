@@ -133,6 +133,10 @@ async function loadUserProfile() {
             if (profileData && profileData.user && profileData.counts) {
                 // Lưu tên user toàn cục để cập nhật các tab
                 window.profileUserFullName = profileData.user.full_name || 'Ẩn danh';
+                // Lưu thông tin để kiểm tra quyền xóa bài đăng
+                window.isOwnProfile = isOwnProfile;
+                window.currentUserId = currentUser ? currentUser.user_id : null;
+                
                 // Cập nhật tên động cho các tab
                 const dynamicUsernames = document.querySelectorAll('.dynamic-username');
                 dynamicUsernames.forEach(element => {
@@ -618,7 +622,12 @@ function renderPostsList(posts, container) {
         const date = new Date(post.created_at);
         const formattedDate = date.toLocaleDateString('vi-VN');
         
+        // Kiểm tra xem có phải bài đăng của chính mình không
+        const isOwnPost = window.isOwnProfile && window.currentUserId && 
+                         post.user_id && window.currentUserId.toString() === post.user_id.toString();
+        
         postElement.innerHTML = `
+            ${isOwnPost ? `<button class="delete-post-btn" onclick="deletePost(${post.id}, this)" title="Xóa bài đăng">Xóa</button>` : ''}
             <div class="discussion-title">
                 <a href="post-detail.html?id=${post.id}">${post.title}</a>
             </div>
@@ -652,7 +661,12 @@ function renderReviewsList(reviews, container) {
         // Generate star rating HTML using Font Awesome
         const stars = generateStars(review.rating);
         
+        // Kiểm tra xem có phải đánh giá của chính mình không
+        const isOwnReview = window.isOwnProfile && window.currentUserId && 
+                           review.user_id && window.currentUserId.toString() === review.user_id.toString();
+        
         reviewElement.innerHTML = `
+            ${isOwnReview ? `<button class="delete-review-btn" onclick="deleteReview(${review.id}, this)" title="Xóa đánh giá">Xóa</button>` : ''}
             <div class="review-header">
                 <div class="review-title">
                     Đánh giá cho: <a href="product-detail.html?id=${review.product_id}">${review.product_name}</a>
@@ -696,7 +710,12 @@ function renderCommentsList(comments, container) {
             targetTitle = comment.product_name || 'Sản phẩm';
         }
         
+        // Kiểm tra xem có phải bình luận của chính mình không
+        const isOwnComment = window.isOwnProfile && window.currentUserId && 
+                            comment.user_id && window.currentUserId.toString() === comment.user_id.toString();
+        
         commentElement.innerHTML = `
+            ${isOwnComment ? `<button class="delete-comment-btn" onclick="deleteComment(${comment.id}, this)" title="Xóa bình luận">Xóa</button>` : ''}
             <div class="comment-content">Nội dung bình luận: ${comment.content}</div>
             <div class="comment-meta">
                 <span>Ngày đăng: <i class="icon-calendar"></i> ${formattedDate}</span>
@@ -1205,3 +1224,266 @@ function initializeFollowSystem() {
             });
     };
 }
+
+/**
+ * Xóa bài đăng
+ * @param {number} postId - ID của bài đăng cần xóa
+ * @param {HTMLElement} buttonElement - Element nút xóa để disable
+ */
+async function deletePost(postId, buttonElement) {
+    // Hiển thị modal xác nhận
+    if (!confirm('Bạn có chắc chắn muốn xóa bài đăng này? Hành động này không thể hoàn tác.')) {
+        return;
+    }
+    
+    try {
+        // Disable nút để tránh click nhiều lần
+        if (buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.textContent = 'Đang xóa...';
+        }
+        
+        // Gọi API xóa bài đăng
+        const response = await fetchApi(`/src/api/posts.php?action=delete&id=${postId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        if (response && (response.success === true || response.success === 200)) {
+            // Hiển thị thông báo thành công
+            showNotification('Xóa bài đăng thành công!', 'success');
+            
+            // Xóa element khỏi DOM
+            const postElement = buttonElement.closest('.discussion-item');
+            if (postElement) {
+                postElement.style.opacity = '0.5';
+                postElement.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    postElement.remove();
+                    
+                    // Kiểm tra nếu không còn bài đăng nào
+                    const container = document.getElementById('user-posts-list');
+                    if (container && container.children.length === 0) {
+                        container.innerHTML = `<p class="empty-state">${getEmptyStateMessage("posts")}</p>`;
+                    }
+                }, 300);
+            }
+            
+            // Cập nhật số đếm bài đăng
+            const postCountElement = document.getElementById('profile-post-count');
+            if (postCountElement) {
+                const currentCount = parseInt(postCountElement.textContent) || 0;
+                if (currentCount > 0) {
+                    postCountElement.textContent = currentCount - 1;
+                }
+            }
+            
+        } else {
+            throw new Error(response?.message || 'Không thể xóa bài đăng');
+        }
+        
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        showNotification('Có lỗi xảy ra khi xóa bài đăng: ' + error.message, 'error');
+        
+        // Khôi phục nút nếu có lỗi
+        if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.textContent = 'Xóa';
+        }
+    }
+}
+
+/**
+ * Hiển thị thông báo
+ * @param {string} message - Nội dung thông báo
+ * @param {string} type - Loại thông báo (success, error, warning)
+ */
+function showNotification(message, type = 'info') {
+    // Tạo element thông báo
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    `;
+    
+    // Thiết lập màu sắc theo loại
+    switch (type) {
+        case 'success':
+            notification.style.backgroundColor = '#28a745';
+            break;
+        case 'error':
+            notification.style.backgroundColor = '#dc3545';
+            break;
+        case 'warning':
+            notification.style.backgroundColor = '#ffc107';
+            notification.style.color = '#212529';
+            break;
+        default:
+            notification.style.backgroundColor = '#17a2b8';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Hiển thị thông báo
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Tự động ẩn sau 4 giây
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
+    
+    // Cho phép click để đóng
+    notification.addEventListener('click', () => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    });
+}
+
+/**
+ * Xóa đánh giá
+ * @param {number} reviewId - ID của đánh giá cần xóa
+ * @param {HTMLElement} buttonElement - Element nút xóa để disable
+ */
+async function deleteReview(reviewId, buttonElement) {
+    // Hiển thị modal xác nhận
+    if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.')) {
+        return;
+    }
+    
+    try {
+        // Disable nút để tránh click nhiều lần
+        if (buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.textContent = 'Đang xóa...';
+        }
+        
+        // Gọi API xóa đánh giá
+        const response = await fetchApi(`/src/api/reviews.php?action=delete&id=${reviewId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        if (response && (response.success === true || response.success === 200)) {
+            // Hiển thị thông báo thành công
+            showNotification('Xóa đánh giá thành công!', 'success');
+            
+            // Xóa element khỏi DOM
+            const reviewElement = buttonElement.closest('.review-item');
+            if (reviewElement) {
+                reviewElement.style.opacity = '0.5';
+                reviewElement.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    reviewElement.remove();
+                    
+                    // Kiểm tra nếu không còn đánh giá nào
+                    const container = document.getElementById('user-reviews-list');
+                    if (container && container.children.length === 0) {
+                        container.innerHTML = `<p class="empty-state">${getEmptyStateMessage("reviews")}</p>`;
+                    }
+                }, 300);
+            }
+            
+        } else {
+            throw new Error(response?.message || 'Không thể xóa đánh giá');
+        }
+        
+    } catch (error) {
+        console.error('Error deleting review:', error);
+        showNotification('Có lỗi xảy ra khi xóa đánh giá: ' + error.message, 'error');
+        
+        // Khôi phục nút nếu có lỗi
+        if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.textContent = 'Xóa';
+        }
+    }
+}
+
+/**
+ * Xóa bình luận
+ * @param {number} commentId - ID của bình luận cần xóa
+ * @param {HTMLElement} buttonElement - Element nút xóa để disable
+ */
+async function deleteComment(commentId, buttonElement) {
+    // Hiển thị modal xác nhận
+    if (!confirm('Bạn có chắc chắn muốn xóa bình luận này? Hành động này không thể hoàn tác.')) {
+        return;
+    }
+    
+    try {
+        // Disable nút để tránh click nhiều lần
+        if (buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.textContent = 'Đang xóa...';
+        }
+        
+        // Gọi API xóa bình luận
+        const response = await fetchApi(`/src/api/comments.php?action=delete&id=${commentId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        if (response && (response.success === true || response.success === 200)) {
+            // Hiển thị thông báo thành công
+            showNotification('Xóa bình luận thành công!', 'success');
+            
+            // Xóa element khỏi DOM
+            const commentElement = buttonElement.closest('.comment-item');
+            if (commentElement) {
+                commentElement.style.opacity = '0.5';
+                commentElement.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    commentElement.remove();
+                    
+                    // Kiểm tra nếu không còn bình luận nào
+                    const container = document.getElementById('user-comments-list');
+                    if (container && container.children.length === 0) {
+                        container.innerHTML = `<p class="empty-state">${getEmptyStateMessage("comments")}</p>`;
+                    }
+                }, 300);
+            }
+            
+        } else {
+            throw new Error(response?.message || 'Không thể xóa bình luận');
+        }
+        
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        showNotification('Có lỗi xảy ra khi xóa bình luận: ' + error.message, 'error');
+        
+        // Khôi phục nút nếu có lỗi
+        if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.textContent = 'Xóa';
+        }
+    }
+}
+
+// Đảm bảo các hàm có thể được gọi từ global scope
+window.deletePost = deletePost;
+window.deleteReview = deleteReview;
+window.deleteComment = deleteComment;

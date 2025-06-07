@@ -492,7 +492,6 @@
 .user-grid-item:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    border-color: var(--color-primary);
 }
 
 /* Avatar styles */
@@ -772,11 +771,49 @@
     box-shadow: var(--box-shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid var(--color-border);
+    position: relative; /* Để position nút xóa */
 }
 
 #user-posts-list .discussion-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Nút xóa bài đăng */
+.delete-post-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.delete-post-btn:hover {
+    background: #c82333;
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.delete-post-btn:active {
+    transform: scale(0.95);
+}
+
+/* Discussion item actions container */
+.discussion-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border);
 }
 
 .discussion-header {
@@ -892,7 +929,7 @@
 #user-reviews-list .review-item {
     background: var(--color-background);
     border-radius: var(--border-radius);
-    padding: 20px;
+    padding: 25px 20px 20px 20px; /* Tăng padding-top từ 20px lên 25px */
     box-shadow: var(--box-shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid var(--color-border);
@@ -1046,6 +1083,45 @@
     font-size: 1.1em;
 }
 
+/* Nút xóa cho reviews và comments */
+.delete-review-btn,
+.delete-comment-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.delete-review-btn:hover,
+.delete-comment-btn:hover {
+    background: #c82333;
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.delete-review-btn:active,
+.delete-comment-btn:active {
+    transform: scale(0.95);
+}
+
+/* Đảm bảo position relative cho các container */
+#user-reviews-list .review-item,
+#user-comments-list .comment-item {
+    position: relative;
+}
+
 /* Comments Tab */
 #user-comments-list {
     display: flex;
@@ -1056,7 +1132,7 @@
 #user-comments-list .comment-item {
     background: var(--color-background);
     border-radius: var(--border-radius);
-    padding: 20px;
+    padding: 25px 20px 20px 20px; /* Tăng padding-top từ 20px lên 25px */
     box-shadow: var(--box-shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid var(--color-border);
@@ -1170,17 +1246,6 @@
 
 .comment-action-btn i {
     font-size: 1.1em;
-}
-
-/* Centered message for logged out state */
-.profile-logged-out-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  text-align: center;
-  gap: 18px;
 }
 
 /* Responsive Design */

@@ -421,22 +421,23 @@
     top: 0;
     right: 0;
     font-size: var(--text-xs);
-    color: #ffffff;
-    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    color: var(--color-primary);
+    background: none;
     padding: 4px 8px;
-    border-radius: 12px;
+    border-radius: 0;
     text-decoration: none;
     font-weight: var(--font-medium);
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(3, 65, 127, 0.2);
+    box-shadow: none;
     z-index: 10;
 }
 
 #auth-section .form-group .forgot-password-link:hover {
-    background: linear-gradient(45deg, var(--color-secondary), var(--color-accent3));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(3, 65, 127, 0.3);
-    color: #ffffff;
+    background: none;
+    transform: none;
+    box-shadow: none;
+    color: var(--color-secondary);
+    text-decoration: underline;
 }
 
 #auth-section .password-wrapper {
@@ -497,21 +498,22 @@
 #auth-section .auth-submit-btn {
     width: 100%;
     padding: 12px;
-    background-color: var(--color-primary);
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
     color: white;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: 12px;
     font-size: var(--text-base);
     font-weight: var(--font-semibold);
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: var(--font-primary);
+    box-shadow: 0 2px 8px rgba(3, 65, 127, 0.2);
 }
 
 #auth-section .auth-submit-btn:hover {
-    background-color: var(--color-secondary);
+    background: linear-gradient(45deg, var(--color-secondary), var(--color-accent3));
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(3, 65, 127, 0.3);
 }
 
 #auth-section .form-error-container {

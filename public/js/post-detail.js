@@ -97,6 +97,9 @@ function renderPostDetails(post) {
     // Update tags and avatars
     updatePostTags(post.tags);
     updateAuthorAvatars(post.profile_picture, post.username, post.full_name);
+    
+    // Update media gallery
+    updateMediaGallery(post.media);
 }
 
 // Load comments for the post
@@ -302,40 +305,6 @@ function setupCommentForm(postId) {
     }
 }
 
-// Setup authentication-dependent UI
-async function setupAuthDependentUI() {
-    try {
-        // Use the global checkLoginStatus function from auth.js
-        const userData = await (window.checkLoginStatus ? window.checkLoginStatus() : null);
-        const isLoggedIn = !!userData;
-        
-        const authRequiredElements = document.querySelectorAll('.auth-required');
-        const guestOnlyElements = document.querySelectorAll('.guest-only');
-        
-        if (isLoggedIn) {
-            authRequiredElements.forEach(el => el.style.display = 'block');
-            guestOnlyElements.forEach(el => el.style.display = 'none');
-            
-            console.log('User is logged in:', userData);
-        } else {
-            authRequiredElements.forEach(el => el.style.display = 'none');
-            guestOnlyElements.forEach(el => el.style.display = 'block');
-            
-            console.log('User is not logged in');
-        }
-        
-        return isLoggedIn;
-    } catch (error) {
-        console.error('Error setting up auth-dependent UI:', error);
-        // Default to guest state on error
-        const authRequiredElements = document.querySelectorAll('.auth-required');
-        const guestOnlyElements = document.querySelectorAll('.guest-only');
-        authRequiredElements.forEach(el => el.style.display = 'none');
-        guestOnlyElements.forEach(el => el.style.display = 'block');
-        return false;
-    }
-}
-
 // Hide loading placeholders
 function hideLoadingPlaceholders() {
     const loadingPlaceholders = document.querySelectorAll('.loading-placeholder');
@@ -344,48 +313,155 @@ function hideLoadingPlaceholders() {
     });
 }
 
-// Utility functions
-function formatDate(dateString) {
-    if (!dateString) return '';
+// Update media gallery - simplified
+function updateMediaGallery(media) {
+    const galleryContainer = document.getElementById('post-media-gallery');
+    const mediaGrid = document.getElementById('media-grid');
+    const postBody = document.getElementById('post-body');
     
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+    if (!media || !Array.isArray(media) || media.length === 0) {
+        galleryContainer.style.display = 'none';
+        if (postBody) postBody.classList.remove('has-gallery');
+        return;
+    }
+    
+    // Add has-gallery class to post body
+    if (postBody) postBody.classList.add('has-gallery');
+    
+    // Clear existing content
+    mediaGrid.innerHTML = '';
+    
+    // Simple grid layout
+    mediaGrid.className = 'media-grid';
+    
+    // Create simple media items
+    media.forEach((imagePath, index) => {
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'media-item';
+        mediaItem.style.cssText = `
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f5f5f5;
+        `;
+        
+        mediaItem.innerHTML = `
+            <img src="${imagePath}" alt="Hình ảnh ${index + 1}" loading="lazy" 
+                 style="width: 100%; height: 200px; object-fit: cover; display: block;"
+                 onerror="this.style.display='none'">
+        `;
+        
+        // No click handler - just display images
+        
+        mediaGrid.appendChild(mediaItem);
+    });
+    
+    // Show gallery
+    galleryContainer.style.display = 'block';
+}
+
+// Simple image display - no lightbox functionality needed
+
+// Thay thế các hàm showNotification cũ bằng showSuccess/showError/showWarning từ notifications.js
+
+// Utility functions for DOM manipulation and error handling
+function safeSetTextContent(elementId, content) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = content || '';
+    }
+}
+
+function safeSetInnerHTML(elementId, content) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.innerHTML = content || '';
+    }
+}
+
+function showPostError(title, message) {
+    document.getElementById('post-title').textContent = title;
+    document.getElementById('post-body').innerHTML = `
+        <div class="error-state">
+            <div class="error-icon">⚠️</div>
+            <p class="error-message">${message}</p>
+            <a href="index.html" class="back-link">← Quay lại trang chủ</a>
+        </div>
+    `;
+}
+
+function showLoadingState() {
+    // Show loading indicators
+    const loadingElements = document.querySelectorAll('.loading-placeholder');
+    loadingElements.forEach(el => {
+        if (el) el.style.display = 'flex';
     });
 }
 
-function truncateText(text, maxLength) {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+function hideLoadingState() {
+    // Hide loading indicators
+    const loadingElements = document.querySelectorAll('.loading-placeholder');
+    loadingElements.forEach(el => {
+        if (el) el.style.display = 'none';
+    });
 }
 
-// Function to check authentication status (fallback if auth.js not loaded)
-function checkAuthStatus() {
-    // First try to use the global checkAuthStatus from auth.js if available
-    if (typeof window.checkAuthStatus === 'function') {
-        return window.checkAuthStatus();
+function showErrorState(message) {
+    console.error('Error state:', message);
+    if (typeof showError === 'function') {
+        showError(message);
+    } else {
+        alert(message);
     }
+}
+
+// Format date function
+function formatDate(dateString) {
+    if (!dateString) return '--/--/----';
     
-    // Fallback: Check local storage/session storage
-    const userToken = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
-    const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
-    
-    // Return true if user is logged in
-    return !!(userToken && userData);
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return '--/--/----';
+    }
+}
+
+// Setup authentication-dependent UI
+async function setupAuthDependentUI() {
+    try {
+        // Check if user is logged in using the global auth check
+        const isLoggedIn = await (window.checkLoginStatus ? !!(await window.checkLoginStatus()) : false);
+        
+        const authRequired = document.querySelectorAll('.auth-required');
+        const guestOnly = document.querySelectorAll('.guest-only');
+        
+        if (isLoggedIn) {
+            authRequired.forEach(el => el.style.display = 'block');
+            guestOnly.forEach(el => el.style.display = 'none');
+        } else {
+            authRequired.forEach(el => el.style.display = 'none');
+            guestOnly.forEach(el => el.style.display = 'block');
+        }
+    } catch (error) {
+        console.error('Error setting up auth UI:', error);
+        // Default to guest state
+        const authRequired = document.querySelectorAll('.auth-required');
+        const guestOnly = document.querySelectorAll('.guest-only');
+        authRequired.forEach(el => el.style.display = 'none');
+        guestOnly.forEach(el => el.style.display = 'block');
+    }
 }
 
 // Fallback fetchApi function if not available globally
 if (typeof window.fetchApi === 'undefined') {
-    console.warn('Global fetchApi not found, using fallback');
-    window.fetchApi = async function(endpoint, options = {}) {
-        const API_BASE_URL = '/src/api/';
-        const url = endpoint.startsWith('http') ? endpoint : API_BASE_URL + endpoint;
-        
+    window.fetchApi = async function(url, options = {}) {
         const defaultOptions = {
             method: 'GET',
             headers: {
@@ -402,7 +478,7 @@ if (typeof window.fetchApi === 'undefined') {
         }
         
         try {
-            const response = await fetch(url, mergedOptions);
+            const response = await fetch(`/src/api/${url}`, mergedOptions);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -421,39 +497,20 @@ if (typeof window.fetchApi === 'undefined') {
     };
 }
 
-// Utility functions for DOM manipulation and error handling
-function safeSetTextContent(elementId, content) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.textContent = content;
+/**
+ * Helper function to truncate text with proper word boundary
+ * @param {string} text - The text to truncate
+ * @param {number} maxLength - Maximum length
+ * @returns {string} - Truncated text with ellipsis
+ */
+function truncateText(text, maxLength) {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    // Find the last space within the maxLength to avoid cutting words
+    let truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > maxLength / 2) { // Only cut at space if it's reasonably far in
+        truncated = truncated.substring(0, lastSpace);
     }
+    return truncated + "...";
 }
-
-function safeSetInnerHTML(elementId, content) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.innerHTML = content;
-    }
-}
-
-function showPostError(title, message) {
-    safeSetTextContent('post-title', title);
-    safeSetInnerHTML('post-body', `<p class="error-message">${message}</p>`);
-}
-
-function showLoadingState() {
-    const loadingElements = document.querySelectorAll('.loading-placeholder');
-    loadingElements.forEach(el => el.style.display = 'block');
-}
-
-function hideLoadingState() {
-    const loadingElements = document.querySelectorAll('.loading-placeholder');
-    loadingElements.forEach(el => el.style.display = 'none');
-}
-
-function showErrorState(message) {
-    safeSetTextContent('post-title', 'Có lỗi xảy ra');
-    safeSetInnerHTML('post-body', `<p class="error-message">${message}</p>`);
-}
-
-// Thay thế các hàm showNotification cũ bằng showSuccess/showError/showWarning từ notifications.js

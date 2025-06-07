@@ -11,6 +11,7 @@
     <script defer src="js/main.js"></script>
     <script defer src="js/api.js"></script>
     <script defer src="js/avatar.js"></script>
+    <script defer src="js/notifications.js"></script>
     <script defer src="js/product-detail.js"></script>
 </head>
 <body>
@@ -22,20 +23,7 @@
             <nav class="main-nav">
                  <ul>
                     <li><a href="index.html">Trang chủ</a></li>
-                    <li class="dropdown">
-                        <a href="#">Danh mục</a>
-                        <ul class="dropdown-menu">
-                            <li><a href="category.html?id=1">Công nghệ</a></li>
-                            <li><a href="category.html?id=2">Thời trang</a></li>
-                            <li><a href="category.html?id=3">Du lịch</a></li>
-                            <li><a href="category.html?id=4">Ẩm thực</a></li>
-                            <li><a href="category.html?id=5">Giáo dục</a></li>
-                            <li><a href="category.html?id=6">Sức khỏe</a></li>
-                            <li><a href="category.html?id=7">Giải trí</a></li>
-                            <li><a href="category.html?id=8">Nội thất</a></li>
-                            <li><a href="category.html?id=9">Làm đẹp</a></li>
-                        </ul>
-                    </li>
+                    <li><a href="category.html">Danh mục</a></li>
                     <li><a href="forum.html">Diễn đàn</a></li>
                     <li><a href="post-create.html">Đăng bài</a></li>
                 </ul>
@@ -73,114 +61,94 @@
                     </div>
                     <div class="product-summary">
                         <h1 id="product-name">Tên Sản phẩm/Dịch vụ</h1> <!-- Dynamic -->
-                        <div class="product-meta">
-                            <span id="product-brand">Thương hiệu/Nhà cung cấp</span> <!-- Dynamic -->
-                            <div class="rating-summary">
-                                <span class="stars" id="product-avg-rating">★★★★☆</span> <!-- Dynamic -->
-                                <span id="product-review-count">(0 đánh giá)</span> <!-- Dynamic -->
-                            </div>
+                        <div class="rating-summary">
+                            <span class="stars" id="product-avg-rating">★★★★☆</span> <!-- Dynamic -->
+                            <span id="product-review-count">(0 đánh giá)</span> <!-- Dynamic -->
                         </div>
                         <div id="product-price" class="price">Giá: Liên hệ</div> <!-- Dynamic -->
-                        <div id="product-tags" class="tags">
-                            <!-- Tags like "Chất lượng cao" loaded here -->
+                        <div id="product-description" class="product-description">
+                            <!-- Product description will be loaded here -->
                         </div>
-                        <div class="product-actions">
-                            <button id="share-btn" class="action-btn">Chia sẻ</button>
-                            <button id="contact-supplier-btn" class="action-btn">Liên hệ nhà cung cấp</button>
+                        <div id="product-specs" class="product-specs">
+                            <h4>Thông số kỹ thuật:</h4>
+                            <ul id="product-specs-list">
+                                <!-- Specs will be loaded here -->
+                            </ul>
+                        </div>
+                        <div class="purchase-links">
+                            <p class="purchase-label">🛒 Mua tại:</p>
+                            <div class="platform-buttons">
+                                <a href="#" id="shopee-link" class="platform-btn shopee-btn" target="_blank" style="display: none;">
+                                    <i class="fas fa-shopping-bag"></i> Shopee
+                                </a>
+                                <a href="#" id="lazada-link" class="platform-btn lazada-btn" target="_blank" style="display: none;">
+                                    <i class="fas fa-store"></i> Lazada
+                                </a>
+                                <a href="#" id="tiki-link" class="platform-btn tiki-btn" target="_blank" style="display: none;">
+                                    <i class="fas fa-shopping-cart"></i> Tiki
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="product-details-tabs">
-                    <div class="tab-navigation">
-                        <button class="tab-link active" data-tab="description">Mô tả chi tiết</button>
-                        <button class="tab-link" data-tab="specs">Thông số kỹ thuật</button> <!-- Hide if not applicable -->
-                        <button class="tab-link" data-tab="reviews">Đánh giá</button>
-                        <button class="tab-link" data-tab="discussions">Thảo luận liên quan</button>
-                    </div>
+                <!-- Review Filters (outside the main reviews container) -->
+                <div class="review-filters">
+                    <label for="review-sort">Sắp xếp:</label>
+                    <select id="review-sort">
+                        <option value="newest">Mới nhất</option>
+                        <option value="helpful">Hữu ích nhất</option>
+                        <option value="highest">Đánh giá cao nhất</option>
+                        <option value="lowest">Đánh giá thấp nhất</option>
+                    </select>
+                </div>
 
-                    <!-- Tab Description -->
-                    <div id="tab-description" class="tab-content active card-box">
-                        <h2>Mô tả</h2>
-                        <p id="product-description-content">Nội dung mô tả chi tiết sản phẩm/dịch vụ...</p>
-                    </div>
-
-                    <!-- Tab Specs -->
-                    <div id="tab-specs" class="tab-content card-box">
-                        <h2>Thông số kỹ thuật / Chi tiết dịch vụ</h2>
-                        <ul id="product-specs-list">
-                        </ul>
-                    </div>
-
-                    <!-- Tab Reviews -->
-                    <div id="tab-reviews" class="tab-content card-box">
-                        <h2>Đánh giá từ cộng đồng</h2>
-                        <div class="reviews-summary">
-                        </div>
-                        <div class="review-actions">
-                            <!-- Toggle buttons for reviews and comments -->
-                            <div class="review-toggle">
-                                <button class="toggle-btn active" data-type="reviews">Đánh giá có rating</button>
-                                <button class="toggle-btn" data-type="comments">Bình luận</button>
-                            </div>
+                <!-- Reviews Container -->
+                <div class="reviews-container card-box">
+                    <h3>Đánh giá từ người dùng</h3>
+                    
+                    <!-- Write Review Section -->
+                    <div class="write-review-section">
+                        <!-- Login Prompt (shown when not logged in) -->
+                        <div class="login-prompt card-box" id="login-prompt">
+                            Vui lòng đăng nhập để bình luận.
                         </div>
                         
-                        <!-- Review Form (có rating) -->
-                        <div id="review-form-container" style="display: none;">
-                            <form id="review-form">
-                                <div class="form-group reviewer-info">
-                                    <div class="reviewer-avatar" id="reviewer-avatar"></div>
-                                    <span id="reviewer-name">Bạn</span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="review-rating" style="display:inline-block; margin-right:8px; vertical-align:middle;">Đánh giá sản phẩm:</label>
-                                    <span class="stars rating-select-inline" id="review-rating-stars" style="display:inline-flex; vertical-align:middle; font-size:1.2em; gap:2px;">
-                                        <i data-value="1" class="star far fa-star"></i>
-                                        <i data-value="2" class="star far fa-star"></i>
-                                        <i data-value="3" class="star far fa-star"></i>
-                                        <i data-value="4" class="star far fa-star"></i>
-                                        <i data-value="5" class="star far fa-star"></i>
-                                    </span>
-                                    <input type="hidden" id="review-rating" name="rating" value="0" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="review-content">Nội dung đánh giá</label>
-                                    <textarea id="review-content" name="content" rows="4" required placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."></textarea>
-                                </div>
-                                <button type="submit" class="action-btn primary">Gửi đánh giá</button>
-                            </form>
-                        </div>
-
-                        <!-- Comment Form (không cần rating) -->
-                        <div id="comment-form-container" style="display: none;">
-                            <form id="product-comment-form">
-                                <div class="form-group commenter-info">
-                                    <div class="commenter-avatar" id="commenter-avatar"></div>
-                                    <span id="commenter-name">Bạn</span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="comment-content">Chia sẻ ý kiến của bạn</label>
-                                    <textarea id="comment-content" name="content" rows="4" required placeholder="Viết bình luận về sản phẩm này..."></textarea>
-                                </div>
-                                <button type="submit" class="action-btn primary">Gửi bình luận</button>
-                            </form>
-                        </div>
-
-                        <div id="reviews-list">
-                        </div>
-                        <div id="comments-list" style="display: none;">
-                        </div>
-                        <div id="pagination-reviews">
-                        </div>
-                        <div id="pagination-comments" style="display: none;">
+                        <!-- Review Form (shown when logged in) -->
+                        <div class="review-form card-box" id="review-form-container" style="display: none;">
+                            <div class="user-info">
+                                <img class="avatar" id="current-user-avatar" src="" alt="" style="display: none;">
+                                <span class="fullname" id="current-user-name"></span>
+                            </div>
+                            <div class="rating-input">
+                                <label>Đánh giá:</label>
+                                <span class="star-rating" id="user-rating-stars">
+                                    <i data-value="1" class="star far fa-star"></i>
+                                    <i data-value="2" class="star far fa-star"></i>
+                                    <i data-value="3" class="star far fa-star"></i>
+                                    <i data-value="4" class="star far fa-star"></i>
+                                    <i data-value="5" class="star far fa-star"></i>
+                                </span>
+                                <input type="hidden" id="user-rating-value" value="0">
+                            </div>
+                            <div class="content-input">
+                                <label for="review-content">Nội dung:</label>
+                                <textarea id="review-content" placeholder="Nhập đánh giá của bạn..." rows="4"></textarea>
+                            </div>
+                            <button id="submit-review-btn" class="submit-review">Gửi đánh giá</button>
                         </div>
                     </div>
-
-                    <!-- Tab Discussions -->
-                    <div id="tab-discussions" class="tab-content card-box">
-                        <h2>Thảo luận liên quan</h2>
-                        <div id="related-discussion-list">
-                        </div>
+                    
+                    <hr class="section-divider">
+                    
+                    <!-- Reviews List -->
+                    <div class="reviews-list" id="reviews-list">
+                        <!-- Review cards will be loaded here -->
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="pagination" id="reviews-pagination">
+                        <!-- Pagination controls will be loaded here -->
                     </div>
                 </div>
 
@@ -210,6 +178,10 @@
                 <p>Hotline: 1900 1234</p>
                 <div class="social-links">
                     <!-- Social media links -->
+                    <a href="https://facebook.com" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="https://twitter.com" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com" class="social-link"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
             <div class="footer-column legal">

@@ -185,14 +185,20 @@ function initializeSmoothScroll() {
     document.querySelectorAll("a[href^=\"#\"]").forEach((anchor) => {
         anchor.addEventListener("click", function (e) {
             const targetId = this.getAttribute("href");
-            if (targetId && targetId !== "#") {
+            // Only process if it's a valid internal anchor (starts with # and is not just #)
+            if (targetId && targetId.startsWith("#") && targetId.length > 1 && !targetId.includes("http")) {
                 e.preventDefault();
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80, // Adjust for header height
-                        behavior: "smooth",
-                    });
+                try {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80, // Adjust for header height
+                            behavior: "smooth",
+                        });
+                    }
+                } catch (error) {
+                    // If querySelector fails (invalid selector), just ignore
+                    console.warn('Invalid selector for smooth scroll:', targetId);
                 }
             }
         });
@@ -377,4 +383,3 @@ if (typeof window.fetchApi === 'undefined') {
         }
     };
 }
-

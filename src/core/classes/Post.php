@@ -50,6 +50,10 @@ class Post {
                 // Xử lý các trường JSON
                 if (!empty($post['media'])) {
                     $post['media'] = json_decode($post['media'], true);
+                    // Xử lý đường dẫn ảnh trên server
+                    if (is_array($post['media'])) {
+                        $post['media'] = $this->processImagePaths($post['media']);
+                    }
                 }
                 if (!empty($post['tags'])) {
                     $post['tags'] = json_decode($post['tags'], true);
@@ -170,6 +174,10 @@ class Post {
             foreach ($posts as &$post) {
                 if (!empty($post['media'])) {
                     $post['media'] = json_decode($post['media'], true);
+                    // Xử lý đường dẫn ảnh trên server
+                    if (is_array($post['media'])) {
+                        $post['media'] = $this->processImagePaths($post['media']);
+                    }
                 }
                 if (!empty($post['tags'])) {
                     $post['tags'] = json_decode($post['tags'], true);
@@ -445,6 +453,59 @@ class Post {
             error_log('Lỗi khi đếm bài viết theo ID người dùng: ' . $e->getMessage());
             return 0; // Trả về 0 khi có lỗi
         }
+    }
+
+    /**
+     * Xử lý đường dẫn ảnh - thêm prefix /public/ và đảm bảo extension đúng
+     * 
+     * @param array $imagePaths Mảng các đường dẫn ảnh từ database
+     * @return array Mảng đường dẫn ảnh đã được xử lý
+     */
+    private function processImagePaths($imagePaths) {
+        if (!is_array($imagePaths)) {
+            return [];
+        }
+
+        $processedPaths = [];
+        foreach ($imagePaths as $imagePath) {
+            if (!is_string($imagePath) || empty($imagePath)) {
+                continue;
+            }
+
+            // Thêm prefix /public/ nếu chưa có
+            $fullPath = $imagePath;
+            if (!str_starts_with($fullPath, '/public/')) {
+                if (str_starts_with($fullPath, '/')) {
+                    $fullPath = '/public' . $fullPath;
+                } else {
+                    $fullPath = '/public/' . $fullPath;
+                }
+            }
+
+            // Kiểm tra file có tồn tại không với extension hiện tại
+            $serverPath = $_SERVER['DOCUMENT_ROOT'] . $fullPath;
+            if (file_exists($serverPath)) {
+                $processedPaths[] = $fullPath;
+                continue;
+            }
+
+            // Nếu file không tồn tại, thử thay đổi extension từ .jpg thành .png
+            $pathInfo = pathinfo($fullPath);
+            if (isset($pathInfo['extension']) && strtolower($pathInfo['extension']) === 'jpg') {
+                $pngPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.png';
+                $serverPngPath = $_SERVER['DOCUMENT_ROOT'] . $pngPath;
+                
+                if (file_exists($serverPngPath)) {
+                    $processedPaths[] = $pngPath;
+                    continue;
+                }
+            }
+
+            // Nếu cả .jpg và .png đều không tồn tại, giữ nguyên đường dẫn gốc
+            $processedPaths[] = $fullPath;
+        }
+
+        return $processedPaths;
     }
 }
 ?>

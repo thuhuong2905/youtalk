@@ -681,15 +681,6 @@
     animation: slideDown 0.3s ease;
 }
 
-/* Focus states for accessibility */
-.main-nav a:focus,
-.user-actions a:focus,
-.cta-button-header:focus,
-.hamburger:focus {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
 /* High contrast mode support */
 @media (prefers-contrast: high) {
     .main-nav a,

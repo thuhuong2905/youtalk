@@ -659,6 +659,14 @@ function clearAuthData() {
     sessionStorage.removeItem('userData');
     sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('userSession');
+    
+    // Clear user-specific data (helpful reviews for all users)
+    // Find and remove all helpful_reviews_* keys
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('helpful_reviews_')) {
+            localStorage.removeItem(key);
+        }
+    });
 }
 
 /**

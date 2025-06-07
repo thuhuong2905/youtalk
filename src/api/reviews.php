@@ -55,8 +55,14 @@ try {
 // Create Review instance
 $review = new Review($conn);
 
-// Get the request data
-$requestData = getRequestData();
+// Get the request data - handle different HTTP methods
+$method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'DELETE') {
+    // For DELETE requests, get data from query parameters
+    $requestData = array_merge($_GET, getRequestData('GET'));
+} else {
+    $requestData = getRequestData();
+}
 
 // Debug: Log request data
 error_log("Request data: " . print_r($requestData, true));
@@ -556,7 +562,13 @@ function handleMarkReviewHelpful($review, $requestData) {
     try {
         $success = $review->markReviewHelpful($reviewId);
         if ($success) {
-            sendResponse(true, 'Marked as helpful');
+            // Get the updated helpful count
+            $updatedReview = $review->getReviewById($reviewId);
+            if ($updatedReview) {
+                sendResponse(true, 'Marked as helpful', ['helpful_count' => (int)$updatedReview['helpful_count']]);
+            } else {
+                sendResponse(true, 'Marked as helpful', ['helpful_count' => 0]);
+            }
         } else {
             sendResponse(false, 'Failed to update helpful count', null, 500);
         }

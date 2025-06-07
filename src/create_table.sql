@@ -105,13 +105,11 @@ CREATE TABLE comments (
     post_id INT NOT NULL,
     user_id INT NOT NULL,
     content TEXT NOT NULL,
-    parent_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status ENUM('active', 'inactive', 'deleted') DEFAULT 'active',
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE SET NULL
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create followers table
