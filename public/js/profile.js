@@ -116,7 +116,7 @@ async function loadUserProfile() {
         } else {
             // Not logged in and no URL parameter
             console.log("User not logged in. Redirecting to login page.");
-            displayLoggedOutProfile();
+            window.location.href = 'login-register.html?message=profile_login_required&redirect=profile.html';
             return;
         }
         // Lưu lại targetUserId và tên để các hàm khác dùng
@@ -351,28 +351,6 @@ async function handleSettingsFormSubmit(event) {
     } catch (error) {
         console.error('Profile update error:', error);
         showError('Không thể kết nối máy chủ.');
-    }
-}
-
-/**
- * Shows logged out state
- */
-function displayLoggedOutProfile() {
-    const profileContainer = document.querySelector(".profile-header-content");
-    const profileContent = document.getElementById("profile-content");
-
-    if (profileContainer) {
-        profileContainer.innerHTML = `
-            <div class="profile-logged-out-message">
-                <h2>Vui lòng đăng nhập</h2>
-                <p>Bạn cần đăng nhập để xem hồ sơ.</p>
-                <a href="login-register.html" class="cta-button">Đăng nhập / Đăng ký</a>
-            </div>
-        `;
-    }
-    
-    if (profileContent) {
-        profileContent.style.display = "none";
     }
 }
 

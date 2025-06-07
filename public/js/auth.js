@@ -551,6 +551,20 @@ function setupForgotPasswordModal() {
 function checkRedirectParam() {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get("redirect");
+    const message = urlParams.get("message");
+    
+    // Hiển thị thông báo dựa trên message parameter với delay nhỏ để đảm bảo DOM đã load
+    if (message === "login_required") {
+        // Hiển thị thông báo toast cho trường hợp cần đăng nhập để tạo bài viết
+        setTimeout(() => {
+            showWarning("Bạn phải đăng nhập để truy cập trang tạo bài đăng!");
+        }, 500);
+    } else if (message === "profile_login_required") {
+        // Hiển thị thông báo toast cho trường hợp cần đăng nhập để xem profile
+        setTimeout(() => {
+            showWarning("Bạn phải đăng nhập để xem hồ sơ cá nhân!");
+        }, 500);
+    }
     
     if (redirectUrl) {
         // Add message about redirect
@@ -559,10 +573,23 @@ function checkRedirectParam() {
         if (authContainer) {
             const redirectMessage = document.createElement("div");
             redirectMessage.className = "redirect-message";
-            redirectMessage.textContent = "Vui lòng đăng nhập hoặc đăng ký để tiếp tục.";
+            
+            // Tùy chỉnh thông báo dựa trên message parameter
+            let messageText = "Vui lòng đăng nhập hoặc đăng ký để tiếp tục.";
+            if (message === "login_required") {
+                messageText = "Bạn cần đăng nhập để tạo bài viết mới.";
+            } else if (message === "profile_login_required") {
+                messageText = "Bạn cần đăng nhập để xem hồ sơ cá nhân.";
+            }
+            
+            redirectMessage.textContent = messageText;
             redirectMessage.style.color = "#e67e22";
             redirectMessage.style.marginBottom = "15px";
             redirectMessage.style.textAlign = "center";
+            redirectMessage.style.backgroundColor = "#fff3cd";
+            redirectMessage.style.border = "1px solid #ffeaa7";
+            redirectMessage.style.borderRadius = "8px";
+            redirectMessage.style.padding = "12px 16px";
             
             authContainer.insertBefore(redirectMessage, authContainer.firstChild);
         }

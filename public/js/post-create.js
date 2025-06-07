@@ -43,19 +43,20 @@ async function checkAuthForPostCreate() {
         if (typeof window.checkLoginStatus === 'function') {
             const user = await window.checkLoginStatus();
             if (!user) {
-                window.location.href = 'login-register.html';
+                // Thêm thông báo vào URL để hiển thị khi chuyển hướng đến trang login
+                window.location.href = 'login-register.html?message=login_required&redirect=post-create.html';
             }
         } else {
             // Fallback nếu window.checkLoginStatus chưa có (hiếm khi xảy ra)
             const res = await fetchApi('/auth.php?action=status');
             if (!res.success || !res.data || !res.data.authenticated) {
-                window.location.href = 'login-register.html';
+                window.location.href = 'login-register.html?message=login_required&redirect=post-create.html';
             }
         }
     } catch (err) {
         showError('Không thể kiểm tra trạng thái đăng nhập. Vui lòng thử lại sau.');
         setTimeout(() => {
-            window.location.href = 'login-register.html';
+            window.location.href = 'login-register.html?message=login_required&redirect=post-create.html';
         }, 2000);
     }
 }
