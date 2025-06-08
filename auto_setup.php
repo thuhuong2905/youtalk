@@ -14,7 +14,7 @@ try {
     }
     
     // Chuyển đến trang chủ
-    header('Location: public/index.html');
+    header('Location: youtalk/public/index.html');
     
 } catch (Exception $e) {
     header('Location: setup.php?error=' . $e->getMessage());
