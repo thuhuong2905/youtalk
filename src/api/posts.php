@@ -437,11 +437,11 @@ function handleCreatePost($post) {
                     $tmpName = $_FILES['media']['tmp_name'][$idx];
                     $ext = pathinfo($name, PATHINFO_EXTENSION);
                     $newName = uniqid('img_') . '.' . $ext;
-                    $uploadDir = __DIR__ . '/../../public/images/postss/';
+                    $uploadDir = __DIR__ . '/../../public/images/posts/';
                     if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
                     $dest = $uploadDir . $newName;
                     if (move_uploaded_file($tmpName, $dest)) {
-                        $media[] = 'images/postss/' . $newName;
+                        $media[] = 'images/posts/' . $newName;
                     }
                 }
             }
