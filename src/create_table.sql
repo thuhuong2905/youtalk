@@ -118,7 +118,6 @@ CREATE TABLE followers (
     follower_user_id INT NOT NULL COMMENT 'ID of the user who is following',
     following_user_id INT NOT NULL COMMENT 'ID of the user being followed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (follower_user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (following_user_id) REFERENCES users(id) ON DELETE CASCADE,
     
