@@ -1,0 +1,118 @@
+/* Thuộc tính CSS tùy chỉnh cho màu sắc danh mục */
+:root {
+    --cat-primary-bg: rgba(3, 65, 127, 0.1);
+    --cat-secondary-bg: rgba(157, 140, 176, 0.1);
+    --cat-accent-bg: rgba(127, 179, 213, 0.1);
+    --cat-warm-bg: rgba(249, 219, 224, 0.15);
+    --cat-soft-bg: rgba(255, 209, 217, 0.15);
+    --cat-light-primary: rgba(3, 65, 127, 0.08);
+    --cat-light-secondary: rgba(157, 140, 176, 0.08);
+    --cat-light-accent: rgba(127, 179, 213, 0.08);
+    --cat-medium-warm: rgba(249, 219, 224, 0.12);
+    --cat-medium-soft: rgba(255, 209, 217, 0.12);
+    --cat-ultra-light: rgba(3, 65, 127, 0.05);
+    --cat-neutral: rgba(248, 249, 250, 0.8);
+}
+
+/* Màu sắc danh mục chính sử dụng biến tối ưu */
+.technology, .tech { background-color: var(--cat-primary-bg); color: var(--color-primary); }
+.fashion { background-color: var(--cat-secondary-bg); color: var(--color-secondary); }
+.travel { background-color: var(--cat-accent-bg); color: var(--color-accent3); }
+.food, .cooking { background-color: var(--cat-warm-bg); color: var(--color-primary); }
+.education, .learning { background-color: var(--cat-soft-bg); color: var(--color-primary); }
+.health, .wellness { background-color: var(--cat-accent-bg); color: var(--color-accent3); }
+.entertainment { background-color: var(--cat-medium-warm); color: var(--color-primary); }
+.furniture, .home { background-color: var(--cat-light-accent); color: var(--color-accent3); }
+.beauty, .cosmetics { background-color: var(--cat-medium-soft); color: var(--color-primary); }
+.sports, .fitness { background-color: var(--cat-light-secondary); color: var(--color-secondary); }
+.automotive, .cars { background-color: var(--cat-light-primary); color: var(--color-primary); }
+.books, .literature { background-color: var(--cat-secondary-bg); color: var(--color-secondary); }
+
+/* Hệ thống màu sắc danh mục theo số - sử dụng biến CSS */
+.category-color-0 { background-color: var(--cat-warm-bg); color: var(--color-primary); }
+.category-color-1 { background-color: var(--cat-accent-bg); color: var(--color-primary); }
+.category-color-2 { background-color: var(--cat-soft-bg); color: var(--color-primary); }
+.category-color-3 { background-color: var(--cat-secondary-bg); color: var(--color-primary); }
+.category-color-4 { background-color: var(--cat-ultra-light); color: var(--color-primary); }
+.category-color-5 { background-color: var(--cat-neutral); color: var(--color-primary); }
+.category-color-6 { background-color: var(--cat-medium-warm); color: var(--color-primary); }
+.category-color-7 { background-color: var(--cat-light-accent); color: var(--color-accent3); }
+.category-color-8 { background-color: var(--cat-medium-soft); color: var(--color-primary); }
+.category-color-9 { background-color: var(--cat-light-secondary); color: var(--color-secondary); }
+
+/* Dự phòng mặc định và các thành phần danh mục chung */
+.default-cat, [class^="cat-"]:not([class*="category-color-"]) { background-color: var(--color-background-alt); color: var(--color-text); }
+
+/* Thiết kế thẻ danh mục và thành phần */
+.category-card h3, .category-card p, .category-card .category-count { color: inherit; }
+.category-card .category-icon { background-color: var(--color-background); border: 1px solid var(--color-border); }
+.category-card .category-icon i { color: inherit; opacity: 0.9; }
+
+/* Huy hiệu danh mục, thẻ và các phần tử tương tác */
+.category-badge, .category-tag {
+    display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: var(--text-sm);
+    font-weight: var(--font-medium); font-family: var(--font-primary); text-decoration: none; transition: all 0.3s ease;
+}
+.category-badge:hover, .category-tag:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+
+.post-meta .category, .topic-category {
+    background-color: var(--color-primary); color: white; padding: 4px 12px; border-radius: 20px;
+    font-size: var(--text-sm); font-weight: var(--font-medium); text-decoration: none; transition: all 0.3s ease;
+}
+.post-meta .category:hover, .topic-category:hover { background-color: var(--color-secondary); color: white; transform: translateY(-1px); }
+
+.category-list-item {
+    display: flex; align-items: center; padding: 12px; border-radius: var(--border-radius);
+    transition: all 0.3s ease; text-decoration: none; color: var(--color-text);
+}
+.category-list-item:hover { background-color: var(--color-background-alt); transform: translateX(5px); }
+.category-list-item .category-name { font-weight: var(--font-medium); margin-right: auto; }
+.category-list-item .category-count {
+    font-size: var(--text-sm); color: var(--color-text-light); font-family: var(--font-mono);
+    background-color: var(--color-background-alt); padding: 2px 8px; border-radius: 12px;
+}
+
+.category-filter {
+    background-color: var(--color-background-alt); color: var(--color-text); border: 1px solid var(--color-border);
+    padding: 8px 16px; border-radius: 20px; font-size: var(--text-sm); font-weight: var(--font-medium);
+    cursor: pointer; transition: all 0.3s ease; font-family: var(--font-primary);
+}
+.category-filter:hover, .category-filter.active { background-color: var(--color-primary); color: white; border-color: var(--color-primary); }
+
+.category-icon-small {
+    width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center;
+    justify-content: center; margin-right: 8px; font-size: 12px; background-color: var(--color-background-alt); color: var(--color-primary);
+}
+
+.category-breadcrumb {
+    display: flex; align-items: center; gap: 8px; font-size: var(--text-sm);
+    color: var(--color-text-light); margin-bottom: 20px;
+}
+.category-breadcrumb a { color: var(--color-primary); text-decoration: none; font-weight: var(--font-medium); transition: color 0.3s ease; }
+.category-breadcrumb a:hover { color: var(--color-secondary); }
+.category-breadcrumb::after { content: "›"; color: var(--color-text-light); font-weight: var(--font-normal); }
+.category-breadcrumb:last-child::after { display: none; }
+
+/* Điều chỉnh responsive */
+@media (max-width: 768px) {
+    .category-badge, .category-tag { font-size: var(--text-xs); padding: 3px 8px; }
+    .category-list-item { padding: 10px; }
+    .category-filter { font-size: var(--text-xs); padding: 6px 12px; }
+}
+
+/* Hỗ trợ chế độ tương phản cao */
+@media (prefers-contrast: high) {
+    .category-card h3, .category-card p, .category-card .category-icon i { color: var(--color-text) !important; text-shadow: none; }
+    .category-badge, .category-tag, .post-meta .category { border: 1px solid currentColor; }
+}
+
+/* Hỗ trợ giảm chuyển động */
+@media (prefers-reduced-motion: reduce) {
+    .category-badge, .category-tag, .category-list-item, .category-filter, .post-meta .category { transition: none; }
+    .category-badge:hover, .category-tag:hover, .category-list-item:hover { transform: none; }
+}
+
+/* Kiểu dáng khi in */
+@media print {
+    .category-card, .category-badge, .category-tag { background-color: transparent !important; color: black !important; border: 1px solid black; }
+}

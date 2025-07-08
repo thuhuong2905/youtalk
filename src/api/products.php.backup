@@ -1,0 +1,173 @@
+<?php
+require_once __DIR__ . '/../core/session_handler.php';
+require_once __DIR__ . '/../core/api_utils.php';
+require_once __DIR__ . '/../core/admin_middleware.php';
+
+// Set header to return JSON
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// Require admin role for all endpoints
+requireAdminRole();
+
+// Get the database connection
+$db = getDbConnection();
+
+// Get request method and action
+$requestMethod = $_SERVER["REQUEST_METHOD"];
+$action = $_GET['action'] ?? null;
+
+// Handle different actions
+switch ($action) {
+    case 'stats':
+        getSystemStats($db);
+        break;
+    case 'recent_activity':
+        getRecentActivity($db);
+        break;
+    case 'system_info':
+        getSystemInfo($db);
+        break;
+    default:
+        sendResponse(400, ['message' => 'Invalid action']);
+        break;
+}
+
+/**
+ * Get system statistics
+ */
+function getSystemStats($db) {
+    try {
+        $stats = [];
+        
+        // Total users
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users");
+        $stmt->execute();
+        $stats['total_users'] = $stmt->fetchColumn();
+        
+        // Active users (last 30 days)
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users WHERE last_login >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+        $stmt->execute();
+        $stats['active_users'] = $stmt->fetchColumn();
+        
+        // Total posts
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM posts WHERE status = 'active'");
+        $stmt->execute();
+        $stats['total_posts'] = $stmt->fetchColumn();
+        
+        // Total comments
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM comments WHERE status = 'active'");
+        $stmt->execute();
+        $stats['total_comments'] = $stmt->fetchColumn();
+        
+        // Total products
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE status = 'active'");
+        $stmt->execute();
+        $stats['total_products'] = $stmt->fetchColumn();
+        
+        // Total reviews
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM reviews WHERE status = 'active'");
+        $stmt->execute();
+        $stats['total_reviews'] = $stmt->fetchColumn();
+        
+        // Today's stats
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM users WHERE DATE(created_at) = CURDATE()");
+        $stmt->execute();
+        $stats['today_users'] = $stmt->fetchColumn();
+        
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM posts WHERE DATE(created_at) = CURDATE() AND status = 'active'");
+        $stmt->execute();
+        $stats['today_posts'] = $stmt->fetchColumn();
+        
+        sendResponse(200, $stats);
+    } catch (Exception $e) {
+        error_log("Error fetching system stats: " . $e->getMessage());
+        sendResponse(500, ['message' => 'Internal Server Error']);
+    }
+}
+
+/**
+ * Get recent activity
+ */
+function getRecentActivity($db) {
+    try {
+        $limit = $_GET['limit'] ?? 10;
+        
+        $stmt = $db->prepare("
+            (SELECT 'user' as type, CONCAT('Người dùng mới: ', username) as description, 
+                    created_at as timestamp, user_id as entity_id
+             FROM users 
+             ORDER BY created_at DESC LIMIT ?)
+            UNION ALL
+            (SELECT 'post' as type, CONCAT('Bài viết mới: ', title) as description, 
+                    created_at as timestamp, post_id as entity_id
+             FROM posts 
+             WHERE status = 'active' 
+             ORDER BY created_at DESC LIMIT ?)
+            UNION ALL
+            (SELECT 'product' as type, CONCAT('Sản phẩm mới: ', title) as description, 
+                    created_at as timestamp, product_id as entity_id
+             FROM products 
+             WHERE status = 'active' 
+             ORDER BY created_at DESC LIMIT ?)
+            ORDER BY timestamp DESC 
+            LIMIT ?
+        ");
+        
+        $stmt->execute([$limit, $limit, $limit, $limit]);
+        $activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        sendResponse(200, $activities);
+    } catch (Exception $e) {
+        error_log("Error fetching recent activity: " . $e->getMessage());
+        sendResponse(500, ['message' => 'Internal Server Error']);
+    }
+}
+
+/**
+ * Get system information
+ */
+function getSystemInfo($db) {
+    try {
+        $info = [];
+        
+        // Database version
+        $stmt = $db->prepare("SELECT VERSION() as version");
+        $stmt->execute();
+        $info['mysql_version'] = $stmt->fetchColumn();
+        
+        // PHP version
+        $info['php_version'] = phpversion();
+        
+        // Server info
+        $info['server_software'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown';
+        
+        // Database size (approximate)
+        $stmt = $db->prepare("
+            SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb
+            FROM information_schema.tables 
+            WHERE table_schema = DATABASE()
+        ");
+        $stmt->execute();
+        $info['database_size_mb'] = $stmt->fetchColumn();
+        
+        // Memory usage
+        $info['memory_usage'] = [
+            'current' => round(memory_get_usage() / 1024 / 1024, 2) . ' MB',
+            'peak' => round(memory_get_peak_usage() / 1024 / 1024, 2) . ' MB'
+        ];
+        
+        sendResponse(200, $info);
+    } catch (Exception $e) {
+        error_log("Error fetching system info: " . $e->getMessage());
+        sendResponse(500, ['message' => 'Internal Server Error']);
+    }
+}

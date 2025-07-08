@@ -1,0 +1,386 @@
+-- Insert 50 users
+INSERT INTO users (username, full_name, email, password, profile_picture, bio, role, status) VALUES
+-- Existing users from youtalk_database.sql (50 users)
+('admin', 'Quản trị viên', 'admin@youtalk.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/A.png', 'Quản trị viên của YouTalk', 'admin', 'active'),
+('nguyenvan', 'Nguyễn Văn A', 'nguyenvan@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/A.png', 'Tôi là người đam mê công nghệ và thích khám phá sản phẩm mới', 'user', 'active'),
+('thanhha', 'Trần Thanh Hà', 'thanhha@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/H.png', 'Chuyên gia đánh giá thời trang và mỹ phẩm', 'user', 'active'),
+('minhtuan', 'Nguyễn Minh Tuấn', 'minhtuan@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/T.png', 'Người yêu thích du lịch và ẩm thực', 'user', 'active'),
+('phuonglinh', 'Phạm Phương Linh', 'phuonglinh@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/L.png', 'Giáo viên tiếng Anh, thích chia sẻ kinh nghiệm giáo dục', 'user', 'active'),
+('hoangminh', 'Hoàng Minh Khôi', 'hoangminh@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/K.png', 'Chuyên gia tư vấn công nghệ và đầu tư', 'user', 'active'),
+('lethuy', 'Lê Thùy Linh', 'lethuy@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/L2.png', 'Blogger chuyên về ẩm thực và du lịch', 'user', 'active'),
+('vuduc', 'Vũ Đức Anh', 'vuduc@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/A2.png', 'Game thủ chuyên nghiệp và streamer', 'user', 'active'),
+('maihuong', 'Mai Hương', 'maihuong@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/H2.png', 'Chuyên gia làm đẹp và skincare', 'user', 'active'),
+('tandat', 'Trần Đạt', 'tandat@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/D.png', 'Nhiếp ảnh gia và content creator', 'user', 'active'),
+('ngoclan', 'Ngọc Lan', 'ngoclan@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/N.png', 'Giáo viên yoga và fitness trainer', 'user', 'active'),
+('quangminh', 'Quang Minh', 'quangminh@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/Q.png', 'Kỹ sư phần mềm và tech reviewer', 'user', 'active'),
+('thuha', 'Thu Hà', 'thuha@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/T2.png', 'Chuyên gia marketing và social media', 'user', 'active'),
+('ducthang', 'Đức Thắng', 'ducthang@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/DT.png', 'Chuyên gia tài chính và đầu tư', 'user', 'active'),
+('hoangnha', 'Hoàng Nhã', 'hoangnha@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/HN.png', 'Interior designer và home decor', 'user', 'active'),
+('minhduc', 'Minh Đức', 'minhduc@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/MD.png', 'Chuyên gia dinh dưỡng và sức khỏe', 'user', 'active'),
+('thanhthao', 'Thanh Thảo', 'thanhthao@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/TT.png', 'Fashion blogger và stylist', 'user', 'active'),
+('vanquy', 'Văn Quý', 'vanquy@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/VQ.png', 'Chuyên gia bất động sản', 'user', 'active'),
+('kimchi', 'Kim Chi', 'kimchi@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/KC.png', 'Food blogger và đầu bếp', 'user', 'active'),
+('baotran', 'Bảo Trân', 'baotran@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/BT.png', 'Chuyên gia giáo dục trẻ em', 'user', 'active'),
+('hongson', 'Hồng Sơn', 'hongson@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/HS.png', 'Vận động viên và huấn luyện viên gym', 'user', 'active'),
+('phuongthao', 'Phương Thảo', 'phuongthao@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/PT.png', 'Chuyên gia làm đẹp và spa', 'user', 'active'),
+('anhtu', 'Anh Tú', 'anhtu@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/AT.png', 'Musician và âm nhạc producer', 'user', 'active'),
+('mynguyen', 'Mỹ Nguyên', 'mynguyen@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/MN.png', 'Chuyên gia tâm lý và coaching', 'user', 'active'),
+('duclong', 'Đức Long', 'duclong@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/DL.png', 'Chuyên gia ô tô và xe máy', 'user', 'active'),
+('thuytrang', 'Thúy Trang', 'thuytrang@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/TTR.png', 'Chuyên gia mẹ và bé', 'user', 'active'),
+('minhtam', 'Minh Tâm', 'minhtam@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/MT.png', 'Book reviewer và văn học', 'user', 'active'),
+('haiyen', 'Hải Yến', 'haiyen@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/HY.png', 'Chuyên gia thú cưng', 'user', 'active'),
+('thanhdat', 'Thành Đạt', 'thanhdat@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/TD.png', 'E-commerce và dropshipping expert', 'user', 'active'),
+('lanhuong', 'Lan Hương', 'lanhuong@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/LH.png', 'Chuyên gia làm vườn và nông nghiệp', 'user', 'active'),
+('quocbao', 'Quốc Bảo', 'quocbao@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/QB.png', 'Chuyên gia công nghệ blockchain', 'user', 'active'),
+('anhmai', 'Ánh Mai', 'anhmai@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/AM.png', 'Wedding planner và event organizer', 'user', 'active'),
+('duchai', 'Đức Hải', 'duchai@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/DH.png', 'Chuyên gia bảo hiểm và tài chính', 'user', 'active'),
+('thuylinh', 'Thùy Linh', 'thuylinh@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/TL.png', 'Chuyên gia nghệ thuật và handmade', 'user', 'active'),
+('hoangvu', 'Hoàng Vũ', 'hoangvu@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/HV.png', 'Chuyên gia coffee và barista', 'user', 'active'),
+('minhchau', 'Minh Châu', 'minhchau@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/MC.png', 'Jewelry designer và fashion accessories', 'user', 'active'),
+('vannam', 'Văn Nam', 'vannam@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/VN.png', 'Chuyên gia crypto và trading', 'user', 'active'),
+('thuytien', 'Thúy Tiên', 'thuytien@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/TTI.png', 'Chuyên gia skincare và cosmetics', 'user', 'active'),
+('ducminh', 'Đức Minh', 'ducminh@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/DM.png', 'Chuyên gia smart home và IoT', 'user', 'active'),
+('hoamai', 'Hoa Mai', 'hoamai@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/HM.png', 'Chuyên gia online courses và e-learning', 'user', 'active'),
+('thanhlong', 'Thành Long', 'thanhlong@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/TLO.png', 'Chuyên gia thể thao và outdoor activities', 'user', 'active'),
+('myhoa', 'Mỹ Hoa', 'myhoa@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/MH.png', 'Chuyên gia nail art và beauty services', 'user', 'active'),
+('quanghuy', 'Quang Huy', 'quanghuy@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/QH.png', 'Chuyên gia mobile apps và UX/UI', 'user', 'active'),
+('linhchi', 'Linh Chi', 'linhchi@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/LC.png', 'Chuyên gia organic food và healthy lifestyle', 'user', 'active'),
+('ducthuan', 'Đức Thuận', 'ducthuan@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/DTH.png', 'Chuyên gia photography và video editing', 'user', 'active'),
+('mailin', 'Mai Lin', 'mailin@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/ML.png', 'Language teacher và translation services', 'user', 'active'),
+('hoangnam', 'Hoàng Nam', 'hoangnam@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/HNA.png', 'Chuyên gia renewable energy và sustainability', 'user', 'active'),
+('thuyduyen', 'Thùy Duyên', 'thuyduyen@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/TDU.png', 'Chuyên gia wine và beverages', 'user', 'active'),
+('minhquang', 'Minh Quang', 'minhquang@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/MQ.png', 'Chuyên gia real estate và property investment', 'user', 'active'),
+('thuhuong', 'Nguyễn Thu Hương', 'thuhuong@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/H.png', 'Người dùng thử nghiệm số 44', 'user', 'active'),
+('huonglien', 'Trần Hương Liên', 'huonglien@example.com', '$2b$12$WzAHlcp.FUV.p4PVID1uCe2zjTzC1nWUN2i9O2u1uo/16M9din0Rm', 'images/profiles/L.png', 'Người dùng thử nghiệm số 45', 'user', 'active');
+
+-- Insert 50 categories
+INSERT INTO categories (name, description, parent_id, image, status) VALUES
+('Công nghệ', 'Sản phẩm và dịch vụ công nghệ', NULL, 'images/categories/technology.png', 'active'),
+('Thời trang', 'Quần áo, phụ kiện và xu hướng thời trang', NULL, 'images/categories/fashion.png', 'active'),
+('Du lịch', 'Địa điểm du lịch, dịch vụ lưu trú và trải nghiệm', NULL, 'images/categories/travel.png', 'active'),
+('Ẩm thực', 'Nhà hàng, quán ăn và đồ ăn', NULL, 'images/categories/food.png', 'active'),
+('Giáo dục', 'Khóa học, sách và dịch vụ giáo dục', NULL, 'images/categories/education.png', 'active'),
+('Sức khỏe', 'Sản phẩm và dịch vụ chăm sóc sức khỏe', NULL, 'images/categories/health.png', 'active'),
+('Giải trí', 'Phim, âm nhạc, trò chơi và giải trí', NULL, 'images/categories/entertainment.png', 'active'),
+('Nội thất', 'Đồ nội thất và trang trí nhà cửa', NULL, 'images/categories/furniture.png', 'active'),
+('Làm đẹp', 'Mỹ phẩm và dịch vụ làm đẹp', NULL, 'images/categories/beauty.png', 'active'),
+('Điện thoại', 'Điện thoại di động và phụ kiện', 1, 'images/categories/phones.png', 'active'),
+('Laptop', 'Máy tính xách tay và phụ kiện', 1, 'images/categories/laptops.png', 'active'),
+('Tablet', 'Máy tính bảng và phụ kiện', 1, 'images/categories/tablets.png', 'active'),
+('Tai nghe', 'Tai nghe, loa và phụ kiện âm thanh', 1, 'images/categories/headphones.png', 'active'),
+('Smart Watch', 'Đồng hồ thông minh và wearable devices', 1, 'images/categories/smartwatch.png', 'active'),
+('PC Gaming', 'Máy tính gaming và linh kiện', 1, 'images/categories/gaming_pc.png', 'active'),
+('Quần áo nam', 'Thời trang nam các loại', 2, 'images/categories/men_fashion.png', 'active'),
+('Quần áo nữ', 'Thời trang nữ các loại', 2, 'images/categories/women_fashion.png', 'active'),
+('Giày dép', 'Giày dép nam nữ các loại', 2, 'images/categories/shoes.png', 'active'),
+('Phụ kiện', 'Phụ kiện thời trang', 2, 'images/categories/accessories.png', 'active'),
+('Tour trong nước', 'Tour du lịch trong nước', 3, 'images/categories/domestic_tours.png', 'active'),
+('Tour nước ngoài', 'Tour du lịch quốc tế', 3, 'images/categories/international_tours.png', 'active'),
+('Khách sạn', 'Dịch vụ lưu trú khách sạn', 3, 'images/categories/hotels.png', 'active'),
+('Vé máy bay', 'Dịch vụ đặt vé máy bay', 3, 'images/categories/flight_tickets.png', 'active'),
+('Nhà hàng', 'Dịch vụ nhà hàng và quán ăn', 4, 'images/categories/restaurants.png', 'active'),
+('Đồ uống', 'Các loại đồ uống và beverage', 4, 'images/categories/beverages.png', 'active'),
+('Thực phẩm', 'Thực phẩm tươi sống và chế biến', 4, 'images/categories/food_products.png', 'active'),
+('Khóa học online', 'Các khóa học trực tuyến', 5, 'images/categories/online_courses.png', 'active'),
+('Sách', 'Sách giáo khoa và tham khảo', 5, 'images/categories/books.png', 'active'),
+('Dụng cụ học tập', 'Văn phòng phẩm và dụng cụ học tập', 5, 'images/categories/study_tools.png', 'active'),
+('Thuốc', 'Dược phẩm và thuốc điều trị', 6, 'images/categories/medicine.png', 'active'),
+('Thực phẩm chức năng', 'Vitamin và thực phẩm bổ sung', 6, 'images/categories/supplements.png', 'active'),
+('Thiết bị y tế', 'Máy đo huyết áp, nhiệt kế...', 6, 'images/categories/medical_devices.png', 'active'),
+('Phim', 'Phim ảnh và video content', 7, 'images/categories/movies.png', 'active'),
+('Âm nhạc', 'Dịch vụ nghe nhạc và concerts', 7, 'images/categories/music.png', 'active'),
+('Game', 'Game và entertainment software', 7, 'images/categories/games.png', 'active'),
+('Sofa', 'Ghế sofa và ghế ngồi', 8, 'images/categories/sofas.png', 'active'),
+('Giường', 'Giường ngủ và nệm', 8, 'images/categories/beds.png', 'active'),
+('Bàn ghế', 'Bàn ăn, bàn làm việc, ghế', 8, 'images/categories/tables_chairs.png', 'active'),
+('Trang trí', 'Đồ trang trí nội thất', 8, 'images/categories/decorations.png', 'active'),
+('Skincare', 'Sản phẩm chăm sóc da', 9, 'images/categories/skincare.png', 'active'),
+('Makeup', 'Trang điểm và cosmetics', 9, 'images/categories/makeup.png', 'active'),
+('Spa', 'Dịch vụ spa và massage', 9, 'images/categories/spa.png', 'active'),
+('Ô tô', 'Xe hơi và phụ kiện ô tô', NULL, 'images/categories/cars.png', 'active'),
+('Xe máy', 'Xe máy và phụ kiện', NULL, 'images/categories/motorcycles.png', 'active'),
+('Thể thao', 'Dụng cụ thể thao và fitness', NULL, 'images/categories/sports.png', 'active'),
+('Mẹ và bé', 'Sản phẩm cho mẹ và trẻ em', NULL, 'images/categories/mother_baby.png', 'active'),
+('Thú cưng', 'Sản phẩm và dịch vụ cho thú cưng', NULL, 'images/categories/pets.png', 'active'),
+('Vật liệu xây dựng', 'Vật liệu và công cụ xây dựng', NULL, 'images/categories/construction.png', 'active'),
+('Nông nghiệp', 'Sản phẩm nông nghiệp và làm vườn', NULL, 'images/categories/agriculture.png', 'active'),
+('Bảo hiểm', 'Dịch vụ bảo hiểm các loại', NULL, 'images/categories/insurance.png', 'active');
+
+-- Insert 50 products
+INSERT INTO products (name, description, price, category_id, creator_id, brand, location, images, specs, is_featured, view_count, status) VALUES
+('iPhone 13 Pro', 'iPhone 13 Pro với màn hình Super Retina XDR 6.1 inch, camera chuyên nghiệp và pin dài lâu.', 24990000, 10, 1, 'Apple', 'Hà Nội', '["images/products/iphone13pro_1.png", "images/products/iphone13pro_2.png", "images/products/iphone13pro_3.png"]', '{"Màn hình": "6.1 inch Super Retina XDR", "CPU": "A15 Bionic", "RAM": "6GB", "Bộ nhớ": "128GB", "Camera": "12MP (3 camera)", "Pin": "3095mAh"}', TRUE, 156, 'active'),
+('Samsung Galaxy S21', 'Samsung Galaxy S21 với màn hình Dynamic AMOLED 2X, camera 64MP và pin 4000mAh.', 18990000, 10, 2, 'Samsung', 'TP. Hồ Chí Minh', '["images/products/galaxys21_1.png", "images/products/galaxys21_2.png"]', '{"Màn hình": "6.2 inch Dynamic AMOLED 2X", "CPU": "Exynos 2100", "RAM": "8GB", "Bộ nhớ": "128GB", "Camera": "64MP", "Pin": "4000mAh"}', TRUE, 145, 'active'),
+('MacBook Pro M1', 'MacBook Pro với chip M1, màn hình Retina và thời lượng pin lên đến 20 giờ.', 32990000, 11, 1, 'Apple', 'Hà Nội', '["images/products/macbookpro_1.png", "images/products/macbookpro_2.png"]', '{"Màn hình": "13.3 inch Retina", "CPU": "Apple M1", "RAM": "8GB", "Bộ nhớ": "256GB SSD", "Pin": "20 giờ"}', TRUE, 178, 'active'),
+('Dell XPS 13', 'Dell XPS 13 với màn hình InfinityEdge, bộ xử lý Intel Core i7 và thiết kế mỏng nhẹ.', 29990000, 11, 3, 'Dell', 'Đà Nẵng', '["images/products/dellxps13_1.png", "images/products/dellxps13_2.png"]', '{"Màn hình": "13.4 inch InfinityEdge", "CPU": "Intel Core i7", "RAM": "16GB", "Bộ nhớ": "512GB SSD", "Pin": "12 giờ"}', FALSE, 132, 'active'),
+('Áo sơ mi nam', 'Áo sơ mi nam dài tay, chất liệu cotton cao cấp, phù hợp cho công sở và dạo phố.', 450000, 16, 3, 'Việt Tiến', 'TP. Hồ Chí Minh', '["images/products/shirt_1.png", "images/products/shirt_2.png"]', '{"Chất liệu": "Cotton", "Màu sắc": "Trắng, Xanh, Đen", "Size": "M, L, XL, XXL"}', FALSE, 87, 'active'),
+('Khóa học tiếng Anh online', 'Khóa học tiếng Anh trực tuyến với giáo viên bản ngữ, phù hợp mọi trình độ.', 2500000, 27, 5, 'English Center', 'Online', '["images/products/english_course.png"]', '{"Thời lượng": "3 tháng", "Số buổi": "36 buổi", "Trình độ": "Sơ cấp đến cao cấp", "Chứng chỉ": "Có"}', TRUE, 210, 'active'),
+('Resort Phú Quốc', 'Khu nghỉ dưỡng 5 sao tại Phú Quốc với bãi biển riêng và nhiều tiện ích cao cấp.', 3500000, 22, 4, 'Vinpearl', 'Phú Quốc', '["images/products/resort_1.png", "images/products/resort_2.png", "images/products/resort_3.png"]', '{"Hạng phòng": "Deluxe, Suite, Villa", "Diện tích": "45-200m2", "Tiện ích": "Hồ bơi, Spa, Nhà hàng, Bar"}', TRUE, 245, 'active'),
+('Kem dưỡng da', 'Kem dưỡng da chống lão hóa, cung cấp độ ẩm và làm sáng da.', 850000, 30, 4, 'Innisfree', 'Hàn Quốc', '["images/products/cream_1.png", "images/products/cream_2.png"]', '{"Dung tích": "50ml", "Loại da": "Mọi loại da", "Công dụng": "Dưỡng ẩm, Chống lão hóa, Làm sáng da"}', FALSE, 123, 'active'),
+('Samsung Galaxy S21 5G', 'Điện thoại thông minh cao cấp với chip Exynos 2100, camera 64MP telephoto và màn hình Dynamic AMOLED 2X 6.2 inch. Hỗ trợ 5G và sạc nhanh 25W.', 18990000, 10, 2, 'Samsung', 'Hà Nội', '["images/products/samsung_s21_1.jpg", "images/products/samsung_s21_2.jpg", "images/products/samsung_s21_3.jpg"]', '{"screen": "6.2 inch Dynamic AMOLED 2X", "processor": "Exynos 2100", "ram": "8GB", "storage": "128GB", "camera": "64MP Triple Camera", "battery": "4000mAh", "os": "Android 11"}', TRUE, 145, 'active'),
+('Apple AirPods Pro (2nd Gen)', 'Tai nghe không dây cao cấp với công nghệ chống ồn chủ động, âm thanh Spatial Audio và thời lượng pin lên đến 30 giờ với case sạc.', 5990000, 13, 3, 'Apple', 'TP.HCM', '["images/products/airpods_pro_1.jpg", "images/products/airpods_pro_2.jpg"]', '{"connectivity": "Bluetooth 5.3", "battery": "6h + 24h (case)", "features": "Active Noise Cancellation, Spatial Audio", "water_resistance": "IPX4", "compatibility": "iPhone, iPad, Mac"}', TRUE, 89, 'active'),
+('Apple Watch Series 8', 'Đồng hồ thông minh với tính năng theo dõi sức khỏe toàn diện, GPS tích hợp và khả năng chống nước. Màn hình Retina Always-On 45mm.', 8990000, 14, 4, 'Apple', 'Đà Nẵng', '["images/products/apple_watch_s8_1.jpg", "images/products/apple_watch_s8_2.jpg"]', '{"screen": "45mm Retina Always-On", "processor": "S8 SiP", "connectivity": "GPS + Cellular", "sensors": "Blood Oxygen, ECG, Temperature", "battery": "18 hours", "water_resistance": "50m"}', FALSE, 67, 'active'),
+('ASUS ROG Strix RTX 3080', 'Card đồ họa gaming cao cấp với 10GB GDDR6X, hỗ trợ Ray Tracing và DLSS. Thiết kế tản nhiệt 3 quạt hiệu suất cao cho game thủ chuyên nghiệp.', 25990000, 15, 5, 'ASUS', 'Hà Nội', '["images/products/rtx_3080_1.jpg", "images/products/rtx_3080_2.jpg", "images/products/rtx_3080_3.jpg"]', '{"memory": "10GB GDDR6X", "base_clock": "1440 MHz", "boost_clock": "1935 MHz", "cooling": "Triple Fan", "power": "320W", "ports": "3x DisplayPort, 2x HDMI"}', TRUE, 234, 'active'),
+('Adidas Ultraboost 22', 'Giày chạy bộ cao cấp với công nghệ đệm Boost, upper Primeknit+ và đế ngoài Continental Rubber. Thiết kế hiện đại, thoải mái cho mọi hoạt động.', 4290000, 18, 6, 'Adidas', 'TP.HCM', '["images/products/ultraboost_22_1.jpg", "images/products/ultraboost_22_2.jpg", "images/products/ultraboost_22_3.jpg"]', '{"upper": "Primeknit+", "midsole": "Boost Technology", "outsole": "Continental Rubber", "weight": "326g", "drop": "10mm", "support": "Neutral"}', FALSE, 156, 'active'),
+('iPad Air', 'iPad Air với chip M1, màn hình Liquid Retina 10.9 inch và hiệu năng mạnh mẽ.', 15990000, 12, 6, 'Apple', 'Hà Nội', '["images/products/ipad_air_1.png", "images/products/ipad_air_2.png"]', '{"Màn hình": "10.9 inch Liquid Retina", "CPU": "Apple M1", "RAM": "8GB", "Bộ nhớ": "64GB", "Camera": "12MP", "Pin": "10 giờ"}', TRUE, 125, 'active'),
+('AirPods Pro', 'Tai nghe không dây cao cấp với chống ồn chủ động và chất lượng âm thanh vượt trội.', 5990000, 13, 7, 'Apple', 'TP. Hồ Chí Minh', '["images/products/airpods_pro_1.png", "images/products/airpods_pro_2.png"]', '{"Loại": "True Wireless", "Chống ồn": "Có", "Pin": "6 giờ", "Kết nối": "Bluetooth 5.0"}', TRUE, 89, 'active'),
+('Apple Watch Series 8 GPS', 'Đồng hồ thông minh với tính năng theo dõi sức khỏe toàn diện và thiết kế sang trọng.', 9990000, 14, 8, 'Apple', 'Đà Nẵng', '["images/products/apple_watch_1.png", "images/products/apple_watch_2.png"]', '{"Màn hình": "45mm Retina", "GPS": "Có", "Pin": "18 giờ", "Chống nước": "50m"}', FALSE, 67, 'active'),
+('Gaming PC RTX 3080', 'Máy tính gaming hiệu năng cao với RTX 3080, phù hợp cho game thủ chuyên nghiệp.', 45000000, 15, 9, 'Custom Build', 'Hà Nội', '["images/products/gaming_pc_1.png", "images/products/gaming_pc_2.png"]', '{"CPU": "Intel i7-12700K", "GPU": "RTX 3080", "RAM": "32GB", "SSD": "1TB", "Tản nhiệt": "Nước"}', TRUE, 201, 'active'),
+('Áo khoác nam', 'Áo khoác nam thời trang, chất liệu cao cấp, phù hợp cho mùa đông.', 1200000, 16, 10, 'Canifa', 'Hải Phòng', '["images/products/jacket_men_1.png", "images/products/jacket_men_2.png"]', '{"Chất liệu": "Polyester", "Màu sắc": "Đen, Xanh, Nâu", "Size": "M-XXL", "Mùa": "Thu Đông"}', FALSE, 34, 'active'),
+('Váy công sở', 'Váy công sở thanh lịch cho phái đẹp, phù hợp cho môi trường làm việc chuyên nghiệp.', 750000, 17, 11, 'Elise', 'TP. Hồ Chí Minh', '["images/products/office_dress_1.png", "images/products/office_dress_2.png"]', '{"Chất liệu": "Vải tằm", "Màu sắc": "Đen, Xanh navy", "Size": "S-XL", "Kiểu dáng": "Chữ A"}', FALSE, 56, 'active'),
+('Giày sneaker nam', 'Giày thể thao nam phong cách street style, thoải mái và thời trang.', 2200000, 18, 12, 'Adidas', 'Đà Nẵng', '["images/products/sneaker_men_1.png", "images/products/sneaker_men_2.png"]', '{"Chất liệu": "Da + Mesh", "Màu sắc": "Trắng, Đen", "Size": "39-45", "Đế": "Boost"}', TRUE, 145, 'active'),
+('Túi xách nữ', 'Túi xách da thật cao cấp cho nữ, thiết kế sang trọng và tinh tế.', 3500000, 19, 13, 'Charles & Keith', 'Hà Nội', '["images/products/handbag_1.png", "images/products/handbag_2.png"]', '{"Chất liệu": "Da thật", "Màu sắc": "Đen, Nâu", "Kích thước": "30x25x15cm", "Ngăn": "3 ngăn"}', FALSE, 78, 'active'),
+('Tour Hạ Long 2N1Đ', 'Tour du lịch vịnh Hạ Long 2 ngày 1 đêm, khám phá kỳ quan thiên nhiên thế giới.', 2500000, 20, 14, 'Saigon Tourist', 'Quảng Ninh', '["images/products/halong_tour_1.png", "images/products/halong_tour_2.png"]', '{"Thời gian": "2 ngày 1 đêm", "Khách sạn": "3 sao", "Phương tiện": "Ô tô + Thuyền", "Bữa ăn": "3 bữa"}', TRUE, 189, 'active'),
+('Tour Nhật Bản 5N4Đ', 'Tour khám phá Tokyo - Osaka 5 ngày 4 đêm, trải nghiệm văn hóa và ẩm thực Nhật Bản.', 25000000, 21, 15, 'Vietravel', 'Nhật Bản', '["images/products/japan_tour_1.png", "images/products/japan_tour_2.png"]', '{"Thời gian": "5 ngày 4 đêm", "Khách sạn": "4 sao", "Vé máy bay": "Khứ hồi", "Bữa ăn": "Theo chương trình"}', TRUE, 234, 'active'),
+('Khách sạn 5 sao Đà Nẵng', 'Phòng suite cao cấp view biển tại Đà Nẵng, dịch vụ đẳng cấp 5 sao.', 3000000, 22, 16, 'Pullman', 'Đà Nẵng', '["images/products/danang_hotel_1.png", "images/products/danang_hotel_2.png"]', '{"Loại phòng": "Suite", "Diện tích": "80m2", "View": "Biển", "Tiện ích": "Đầy đủ", "Bữa sáng": "Buffet"}', FALSE, 167, 'active'),
+('Vé máy bay HN-SGN', 'Vé máy bay khứ hồi Hà Nội - TP.HCM, lịch bay linh hoạt.', 3500000, 23, 17, 'Vietnam Airlines', 'Toàn quốc', '["images/products/flight_ticket_1.png"]', '{"Loại": "Khứ hồi", "Hạng": "Economy", "Thời gian bay": "2 tiếng", "Hành lý": "23kg"}', FALSE, 98, 'active'),
+('Nhà hàng hải sản', 'Nhà hàng hải sản tươi sống với không gian sang trọng và view biển.', 500000, 24, 18, 'Ocean Palace', 'Nha Trang', '["images/products/seafood_restaurant_1.png", "images/products/seafood_restaurant_2.png"]', '{"Món đặc sản": "Hải sản tươi sống", "Sức chứa": "200 người", "Không gian": "View biển", "Đặt chỗ": "Có"}', TRUE, 156, 'active'),
+('Cà phê hạt Arabica', 'Cà phê hạt Arabica nguyên chất từ Tây Nguyên, hương vị đậm đà.', 250000, 25, 19, 'Trung Nguyên', 'Đắk Lắk', '["images/products/coffee_beans_1.png", "images/products/coffee_beans_2.png"]', '{"Loại": "Arabica", "Khối lượng": "500g", "Rang": "Medium", "Xuất xứ": "Tây Nguyên"}', FALSE, 67, 'active'),
+('Thịt bò Wagyu', 'Thịt bò Wagyu nhập khẩu từ Nhật Bản, vân mỡ đẹp, thơm ngon.', 1800000, 26, 20, 'Kobe', 'Nhật Bản', '["images/products/wagyu_beef_1.png", "images/products/wagyu_beef_2.png"]', '{"Loại": "A5 Wagyu", "Khối lượng": "500g", "Xuất xứ": "Nhật Bản", "Bảo quản": "-18°C"}', TRUE, 89, 'active'),
+('Khóa học lập trình Python', 'Khóa học lập trình Python từ cơ bản đến nâng cao, phù hợp cho người mới bắt đầu.', 1500000, 27, 21, 'CodeGym', 'Online', '["images/products/python_course_1.png"]', '{"Thời lượng": "3 tháng", "Số buổi": "24 buổi", "Trình độ": "Cơ bản đến nâng cao", "Chứng chỉ": "Có"}', TRUE, 178, 'active'),
+('Sách "Đắc Nhân Tâm"', 'Cuốn sách kinh điển về nghệ thuật giao tiếp và phát triển bản thân.', 120000, 28, 22, 'First News', 'Toàn quốc', '["images/products/book_1.png"]', '{"Tác giả": "Dale Carnegie", "Số trang": "320", "Ngôn ngữ": "Tiếng Việt", "Bìa": "Bìa cứng"}', FALSE, 56, 'active'),
+('Bút Parker cao cấp', 'Bút máy Parker cao cấp, thiết kế sang trọng, phù hợp làm quà tặng.', 2500000, 29, 23, 'Parker', 'Anh Quốc', '["images/products/pen_1.png", "images/products/pen_2.png"]', '{"Chất liệu": "Kim loại + Vàng 18K", "Màu sắc": "Đen, Bạc", "Mực": "Xanh", "Bảo hành": "Trọn đời"}', FALSE, 34, 'active'),
+('Thuốc bổ gan', 'Thuốc bổ gan từ thảo dược tự nhiên, giúp giải độc và tăng cường chức năng gan.', 350000, 30, 24, 'Traphaco', 'Hà Nội', '["images/products/liver_medicine_1.png"]', '{"Thành phần": "Thảo dược tự nhiên", "Đóng gói": "60 viên", "Liều dùng": "2 viên/ngày", "Xuất xứ": "Việt Nam"}', FALSE, 45, 'active'),
+('Vitamin tổng hợp', 'Vitamin tổng hợp bổ sung dinh dưỡng hàng ngày, tăng cường sức khỏe.', 450000, 31, 25, 'Centrum', 'Mỹ', '["images/products/vitamin_1.png"]', '{"Thành phần": "26 vitamin và khoáng chất", "Đóng gói": "100 viên", "Liều dùng": "1 viên/ngày", "Xuất xứ": "Mỹ"}', TRUE, 78, 'active'),
+('Máy đo huyết áp', 'Máy đo huyết áp điện tử tự động, chính xác và dễ sử dụng.', 1200000, 32, 26, 'Omron', 'Nhật Bản', '["images/products/blood_pressure_1.png", "images/products/blood_pressure_2.png"]', '{"Loại": "Điện tử tự động", "Bộ nhớ": "60 kết quả", "Độ chính xác": "±3 mmHg", "Bảo hành": "5 năm"}', FALSE, 67, 'active'),
+('Phim "Avengers: Endgame"', 'Bộ phim bom tấn siêu anh hùng của Marvel, phiên bản Blu-ray 4K.', 500000, 33, 27, 'Marvel Studios', 'Mỹ', '["images/products/movie_1.png"]', '{"Định dạng": "Blu-ray 4K", "Thời lượng": "181 phút", "Ngôn ngữ": "Đa ngôn ngữ", "Phụ đề": "Có"}', TRUE, 123, 'active'),
+('Album "Map of the Soul"', 'Album nhạc K-pop của BTS, phiên bản giới hạn kèm photobook.', 850000, 34, 28, 'Big Hit Entertainment', 'Hàn Quốc', '["images/products/album_1.png", "images/products/album_2.png"]', '{"Nghệ sĩ": "BTS", "Số bài hát": "15", "Phụ kiện": "Photobook, Poster, Photocard", "Phiên bản": "Limited Edition"}', FALSE, 89, 'active'),
+('Game FIFA 23', 'Game bóng đá FIFA 23, phiên bản mới nhất với nhiều tính năng cải tiến.', 1200000, 35, 29, 'EA Sports', 'Mỹ', '["images/products/game_1.png"]', '{"Nền tảng": "PS5, Xbox Series X, PC", "Thể loại": "Thể thao", "Multiplayer": "Có", "Ngôn ngữ": "Đa ngôn ngữ"}', TRUE, 156, 'active'),
+('Sofa góc phòng khách', 'Sofa góc phòng khách cao cấp, thiết kế hiện đại và sang trọng.', 15000000, 36, 30, 'IKEA', 'Thụy Điển', '["images/products/sofa_1.png", "images/products/sofa_2.png"]', '{"Chất liệu": "Da thật", "Màu sắc": "Xám, Kem", "Kích thước": "L300xW180xH85cm", "Bảo hành": "5 năm"}', TRUE, 78, 'active'),
+('Giường ngủ gỗ tự nhiên', 'Giường ngủ gỗ tự nhiên cao cấp, thiết kế sang trọng và bền đẹp.', 12000000, 37, 31, 'Hòa Phát', 'Việt Nam', '["images/products/bed_1.png", "images/products/bed_2.png"]', '{"Chất liệu": "Gỗ sồi tự nhiên", "Kích thước": "King size 1m8 x 2m", "Màu sắc": "Nâu gỗ tự nhiên", "Bảo hành": "5 năm"}', FALSE, 56, 'active'),
+('Bàn ăn 6 người', 'Bàn ăn 6 người bằng gỗ tự nhiên, thiết kế hiện đại và sang trọng.', 8500000, 38, 32, 'Nhà Xinh', 'Việt Nam', '["images/products/dining_table_1.png", "images/products/dining_table_2.png"]', '{"Chất liệu": "Gỗ sồi + mặt đá", "Kích thước": "160x80x75cm", "Ghế": "6 ghế", "Bảo hành": "2 năm"}', FALSE, 45, 'active'),
+('Đèn trang trí phòng khách', 'Đèn trang trí phòng khách phong cách hiện đại, ánh sáng dịu nhẹ.', 2500000, 39, 33, 'Philips', 'Hà Lan', '["images/products/lamp_1.png", "images/products/lamp_2.png"]', '{"Chất liệu": "Kim loại + Thủy tinh", "Công suất": "60W", "Kích thước": "H150cm", "Điều khiển": "Có"}', TRUE, 67, 'active'),
+('Serum Vitamin C', 'Serum Vitamin C giúp làm sáng da, mờ thâm và chống lão hóa.', 1200000, 40, 34, 'The Ordinary', 'Canada', '["images/products/serum_1.png", "images/products/serum_2.png"]', '{"Dung tích": "30ml", "Nồng độ": "20% Vitamin C", "Loại da": "Mọi loại da", "Xuất xứ": "Canada"}', TRUE, 123, 'active'),
+('Phấn nền Dior', 'Phấn nền Dior cao cấp, che phủ hoàn hảo và lâu trôi.', 1500000, 41, 35, 'Dior', 'Pháp', '["images/products/foundation_1.png", "images/products/foundation_2.png"]', '{"Loại": "Cushion", "Màu sắc": "Nhiều tông", "SPF": "SPF50+", "Xuất xứ": "Pháp"}', FALSE, 89, 'active'),
+('Gói Spa trọn gói', 'Gói Spa trọn gói bao gồm massage, đắp mặt nạ và tắm thảo dược.', 2000000, 42, 36, 'Thann Spa', 'TP. Hồ Chí Minh', '["images/products/spa_1.png", "images/products/spa_2.png"]', '{"Thời gian": "120 phút", "Dịch vụ": "Massage, Đắp mặt nạ, Tắm thảo dược", "Số người": "1 người", "Đặt trước": "Có"}', TRUE, 78, 'active'),
+('Toyota Camry 2023', 'Toyota Camry 2023 phiên bản mới nhất, động cơ mạnh mẽ và tiết kiệm nhiên liệu.', 1250000000, 43, 37, 'Toyota', 'Nhật Bản', '["images/products/car_1.png", "images/products/car_2.png"]', '{"Động cơ": "2.5L", "Hộp số": "Tự động 8 cấp", "Nhiên liệu": "Xăng", "Số chỗ": "5", "Xuất xứ": "Nhập khẩu"}', TRUE, 201, 'active'),
+('Honda SH 350i', 'Honda SH 350i phiên bản mới nhất, thiết kế sang trọng và động cơ mạnh mẽ.', 150000000, 44, 38, 'Honda', 'Ý', '["images/products/motorbike_1.png", "images/products/motorbike_2.png"]', '{"Động cơ": "350cc", "Công suất": "29 mã lực", "Phanh": "ABS 2 kênh", "Xuất xứ": "Ý"}', TRUE, 156, 'active'),
+('Máy chạy bộ điện', 'Máy chạy bộ điện cao cấp, nhiều chương trình tập luyện và màn hình LCD.', 25000000, 45, 39, 'Adidas', 'Đức', '["images/products/treadmill_1.png", "images/products/treadmill_2.png"]', '{"Công suất": "3.5HP", "Tốc độ": "1-20km/h", "Màn hình": "LCD 10 inch", "Chương trình": "12 chương trình", "Bảo hành": "3 năm"}', FALSE, 67, 'active'),
+('Bỉm Pampers size L', 'Bỉm Pampers size L, siêu thấm, mềm mại và thoáng khí cho bé.', 350000, 46, 40, 'Pampers', 'Mỹ', '["images/products/diaper_1.png"]', '{"Size": "L (9-14kg)", "Số miếng": "68 miếng", "Loại": "Dán", "Xuất xứ": "Nhật Bản"}', FALSE, 45, 'active'),
+('Thức ăn cho chó', 'Thức ăn hạt khô cao cấp cho chó trưởng thành, giàu dinh dưỡng.', 850000, 47, 41, 'Royal Canin', 'Pháp', '["images/products/dog_food_1.png", "images/products/dog_food_2.png"]', '{"Loại": "Hạt khô", "Khối lượng": "10kg", "Đối tượng": "Chó trưởng thành", "Xuất xứ": "Pháp"}', TRUE, 78, 'active'),
+('Xi măng Hà Tiên', 'Xi măng Hà Tiên PCB40, chất lượng cao, độ bền vượt trội.', 95000, 48, 42, 'Hà Tiên', 'Việt Nam', '["images/products/cement_1.png"]', '{"Loại": "PCB40", "Khối lượng": "50kg/bao", "Đóng gói": "Bao giấy Kraft", "Xuất xứ": "Việt Nam"}', FALSE, 34, 'active'),
+('Hạt giống rau muống', 'Hạt giống rau muống sạch, tỷ lệ nảy mầm cao, dễ trồng.', 25000, 49, 43, 'Rạng Đông', 'Việt Nam', '["images/products/seed_1.png"]', '{"Loại": "Rau muống", "Khối lượng": "50g", "Xuất xứ": "Việt Nam", "Hạn sử dụng": "12 tháng"}', FALSE, 23, 'active'),
+('Bảo hiểm nhân thọ', 'Gói bảo hiểm nhân thọ toàn diện, bảo vệ bạn và gia đình.', 10000000, 50, 44, 'Prudential', 'Toàn quốc', '["images/products/insurance_1.png"]', '{"Loại": "Nhân thọ", "Thời hạn": "20 năm", "Quyền lợi": "Tử vong, Thương tật, Bệnh hiểm nghèo", "Đơn vị": "Prudential Việt Nam"}', TRUE, 89, 'active');
+
+-- Insert 50 posts
+INSERT INTO posts (title, content, user_id, category_id, post_type, product_id, media, tags, view_count, status) VALUES
+('Review iPhone 13 Pro sau 1 tháng sử dụng', 'Sau 1 tháng sử dụng iPhone 13 Pro, tôi rất hài lòng với hiệu năng và thời lượng pin của máy. Camera chụp ảnh rất đẹp, đặc biệt là chế độ chụp đêm. Tuy nhiên, giá thành khá cao và sạc riêng phải mua thêm. Tổng thể là một chiếc điện thoại đáng mua nếu bạn có điều kiện.', 2, 10, 'review', 1, '["images/posts/iphone_review_1.jpg", "images/posts/iphone_review_2.jpg"]', '["iphone", "apple", "smartphone", "review"]', 156, 'active'),
+('So sánh MacBook Pro M1 và Dell XPS 13', 'Bài viết này sẽ so sánh chi tiết giữa MacBook Pro M1 và Dell XPS 13 về hiệu năng, thời lượng pin, màn hình và giá cả. Cả hai đều là những laptop cao cấp nhưng phù hợp với những đối tượng người dùng khác nhau.', 3, 11, 'discussion', NULL, '["images/posts/laptop_compare_1.jpg", "images/posts/laptop_compare_2.jpg"]', '["laptop", "macbook", "dell", "so sánh"]', 89, 'active'),
+('Hỏi về khóa học tiếng Anh online', 'Tôi đang tìm kiếm một khóa học tiếng Anh online hiệu quả để cải thiện kỹ năng giao tiếp. Khóa học tiếng Anh của English Center có tốt không? Mọi người có kinh nghiệm nào chia sẻ không?', 4, 5, 'question', 6, NULL, '["tiếng anh", "học online", "khóa học"]', 42, 'active'),
+('Chia sẻ kinh nghiệm du lịch Phú Quốc', 'Vừa có chuyến đi Phú Quốc 5 ngày 4 đêm, tôi muốn chia sẻ kinh nghiệm về chỗ ở, đi lại, ăn uống và các địa điểm tham quan đẹp nhất. Resort Vinpearl là lựa chọn tuyệt vời nếu bạn muốn nghỉ dưỡng cao cấp.', 4, 3, 'discussion', 7, '["images/posts/phuquoc_1.jpg", "images/posts/phuquoc_2.jpg", "images/posts/phuquoc_3.jpg"]', '["du lịch", "phú quốc", "kinh nghiệm", "resort"]', 215, 'active'),
+('Tư vấn mua laptop cho sinh viên IT', 'Mình là sinh viên năm nhất ngành CNTT, đang cần tư vấn mua laptop phù hợp với ngành học và ngân sách khoảng 20 triệu. Mọi người có gợi ý gì không?', 2, 11, 'question', NULL, NULL, '["laptop", "sinh viên", "CNTT", "tư vấn"]', 78, 'active'),
+('Đánh giá Samsung Galaxy S21 sau 6 tháng', 'Sau 6 tháng sử dụng Samsung Galaxy S21, tôi vẫn rất hài lòng với hiệu năng và camera của máy. Pin trâu, chụp ảnh đẹp và chơi game mượt. Tuy nhiên, máy hơi nóng khi sử dụng lâu và chơi game nặng.', 6, 10, 'review', 2, '["images/posts/samsung_review_1.jpg", "images/posts/samsung_review_2.jpg"]', '["samsung", "galaxy", "smartphone", "review"]', 132, 'active'),
+('Trải nghiệm iPad Air M1 cho công việc thiết kế', 'Tôi đã sử dụng iPad Air M1 cho công việc thiết kế đồ họa được 3 tháng và đây là những trải nghiệm của tôi. Máy mạnh mẽ, màn hình đẹp và Apple Pencil 2 hoạt động rất mượt mà. Tuy nhiên, vẫn có một số hạn chế so với máy tính.', 7, 12, 'review', 9, '["images/posts/ipad_design_1.jpg", "images/posts/ipad_design_2.jpg"]', '["ipad", "apple", "thiết kế", "m1"]', 98, 'active'),
+('AirPods Pro có đáng mua không?', 'Tôi đang phân vân có nên mua AirPods Pro không? Mọi người đánh giá thế nào về chất lượng âm thanh và tính năng chống ồn? Có đáng để đầu tư với mức giá gần 6 triệu không?', 8, 13, 'question', 10, NULL, '["airpods", "apple", "tai nghe", "chống ồn"]', 67, 'active'),
+('Review Apple Watch Series 8: Đáng tiền không?', 'Tôi vừa mua Apple Watch Series 8 được 2 tuần và đây là những trải nghiệm của tôi. Tính năng theo dõi sức khỏe rất tốt, pin đủ dùng 1-2 ngày và thiết kế đẹp. Tuy nhiên, giá khá cao và một số tính năng chỉ hoạt động với iPhone.', 9, 14, 'review', 11, '["images/posts/apple_watch_review.jpg"]', '["apple watch", "smartwatch", "review", "sức khỏe"]', 89, 'active'),
+('Cấu hình PC Gaming tầm 45 triệu', 'Tôi vừa build xong một bộ PC Gaming với RTX 3080 và đây là những linh kiện tôi đã chọn. Hiệu năng rất tốt, chơi mọi game ở mức Ultra với FPS cao. Chia sẻ để mọi người tham khảo.', 10, 15, 'discussion', 12, '["images/posts/gaming_pc_build.jpg"]', '["pc gaming", "rtx 3080", "build pc", "gaming"]', 156, 'active'),
+('Tư vấn chọn áo khoác nam mùa đông', 'Mùa đông sắp tới, tôi đang tìm kiếm một chiếc áo khoác nam vừa ấm vừa thời trang. Mọi người có gợi ý thương hiệu và mẫu nào tốt không? Budget khoảng 1-2 triệu.', 11, 16, 'question', 13, NULL, '["thời trang nam", "áo khoác", "mùa đông", "tư vấn"]', 45, 'active'),
+('5 mẫu váy công sở thanh lịch cho phái đẹp', 'Tôi xin chia sẻ 5 mẫu váy công sở vừa thanh lịch vừa thời trang cho chị em công sở. Các mẫu này phù hợp với nhiều vóc dáng và dễ phối đồ.', 12, 17, 'discussion', 14, '["images/posts/office_dress_collection.jpg"]', '["thời trang nữ", "váy công sở", "thời trang công sở", "phối đồ"]', 78, 'active'),
+('Review giày Adidas Ultraboost', 'Tôi vừa mua đôi giày Adidas Ultraboost và đây là trải nghiệm sau 1 tháng sử dụng. Đế boost rất êm, phù hợp chạy bộ và đi lại hàng ngày. Tuy nhiên, giá hơi cao và dễ bẩn.', 13, 18, 'review', 15, '["images/posts/adidas_review.jpg"]', '["giày", "adidas", "ultraboost", "review"]', 67, 'active'),
+('Tư vấn chọn túi xách nữ cao cấp', 'Tôi đang muốn đầu tư một chiếc túi xách nữ cao cấp vừa đẹp vừa bền. Budget khoảng 3-5 triệu. Mọi người có gợi ý thương hiệu và mẫu nào tốt không?', 14, 19, 'question', 16, NULL, '["túi xách", "thời trang nữ", "hàng hiệu", "tư vấn"]', 56, 'active'),
+('Kinh nghiệm du lịch Hạ Long tự túc', 'Tôi vừa có chuyến đi Hạ Long tự túc 3 ngày 2 đêm và muốn chia sẻ kinh nghiệm về lịch trình, chỗ ở, đi lại và các địa điểm tham quan đẹp nhất. Chi phí chỉ khoảng 3 triệu/người.', 15, 20, 'discussion', 17, '["images/posts/halong_experience_1.jpg", "images/posts/halong_experience_2.jpg"]', '["du lịch", "hạ long", "tự túc", "kinh nghiệm"]', 145, 'active'),
+('Chia sẻ kinh nghiệm du lịch Nhật Bản', 'Tôi vừa có chuyến đi Nhật Bản 7 ngày và muốn chia sẻ kinh nghiệm về visa, lịch trình, chỗ ở, đi lại và ẩm thực. Nhật Bản thực sự là một đất nước tuyệt vời để khám phá.', 16, 21, 'discussion', 18, '["images/posts/japan_trip_1.jpg", "images/posts/japan_trip_2.jpg", "images/posts/japan_trip_3.jpg"]', '["du lịch", "nhật bản", "kinh nghiệm", "visa"]', 189, 'active'),
+('Review khách sạn Pullman Đà Nẵng', 'Tôi vừa có kỳ nghỉ 4 ngày tại khách sạn Pullman Đà Nẵng và đây là những trải nghiệm của tôi. Phòng đẹp, view biển tuyệt vời, dịch vụ chuyên nghiệp. Tuy nhiên, giá hơi cao vào mùa cao điểm.', 17, 22, 'review', 19, '["images/posts/pullman_review_1.jpg", "images/posts/pullman_review_2.jpg"]', '["khách sạn", "đà nẵng", "pullman", "review"]', 78, 'active'),
+('Kinh nghiệm săn vé máy bay giá rẻ', 'Tôi xin chia sẻ một số mẹo săn vé máy bay giá rẻ mà tôi đã áp dụng thành công nhiều lần. Bao gồm thời điểm đặt vé, các website so sánh giá và chương trình khuyến mãi.', 18, 23, 'discussion', 20, NULL, '["vé máy bay", "du lịch", "tiết kiệm", "mẹo"]', 123, 'active'),
+('Top 5 nhà hàng hải sản ngon ở Nha Trang', 'Tôi vừa có chuyến đi Nha Trang và muốn chia sẻ 5 nhà hàng hải sản ngon, giá cả hợp lý mà tôi đã trải nghiệm. Ocean Palace là một trong những nhà hàng tuyệt vời nhất.', 19, 24, 'discussion', 21, '["images/posts/seafood_restaurants.jpg"]', '["ẩm thực", "hải sản", "nha trang", "nhà hàng"]', 98, 'active'),
+('Cách pha cà phê Arabica ngon tại nhà', 'Tôi xin chia sẻ cách pha cà phê Arabica ngon tại nhà với các dụng cụ đơn giản. Từ cách chọn hạt, rang, xay đến các phương pháp pha chế khác nhau.', 20, 25, 'discussion', 22, '["images/posts/coffee_brewing.jpg"]', '["cà phê", "arabica", "pha chế", "barista"]', 67, 'active'),
+('Cách chế biến thịt bò Wagyu ngon nhất', 'Tôi vừa mua thịt bò Wagyu và muốn chia sẻ cách chế biến để giữ được hương vị tuyệt vời của loại thịt cao cấp này. Nhiệt độ và thời gian nấu rất quan trọng.', 21, 26, 'discussion', 23, '["images/posts/wagyu_cooking.jpg"]', '["ẩm thực", "thịt bò", "wagyu", "nấu ăn"]', 56, 'active'),
+('Review khóa học lập trình Python online', 'Tôi vừa hoàn thành khóa học lập trình Python online và đây là những đánh giá của tôi. Nội dung dễ hiểu, giảng viên nhiệt tình, có nhiều bài tập thực hành. Rất phù hợp cho người mới bắt đầu.', 22, 27, 'review', 24, NULL, '["python", "lập trình", "khóa học", "review"]', 89, 'active'),
+('Cảm nhận sau khi đọc "Đắc Nhân Tâm"', 'Tôi vừa đọc xong cuốn sách "Đắc Nhân Tâm" và muốn chia sẻ những bài học quý giá từ cuốn sách này. Đây thực sự là một cuốn sách đáng đọc về nghệ thuật giao tiếp và phát triển bản thân.', 23, 28, 'discussion', 25, '["images/posts/book_review.jpg"]', '["sách", "đắc nhân tâm", "phát triển bản thân", "review"]', 67, 'active'),
+('Tư vấn chọn bút cao cấp làm quà tặng', 'Tôi đang muốn mua một chiếc bút cao cấp làm quà tặng cho sếp. Budget khoảng 2-3 triệu. Mọi người có gợi ý thương hiệu và mẫu nào tốt không?', 24, 29, 'question', 26, NULL, '["bút", "quà tặng", "cao cấp", "tư vấn"]', 34, 'active'),
+('Thuốc bổ gan nào tốt nhất hiện nay?', 'Tôi đang tìm kiếm một loại thuốc bổ gan tốt cho người hay uống rượu bia. Mọi người có kinh nghiệm với sản phẩm nào không? Thuốc bổ gan của Traphaco có tốt không?', 25, 30, 'question', 27, NULL, '["thuốc", "gan", "sức khỏe", "tư vấn"]', 56, 'active'),
+('Review vitamin tổng hợp Centrum', 'Tôi đã sử dụng vitamin tổng hợp Centrum được 3 tháng và đây là những thay đổi tích cực về sức khỏe mà tôi nhận thấy. Sản phẩm này có thực sự tốt như quảng cáo không?', 26, 31, 'review', 28, '["images/posts/vitamin_review.jpg"]', '["vitamin", "centrum", "sức khỏe", "review"]', 45, 'active'),
+('Máy đo huyết áp loại nào chính xác nhất?', 'Tôi đang tìm mua một máy đo huyết áp cho người thân bị cao huyết áp. Mọi người có kinh nghiệm với thương hiệu và loại nào chính xác, dễ sử dụng không?', 27, 32, 'question', 29, NULL, '["máy đo huyết áp", "sức khỏe", "omron", "tư vấn"]', 78, 'active'),
+('Review phim Avengers: Endgame', 'Tôi vừa xem lại Avengers: Endgame trên Blu-ray 4K và muốn chia sẻ cảm nhận. Chất lượng hình ảnh và âm thanh tuyệt vời, cốt truyện cảm động và hoành tráng. Một kiệt tác của MCU.', 28, 33, 'review', 30, '["images/posts/avengers_review.jpg"]', '["phim", "avengers", "marvel", "review"]', 112, 'active'),
+('Cảm nhận về album "Map of the Soul" của BTS', 'Tôi vừa mua album "Map of the Soul" của BTS phiên bản giới hạn và muốn chia sẻ cảm nhận. Chất lượng âm nhạc tuyệt vời, photobook đẹp và nhiều quà tặng kèm theo.', 29, 34, 'review', 31, '["images/posts/bts_album_review.jpg"]', '["âm nhạc", "bts", "kpop", "album"]', 89, 'active'),
+('Review game FIFA 23: Có gì mới?', 'Tôi vừa chơi FIFA 23 được 2 tuần và muốn chia sẻ những điểm mới so với phiên bản trước. Đồ họa đẹp hơn, gameplay thực tế hơn và nhiều tính năng mới thú vị.', 30, 35, 'review', 32, '["images/posts/fifa_review.jpg"]', '["game", "fifa", "ea sports", "review"]', 134, 'active'),
+('Tư vấn chọn sofa phòng khách', 'Tôi đang muốn mua một bộ sofa cho phòng khách rộng 30m2. Mọi người có gợi ý về kiểu dáng, chất liệu và thương hiệu nào tốt không? Budget khoảng 15-20 triệu.', 31, 36, 'question', 33, NULL, '["nội thất", "sofa", "phòng khách", "tư vấn"]', 67, 'active'),
+('Kinh nghiệm chọn giường ngủ gỗ tự nhiên', 'Tôi vừa mua một chiếc giường ngủ gỗ tự nhiên và muốn chia sẻ kinh nghiệm chọn gỗ, kiểu dáng và thương hiệu uy tín. Những lưu ý quan trọng khi mua giường gỗ.', 32, 37, 'discussion', 34, '["images/posts/wooden_bed.jpg"]', '["nội thất", "giường ngủ", "gỗ tự nhiên", "kinh nghiệm"]', 56, 'active'),
+('Tư vấn chọn bàn ăn cho gia đình', 'Tôi đang tìm một bộ bàn ăn 6 người cho gia đình. Mọi người có gợi ý về kiểu dáng, chất liệu và thương hiệu nào tốt không? Budget khoảng 8-10 triệu.', 33, 38, 'question', 35, NULL, '["nội thất", "bàn ăn", "gia đình", "tư vấn"]', 45, 'active'),
+('5 mẫu đèn trang trí phòng khách đẹp', 'Tôi xin chia sẻ 5 mẫu đèn trang trí phòng khách vừa đẹp vừa hiện đại. Các mẫu này phù hợp với nhiều phong cách nội thất khác nhau.', 34, 39, 'discussion', 36, '["images/posts/living_room_lamps.jpg"]', '["nội thất", "đèn trang trí", "phòng khách", "decor"]', 78, 'active'),
+('Review serum Vitamin C The Ordinary', 'Tôi đã sử dụng serum Vitamin C của The Ordinary được 2 tháng và đây là những thay đổi tích cực trên da mặt tôi. Sản phẩm giá rẻ nhưng hiệu quả bất ngờ.', 35, 40, 'review', 37, '["images/posts/serum_review.jpg"]', '["làm đẹp", "skincare", "vitamin c", "review"]', 98, 'active'),
+('So sánh các loại phấn nền cao cấp', 'Tôi xin chia sẻ bài so sánh chi tiết giữa các loại phấn nền cao cấp như Dior, Chanel, Lancome và YSL. Độ che phủ, độ bền và phù hợp với từng loại da.', 36, 41, 'discussion', 38, '["images/posts/foundation_comparison.jpg"]', '["làm đẹp", "makeup", "phấn nền", "so sánh"]', 67, 'active'),
+('Trải nghiệm gói Spa trọn gói tại Thann Spa', 'Tôi vừa trải nghiệm gói Spa trọn gói tại Thann Spa và muốn chia sẻ cảm nhận. Dịch vụ chuyên nghiệp, không gian thư giãn và hiệu quả rất tốt.', 37, 42, 'review', 39, '["images/posts/spa_experience.jpg"]', '["làm đẹp", "spa", "massage", "review"]', 56, 'active'),
+('Đánh giá Toyota Camry 2023', 'Tôi vừa mua Toyota Camry 2023 được 1 tháng và muốn chia sẻ trải nghiệm. Xe vận hành êm ái, tiết kiệm nhiên liệu và nhiều tính năng an toàn. Tuy nhiên, giá hơi cao.', 38, 43, 'review', 40, '["images/posts/camry_review_1.jpg", "images/posts/camry_review_2.jpg"]', '["ô tô", "toyota", "camry", "review"]', 123, 'active'),
+('So sánh Honda SH 350i và SH 150i', 'Tôi xin chia sẻ bài so sánh chi tiết giữa Honda SH 350i và SH 150i về động cơ, thiết kế, tính năng và giá cả. Liệu có đáng để nâng cấp lên 350i không?', 39, 44, 'discussion', 41, '["images/posts/sh_comparison.jpg"]', '["xe máy", "honda", "sh", "so sánh"]', 145, 'active'),
+('Review máy chạy bộ điện Adidas', 'Tôi đã sử dụng máy chạy bộ điện Adidas được 3 tháng và đây là những trải nghiệm của tôi. Máy chạy êm, nhiều chương trình tập luyện và màn hình LCD dễ sử dụng.', 40, 45, 'review', 42, '["images/posts/treadmill_review.jpg"]', '["thể thao", "máy chạy bộ", "adidas", "review"]', 67, 'active'),
+('So sánh các loại bỉm cho bé', 'Tôi xin chia sẻ bài so sánh chi tiết giữa các loại bỉm phổ biến như Pampers, Huggies, Bobby và Merries. Độ thấm hút, thoáng khí và giá cả.', 41, 46, 'discussion', 43, '["images/posts/diaper_comparison.jpg"]', '["mẹ và bé", "bỉm", "pampers", "so sánh"]', 89, 'active'),
+('Kinh nghiệm chọn thức ăn cho chó', 'Tôi đã nuôi chó được 5 năm và muốn chia sẻ kinh nghiệm chọn thức ăn phù hợp cho từng giống chó và độ tuổi. Các thương hiệu uy tín và thành phần cần chú ý.', 42, 47, 'discussion', 44, '["images/posts/dog_food_guide.jpg"]', '["thú cưng", "chó", "thức ăn", "kinh nghiệm"]', 78, 'active'),
+('Tư vấn chọn xi măng xây nhà', 'Tôi đang chuẩn bị xây nhà và đang tìm hiểu về các loại xi măng. Mọi người có kinh nghiệm với loại xi măng nào tốt, bền và giá cả hợp lý không?', 43, 48, 'question', 45, NULL, '["xây dựng", "xi măng", "nhà cửa", "tư vấn"]', 45, 'active'),
+('Hướng dẫn trồng rau muống tại nhà', 'Tôi xin chia sẻ cách trồng rau muống tại nhà đơn giản, không cần nhiều diện tích. Từ cách chọn hạt giống, đất trồng đến chăm sóc và thu hoạch.', 44, 49, 'discussion', 46, '["images/posts/vegetable_growing.jpg"]', '["nông nghiệp", "rau muống", "trồng rau", "hướng dẫn"]', 67, 'active'),
+('Tư vấn chọn bảo hiểm nhân thọ', 'Tôi đang tìm hiểu về bảo hiểm nhân thọ cho gia đình 4 người. Mọi người có kinh nghiệm với gói bảo hiểm nào tốt, quyền lợi đầy đủ và chi phí hợp lý không?', 45, 50, 'question', 47, NULL, '["bảo hiểm", "nhân thọ", "gia đình", "tư vấn"]', 56, 'active'),
+('Kinh nghiệm mua iPhone cũ', 'Tôi xin chia sẻ kinh nghiệm mua iPhone cũ, những điều cần kiểm tra và các địa chỉ uy tín. Làm sao để không mua phải hàng dựng, hàng kém chất lượng.', 46, 10, 'discussion', NULL, '["images/posts/used_iphone_guide.jpg"]', '["iphone", "điện thoại cũ", "kinh nghiệm", "mẹo"]', 123, 'active'),
+('Tư vấn laptop cho dân đồ họa', 'Tôi là designer, đang tìm một chiếc laptop phù hợp với công việc đồ họa, chỉnh sửa video. Budget khoảng 30-35 triệu. Mọi người có gợi ý gì không?', 47, 11, 'question', NULL, NULL, '["laptop", "đồ họa", "designer", "tư vấn"]', 89, 'active'),
+('Kinh nghiệm chọn trường mầm non chất lượng', 'Tôi xin chia sẻ kinh nghiệm chọn trường mầm non chất lượng cho con, những tiêu chí quan trọng cần lưu ý và cách đánh giá một trường mầm non tốt.', 48, 5, 'discussion', NULL, '["images/posts/kindergarten_guide.jpg"]', '["giáo dục", "mầm non", "trẻ em", "kinh nghiệm"]', 78, 'active'),
+('Tư vấn chọn kem chống nắng', 'Mùa hè đang đến, tôi đang tìm một loại kem chống nắng tốt, không gây nhờn rít và phù hợp với da dầu mụn. Mọi người có gợi ý gì không?', 49, 9, 'question', NULL, NULL, '["làm đẹp", "kem chống nắng", "da dầu", "tư vấn"]', 98, 'active'),
+('Kinh nghiệm du lịch Đà Lạt tự túc', 'Tôi vừa có chuyến đi Đà Lạt tự túc 4 ngày 3 đêm và muốn chia sẻ kinh nghiệm về lịch trình, chỗ ở, đi lại và các địa điểm tham quan đẹp nhất.', 50, 3, 'discussion', NULL, '["images/posts/dalat_guide_1.jpg", "images/posts/dalat_guide_2.jpg"]', '["du lịch", "đà lạt", "tự túc", "kinh nghiệm"]', 167, 'active');
+
+-- Insert 50 reviews
+INSERT INTO reviews (product_id, user_id, rating, comment, media, helpful_count, status) VALUES
+(1, 2, 5, 'iPhone 13 Pro là chiếc điện thoại tốt nhất mình từng dùng. Camera chụp ảnh cực đẹp, pin trâu và hiệu năng mượt mà.', '["images/posts/iphone_review_1.png", "images/posts/iphone_review_2.png"]', 24, 'active'),
+(1, 3, 4, 'Máy chạy rất mượt, camera chụp đẹp. Trừ 1 sao vì giá hơi cao và không kèm sạc.', NULL, 18, 'active'),
+(2, 4, 5, 'Galaxy S21 là một chiếc điện thoại Android hoàn hảo. Màn hình đẹp, chụp ảnh tốt và pin trâu.', '["images/posts/galaxy_review.png"]', 15, 'active'),
+(3, 2, 5, 'MacBook Pro M1 cho thời lượng pin kinh ngạc, hiệu năng tuyệt vời mà không bị nóng máy.', NULL, 32, 'active'),
+(3, 4, 4, 'Máy chạy rất mượt và yên tĩnh. Trừ 1 sao vì cổng kết nối còn hạn chế.', NULL, 21, 'active'),
+(4, 5, 5, 'Dell XPS 13 là chiếc laptop Windows tốt nhất mình từng dùng. Màn hình đẹp, hiệu năng mạnh và thiết kế sang trọng.', '["images/posts/dell_review.png"]', 19, 'active'),
+(5, 6, 4, 'Áo sơ mi chất lượng tốt, vải mềm và thoáng khí. Trừ 1 sao vì màu hơi khác so với hình.', NULL, 8, 'active'),
+(6, 7, 5, 'Khóa học tiếng Anh online rất hiệu quả, giáo viên tận tâm và phương pháp giảng dạy dễ hiểu.', NULL, 27, 'active'),
+(7, 8, 4, 'Resort đẹp, dịch vụ tốt, nhân viên thân thiện. Trừ 1 sao vì giá hơi cao vào mùa cao điểm.', '["images/posts/resort_review_1.png", "images/posts/resort_review_2.png"]', 14, 'active'),
+(8, 9, 5, 'Kem dưỡng da rất hiệu quả, da mình cải thiện rõ rệt sau 2 tuần sử dụng. Sẽ mua lại.', '["images/posts/cream_review.png"]', 22, 'active'),
+(9, 10, 5, 'iPad Air M1 là một thiết bị tuyệt vời cho công việc và giải trí. Màn hình đẹp, hiệu năng mạnh mẽ.', '["images/posts/ipad_review.png"]', 17, 'active'),
+(10, 11, 4, 'AirPods Pro chống ồn tốt, âm thanh chất lượng. Trừ 1 sao vì giá hơi cao.', NULL, 19, 'active'),
+(11, 12, 5, 'Apple Watch Series 8 là chiếc smartwatch tốt nhất hiện nay. Tính năng theo dõi sức khỏe rất chính xác.', '["images/posts/watch_review.png"]', 25, 'active'),
+(12, 13, 5, 'Gaming PC cấu hình mạnh, chơi mọi game ở mức Ultra không giật lag. Rất hài lòng.', '["images/posts/pc_review.png"]', 11, 'active'),
+(13, 14, 4, 'Áo khoác chất lượng tốt, giữ ấm hiệu quả. Trừ 1 sao vì size hơi nhỏ so với bảng size.', NULL, 7, 'active'),
+(14, 15, 3, 'Váy công sở chất vải tốt nhưng đường may chưa thực sự tinh tế. Giá hơi cao so với chất lượng.', '["images/posts/dress_review.png"]', 20, 'active'),
+(15, 16, 5, 'Giày Adidas cực kỳ thoải mái, đi cả ngày không mỏi chân. Rất đáng tiền.', '["images/posts/shoes_review.png"]', 13, 'active'),
+(16, 17, 4, 'Túi xách đẹp, da thật và đường may tỉ mỉ. Trừ 1 sao vì giá hơi cao.', NULL, 28, 'active'),
+(17, 18, 5, 'Tour Hạ Long rất tuyệt vời, lịch trình hợp lý và hướng dẫn viên nhiệt tình. Đáng đồng tiền.', '["images/posts/halong_review.png"]', 16, 'active'),
+(18, 19, 4, 'Tour Nhật Bản tốt, khách sạn và phương tiện di chuyển đều ổn. Trừ 1 sao vì thời gian tự do hơi ít.', '["images/posts/japan_review.png"]', 22, 'active'),
+(19, 20, 5, 'Khách sạn 5 sao xứng đáng với giá tiền. Phòng đẹp, view biển tuyệt vời và dịch vụ chuyên nghiệp.', '["images/posts/hotel_review.png"]', 9, 'active'),
+(20, 21, 3, 'Vé máy bay đúng giờ nhưng dịch vụ trên máy bay không được tốt lắm. Đồ ăn không ngon.', NULL, 18, 'active'),
+(21, 22, 5, 'Nhà hàng hải sản tuyệt vời, hải sản tươi ngon và không gian đẹp. Sẽ quay lại lần sau.', '["images/postspost/restaurant_review.png"]', 11, 'active'),
+(22, 23, 4, 'Cà phê hạt Arabica thơm ngon, đậm đà. Trừ 1 sao vì giá hơi cao so với thị trường.', NULL, 24, 'active'),
+(23, 24, 5, 'Thịt bò Wagyu ngon không thể tả, vân mỡ đẹp và hương vị tuyệt vời. Đáng đồng tiền.', '["images/posts/beef_review.png"]', 19, 'active'),
+(24, 25, 5, 'Khóa học Python rất bổ ích, giảng viên giải thích dễ hiểu và có nhiều bài tập thực hành.', NULL, 13, 'active'),
+(25, 26, 4, 'Sách hay, nội dung bổ ích. Trừ 1 sao vì bản dịch đôi khi còn vài chỗ chưa thực sự mượt.', NULL, 15, 'active'),
+(26, 27, 5, 'Bút Parker cao cấp, viết rất êm và thiết kế sang trọng. Rất phù hợp làm quà tặng.', '["images/posts/pen_review.png"]', 17, 'active'),
+(27, 28, 4, 'Thuốc bổ gan hiệu quả, các chỉ số gan cải thiện rõ rệt sau 1 tháng sử dụng. Trừ 1 sao vì giá hơi cao.', NULL, 21, 'active'),
+(28, 29, 5, 'Vitamin tổng hợp Centrum rất tốt, sức khỏe cải thiện rõ rệt và ít bị cảm cúm hơn.', '["images/posts/vitamin_review.png"]', 14, 'active'),
+(29, 30, 4, 'Máy đo huyết áp chính xác, dễ sử dụng. Trừ 1 sao vì màn hình hơi nhỏ.', NULL, 26, 'active'),
+(30, 31, 5, 'Phim Avengers: Endgame bản Blu-ray 4K cho trải nghiệm hình ảnh và âm thanh tuyệt vời. Đáng mua.', '["images/posts/movie_review.png"]', 18, 'active'),
+(31, 32, 4, 'Album BTS chất lượng tốt, nhiều quà tặng kèm theo. Trừ 1 sao vì giá hơi cao.', NULL, 23, 'active'),
+(32, 33, 5, 'Game FIFA 23 đồ họa đẹp, gameplay thực tế và nhiều tính năng mới thú vị. Rất đáng chơi.', '["images/posts/game_review.png"]', 19, 'active'),
+(33, 34, 5, 'Sofa góc chất lượng tốt, da thật mềm mại và thiết kế sang trọng. Rất hài lòng.', '["images/posts/sofa_review.png"]', 12, 'active'),
+(34, 35, 4, 'Giường ngủ gỗ tự nhiên chắc chắn, thiết kế đẹp. Trừ 1 sao vì thời gian giao hàng hơi lâu.', NULL, 8, 'active'),
+(35, 36, 3, 'Bàn ăn đẹp nhưng chất lượng chưa tương xứng với giá tiền. Mặt đá dễ bị xước.', '["images/posts/table_review.png"]', 16, 'active'),
+(36, 37, 5, 'Đèn trang trí phòng khách đẹp, ánh sáng dịu nhẹ và điều khiển từ xa tiện lợi.', '["images/posts/lamp_review.png"]', 22, 'active'),
+(37, 38, 5, 'Serum Vitamin C hiệu quả rõ rệt, da sáng và đều màu hơn sau 3 tuần sử dụng.', '["images/posts/serum_review.png"]', 15, 'active'),
+(38, 39, 4, 'Phấn nền Dior che phủ tốt, lâu trôi. Trừ 1 sao vì dễ bị lộ vệt khi da khô.', NULL, 20, 'active'),
+(39, 40, 5, 'Gói Spa trọn gói tuyệt vời, massage thư giãn và đắp mặt nạ hiệu quả. Đáng đồng tiền.', '["images/posts/spa_review.png"]', 18, 'active'),
+(40, 41, 4, 'Toyota Camry 2023 vận hành êm ái, tiết kiệm nhiên liệu. Trừ 1 sao vì giá hơi cao.', '["images/posts/car_review.png"]', 24, 'active'),
+(41, 42, 5, 'Honda SH 350i động cơ mạnh mẽ, thiết kế sang trọng và vận hành êm ái. Rất hài lòng.', '["images/posts/motorbike_review.png"]', 13, 'active'),
+(42, 43, 4, 'Máy chạy bộ điện chất lượng tốt, nhiều chương trình tập luyện. Trừ 1 sao vì hơi ồn khi chạy ở tốc độ cao.', NULL, 19, 'active'),
+(43, 44, 5, 'Bỉm Pampers thấm hút tốt, không gây hăm và bé rất thoải mái khi sử dụng.', '["images/posts/diaper_review.png"]', 14, 'active'),
+(44, 45, 4, 'Thức ăn cho chó chất lượng tốt, chó nhà mình rất thích. Trừ 1 sao vì giá hơi cao.', NULL, 7, 'active'),
+(45, 46, 3, 'Xi măng chất lượng ổn nhưng không nổi bật so với các thương hiệu khác trong tầm giá.', NULL, 16, 'active'),
+(46, 47, 5, 'Hạt giống rau muống nảy mầm tốt, cây phát triển khỏe mạnh và cho năng suất cao.', '["images/posts/seed_review.png"]', 12, 'active'),
+(47, 48, 4, 'Gói bảo hiểm nhân thọ quyền lợi tốt, thủ tục đơn giản. Trừ 1 sao vì phí hơi cao so với thị trường.', NULL, 21, 'active'),
+(48, 49, 5, 'Khóa học tiếng Anh online rất hiệu quả, giáo viên tận tâm và phương pháp giảng dạy dễ hiểu.', '["images/posts/english_review.png"]', 17, 'active'),
+(49, 50, 4, 'Hạt giống rau muống nảy mầm tốt, cây phát triển khỏe mạnh. Trừ 1 sao vì tỷ lệ nảy mầm không đạt 100%.', '["images/posts/seed_review_2.png"]', 23, 'active'),
+(50, 1, 5, 'Bảo hiểm nhân thọ của Prudential rất tốt, quyền lợi đầy đủ và thủ tục bồi thường nhanh chóng.', NULL, 10, 'active');
+
+-- Insert 50 comments
+INSERT INTO comments (post_id, user_id, content, status) VALUES
+(1, 3, 'Bài review rất chi tiết và khách quan. Cảm ơn bạn đã chia sẻ!', 'active'),
+(1, 4, 'Mình đang phân vân giữa iPhone 13 Pro và Galaxy S21, bài viết này giúp mình quyết định rồi.', 'active'),
+(1, 2, 'Cảm ơn bạn đã đọc bài viết. Nếu bạn cần tư vấn thêm, có thể hỏi mình.', 'active'),
+(2, 5, 'Mình đang dùng MacBook Pro M1 và rất hài lòng với hiệu năng và thời lượng pin.', 'active'),
+(2, 2, 'Dell XPS 13 cũng là một lựa chọn tốt nếu bạn quen dùng Windows.', 'active'),
+(3, 5, 'Mình đã học khóa này và thấy rất hiệu quả. Giáo viên nhiệt tình và có phương pháp giảng dạy dễ hiểu.', 'active'),
+(4, 2, 'Bài viết rất hữu ích. Mình sẽ đi Phú Quốc vào tháng sau, cảm ơn vì những chia sẻ!', 'active'),
+(4, 3, 'Bạn có thể chia sẻ thêm về chi phí cho chuyến đi không?', 'active'),
+(4, 4, 'Tổng chi phí cho 2 người khoảng 15 triệu, bao gồm vé máy bay, resort 4 đêm và các hoạt động tham quan.', 'active'),
+(5, 3, 'Với ngân sách 20 triệu, bạn có thể xem xét Dell Inspiron 15 hoặc Acer Nitro 5, đều đáp ứng tốt nhu cầu học tập và lập trình.', 'active'),
+(6, 7, 'Mình cũng đang dùng Galaxy S21 và rất hài lòng với camera và hiệu năng.', 'active'),
+(6, 8, 'Bạn có gặp vấn đề gì về pin không? Máy mình dùng 1 ngày phải sạc 2 lần.', 'active'),
+(6, 6, 'Pin của mình dùng được cả ngày nếu không chơi game nặng. Có thể bạn nên kiểm tra các ứng dụng ngầm.', 'active'),
+(7, 9, 'iPad Air M1 có đáng để nâng cấp từ iPad Air 4 không bạn?', 'active'),
+(7, 7, 'Theo mình thì rất đáng, hiệu năng tăng đáng kể và màn hình cũng đẹp hơn.', 'active'),
+(8, 10, 'AirPods Pro có chống ồn tốt không? Mình làm việc ở văn phòng ồn.', 'active'),
+(8, 11, 'Chống ồn rất tốt, mình dùng ở không gian đông người vẫn nghe nhạc rõ.', 'active'),
+(9, 12, 'Apple Watch có theo dõi giấc ngủ chính xác không?', 'active'),
+(9, 9, 'Khá chính xác, nó ghi lại được các giai đoạn ngủ sâu, ngủ nông và thời gian thức giấc.', 'active'),
+(10, 13, 'Bài viết rất chi tiết. Mình đang định build một bộ PC tương tự.', 'active'),
+(10, 14, 'Bạn có thể chia sẻ nhiệt độ CPU và GPU khi chơi game không?', 'active'),
+(10, 10, 'CPU khoảng 65-70 độ và GPU khoảng 75-80 độ khi chơi game nặng, nhiệt độ an toàn.', 'active'),
+(11, 15, 'Mình cũng đang tìm áo khoác cho mùa đông. Bạn đã mua loại nào chưa?', 'active'),
+(11, 16, 'Mình gợi ý áo khoác của Uniqlo, vừa ấm vừa thời trang mà giá cả hợp lý.', 'active'),
+(12, 17, 'Mẫu váy thứ 3 rất đẹp, bạn mua ở đâu vậy?', 'active'),
+(12, 12, 'Mình mua ở Elise, giá khoảng 750k, chất vải rất tốt.', 'active'),
+(13, 18, 'Mình cũng đang dùng Ultraboost, đi rất êm nhưng giá hơi cao.', 'active'),
+(13, 19, 'Có mẫu nào tương tự nhưng giá rẻ hơn không bạn?', 'active'),
+(13, 13, 'Bạn có thể thử Adidas Pureboost hoặc Nike React, giá rẻ hơn nhưng vẫn êm.', 'active'),
+(14, 20, 'Mình gợi ý túi xách của Pedro, chất lượng tốt mà giá chỉ khoảng 2 triệu.', 'active'),
+(15, 21, 'Bài viết rất hữu ích. Mình sẽ đi Hạ Long vào tháng sau.', 'active'),
+(15, 22, 'Bạn có thể chia sẻ thêm về các nhà hàng ngon ở Hạ Long không?', 'active'),
+(15, 15, 'Mình gợi ý nhà hàng Hải Sản Hạ Long và Nhà hàng Cua Biển, hải sản tươi ngon mà giá cả hợp lý.', 'active'),
+(16, 23, 'Bài viết rất chi tiết. Mình đang lên kế hoạch đi Nhật vào năm sau.', 'active'),
+(16, 24, 'Bạn có thể chia sẻ thêm về thủ tục xin visa Nhật không?', 'active'),
+(16, 16, 'Visa Nhật khá dễ xin nếu bạn có đầy đủ giấy tờ chứng minh tài chính và lịch trình rõ ràng.', 'active'),
+(17, 25, 'Mình cũng đã ở Pullman Đà Nẵng và rất hài lòng với dịch vụ.', 'active'),
+(18, 26, 'Mẹo săn vé rất hữu ích. Mình vừa áp dụng và tiết kiệm được 2 triệu cho chuyến đi Nhật.', 'active'),
+(19, 27, 'Mình sẽ đi Nha Trang tháng sau và sẽ thử nhà hàng Ocean Palace.', 'active'),
+(20, 28, 'Mình vừa mua cà phê Arabica và pha theo hướng dẫn của bạn, ngon tuyệt!', 'active'),
+(21, 29, 'Mình vừa mua thịt bò Wagyu và sẽ thử chế biến theo cách bạn chia sẻ.', 'active'),
+(22, 30, 'Khóa học Python này có phù hợp cho người mới bắt đầu không?', 'active'),
+(22, 22, 'Rất phù hợp cho người mới, khóa học bắt đầu từ cơ bản và có nhiều bài tập thực hành.', 'active'),
+(23, 31, 'Mình cũng vừa đọc xong cuốn này và rất tâm đắc với chương 3 về cách giao tiếp.', 'active'),
+(24, 32, 'Mình gợi ý bút Mont Blanc, sang trọng và phù hợp làm quà tặng cho sếp.', 'active'),
+(25, 33, 'Mình đang dùng thuốc bổ gan của Traphaco và thấy khá hiệu quả.', 'active'),
+(26, 34, 'Mình cũng đang dùng Centrum và thấy sức khỏe cải thiện rõ rệt.', 'active'),
+(27, 35, 'Máy đo huyết áp Omron rất chính xác, mình đã so sánh với kết quả đo tại bệnh viện.', 'active'),
+(28, 36, 'Mình cũng vừa xem Endgame bản 4K, trải nghiệm hình ảnh và âm thanh tuyệt vời.', 'active'),
+(29, 37, 'Album BTS này có bao nhiêu phiên bản vậy bạn?', 'active'),
+(29, 29, 'Có 4 phiên bản khác nhau, mỗi phiên bản có photobook và quà tặng khác nhau.', 'active'),
+(30, 38, 'FIFA 23 có gì khác biệt so với FIFA 22 không bạn?', 'active'),
+(30, 30, 'Đồ họa đẹp hơn, gameplay thực tế hơn và có thêm World Cup nữ.', 'active'),
+(31, 39, 'Sofa này có bền không bạn? Mình đang cần mua một bộ cho phòng khách.', 'active'),
+(31, 31, 'Rất bền, mình dùng được 2 năm rồi vẫn như mới, da không bị bong tróc.', 'active'),
+(32, 40, 'Giường gỗ tự nhiên có ưu điểm gì so với gỗ công nghiệp vậy bạn?', 'active'),
+(32, 32, 'Gỗ tự nhiên bền hơn, đẹp hơn theo thời gian và thân thiện với môi trường hơn.', 'active'),
+(33, 41, 'Mình cũng đang tìm bàn ăn, bạn đã mua ở đâu vậy?', 'active'),
+(33, 33, 'Mình mua ở Nhà Xinh, chất lượng tốt và dịch vụ giao hàng, lắp đặt chuyên nghiệp.', 'active'),
+(34, 42, 'Đèn trang trí này có điều chỉnh được độ sáng không bạn?', 'active'),
+(34, 34, 'Có bạn, có thể điều chỉnh 3 mức độ sáng khác nhau bằng remote.', 'active');
+
+-- Insert 50 followers
+INSERT INTO followers (follower_user_id, following_user_id, created_at) VALUES
+(2, 1, '2023-01-15 10:30:00'),  -- Nguyễn Văn A follows Admin
+(3, 1, '2023-01-16 11:20:00'),  -- Trần Thanh Hà follows Admin
+(4, 1, '2023-01-17 09:45:00'),  -- Nguyễn Minh Tuấn follows Admin
+(5, 1, '2023-01-18 14:30:00'),  -- Phạm Phương Linh follows Admin
+(6, 2, '2023-01-20 16:15:00'),  -- Hoàng Minh Khôi follows Nguyễn Văn A (tech enthusiasts)
+(7, 2, '2023-01-22 08:30:00'),  -- Lê Thùy Linh follows Nguyễn Văn A
+(8, 3, '2023-01-25 13:45:00'),  -- Vũ Đức Anh follows Trần Thanh Hà (fashion interest)
+(9, 3, '2023-01-27 17:20:00'),  -- Mai Hương follows Trần Thanh Hà (beauty experts)
+(10, 4, '2023-01-30 11:10:00'), -- Trần Đạt follows Nguyễn Minh Tuấn (travel enthusiasts)
+(11, 4, '2023-02-02 09:30:00'), -- Ngọc Lan follows Nguyễn Minh Tuấn
+(12, 5, '2023-02-05 14:25:00'), -- Quang Minh follows Phạm Phương Linh (education interest)
+(13, 5, '2023-02-08 16:40:00'), -- Thu Hà follows Phạm Phương Linh
+(14, 6, '2023-02-10 10:15:00'), -- Đức Thắng follows Hoàng Minh Khôi (tech & investment)
+(15, 7, '2023-02-12 13:50:00'), -- Hoàng Nhã follows Lê Thùy Linh (food & travel bloggers)
+(16, 8, '2023-02-15 15:30:00'), -- Minh Đức follows Vũ Đức Anh (gaming interest)
+(17, 9, '2023-02-18 11:20:00'), -- Thanh Thảo follows Mai Hương (beauty experts)
+(18, 10, '2023-02-20 09:45:00'), -- Văn Quý follows Trần Đạt (photography interest)
+(19, 11, '2023-02-22 14:10:00'), -- Kim Chi follows Ngọc Lan (fitness & food interest)
+(20, 12, '2023-02-25 16:35:00'), -- Bảo Trân follows Quang Minh (tech reviewers)
+(21, 13, '2023-02-28 10:25:00'), -- Hồng Sơn follows Thu Hà (marketing interest)
+(22, 14, '2023-03-02 13:40:00'), -- Phương Thảo follows Đức Thắng (finance interest)
+(23, 15, '2023-03-05 15:15:00'), -- Anh Tú follows Hoàng Nhã (interior design interest)
+(24, 16, '2023-03-08 11:30:00'), -- Mỹ Nguyên follows Minh Đức (health experts)
+(25, 17, '2023-03-10 09:50:00'), -- Đức Long follows Thanh Thảo (fashion interest)
+(26, 18, '2023-03-12 14:20:00'), -- Thúy Trang follows Văn Quý (real estate interest)
+(27, 19, '2023-03-15 16:45:00'), -- Minh Tâm follows Kim Chi (food bloggers)
+(28, 20, '2023-03-18 10:35:00'), -- Hải Yến follows Bảo Trân (education experts)
+(29, 21, '2023-03-20 13:15:00'), -- Thành Đạt follows Hồng Sơn (fitness experts)
+(30, 22, '2023-03-22 15:40:00'), -- Lan Hương follows Phương Thảo (beauty experts)
+(31, 23, '2023-03-25 11:25:00'), -- Quốc Bảo follows Anh Tú (music interest)
+(32, 24, '2023-03-28 09:30:00'), -- Ánh Mai follows Mỹ Nguyên (psychology interest)
+(33, 25, '2023-03-30 14:15:00'), -- Đức Hải follows Đức Long (automotive interest)
+(34, 26, '2023-04-02 16:50:00'), -- Thùy Linh follows Thúy Trang (parenting interest)
+(35, 27, '2023-04-05 10:40:00'), -- Hoàng Vũ follows Minh Tâm (book reviewers)
+(36, 28, '2023-04-08 13:25:00'), -- Minh Châu follows Hải Yến (pet experts)
+(37, 29, '2023-04-10 15:10:00'), -- Văn Nam follows Thành Đạt (e-commerce interest)
+(38, 30, '2023-04-12 11:35:00'), -- Thúy Tiên follows Lan Hương (gardening interest)
+(39, 31, '2023-04-15 09:20:00'), -- Đức Minh follows Quốc Bảo (blockchain experts)
+(40, 32, '2023-04-18 14:45:00'), -- Hoa Mai follows Ánh Mai (event planning interest)
+(41, 33, '2023-04-20 16:30:00'), -- Thành Long follows Đức Hải (finance experts)
+(42, 34, '2023-04-22 10:15:00'), -- Mỹ Hoa follows Thùy Linh (art & handmade interest)
+(43, 35, '2023-04-25 13:40:00'), -- Quang Huy follows Hoàng Vũ (coffee enthusiasts)
+(44, 36, '2023-04-28 15:25:00'), -- Linh Chi follows Minh Châu (jewelry design interest)
+(45, 37, '2023-04-30 11:10:00'), -- Đức Thuận follows Văn Nam (crypto trading interest)
+(46, 38, '2023-05-02 09:35:00'), -- Mai Lin follows Thúy Tiên (skincare experts)
+(47, 39, '2023-05-05 14:20:00'), -- Hoàng Nam follows Đức Minh (smart home experts)
+(48, 40, '2023-05-08 16:15:00'), -- Thùy Duyên follows Hoa Mai (e-learning interest)
+(49, 41, '2023-05-10 10:50:00'), -- Minh Quang follows Thành Long (sports interest)
+(50, 42, '2023-05-12 13:30:00'); -- Thu Hương follows Mỹ Hoa (nail art interest)

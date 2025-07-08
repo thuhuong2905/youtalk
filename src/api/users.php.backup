@@ -1,0 +1,311 @@
+<?php
+require_once __DIR__ . '/../core/session_handler.php';
+require_once __DIR__ . '/../core/api_utils.php';
+require_once __DIR__ . '/../core/classes/User.php';
+require_once __DIR__ . '/../core/classes/Post.php';
+require_once __DIR__ . '/../core/classes/Review.php';
+
+// Set header to return JSON
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *'); // Adjust for production
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// Define sendResponse function if not available in api_utils.php
+if (!function_exists('sendResponse')) {
+    function sendResponse($statusCode, $data) {
+        http_response_code($statusCode);
+        if ($statusCode >= 200 && $statusCode < 300) {
+            // Ensure the top-level structure matches what frontend expects
+            // Based on profile.js: {success: 200, message: { data: {...} } } or {success: 200, message: {...} }
+            // Let's standardize to {success: true/false, data: ..., message: ...}
+            echo json_encode(['success' => true, 'data' => $data, 'message' => 'Operation successful']);
+        } else {
+            echo json_encode(['success' => false, 'message' => $data['message'] ?? 'Unknown error', 'debug' => $data['debug'] ?? null]);
+        }
+        exit();
+    }
+}
+
+error_log("Debug - userId from GET: " . ($userId ?? 'null'));
+error_log("Debug - GET params: " . print_r($_GET, true));
+
+// Get the database connection
+$db = getDbConnection();
+
+// Instantiate classes
+$userHandler = new User($db);
+$postHandler = new Post($db);
+$reviewHandler = new Review($db);
+
+// Get request method and action
+$requestMethod = $_SERVER["REQUEST_METHOD"];
+$action = $_GET['action'] ?? $_POST['action'] ?? null; // Allow action via POST for update
+$userId = $_GET['user_id'] ?? null;
+
+// Check for admin access
+$isAdmin = isset($_GET['admin']) && $_GET['admin'] == '1';
+if ($isAdmin) {
+    session_start();
+    if (!isset($_SESSION['user_id']) || !isAdminUser($_SESSION['user_id'], $db)) {
+        sendResponse(403, ['message' => 'Admin access required']);
+    }
+}
+
+function isAdminUser($user_id, $db) {
+    try {
+        $stmt = $db->prepare("SELECT role FROM users WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($user = $result->fetch_assoc()) {
+            return $user['role'] === 'admin';
+        }
+        return false;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+// --- Helper Functions (Moved from bottom for clarity) ---
+
+/**
+ * Helper function to get post count by user ID
+ */
+function getPostCountByUserId($db, $userId) {
+    try {
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM posts WHERE user_id = ? AND status = 'active'");
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] ?? 0;
+    } catch (Exception $e) {
+        error_log("Error counting posts for user $userId: " . $e->getMessage());
+        return 0;
+    }
+}
+
+/**
+ * Helper function to get review count by user ID
+ */
+function getReviewCountByUserId($db, $userId) {
+    try {
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM reviews WHERE user_id = ? AND status = 'active'"); // Assuming active reviews
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] ?? 0;
+    } catch (Exception $e) {
+        error_log("Error counting reviews for user $userId: " . $e->getMessage());
+        return 0;
+    }
+}
+
+/**
+ * Helper function to get comment count by user ID
+ */
+function getCommentCountByUserId($db, $userId) {
+    try {
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM comments WHERE user_id = ? AND status = 'active'"); // Assuming active comments
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] ?? 0;
+    } catch (Exception $e) {
+        error_log("Error counting comments for user $userId: " . $e->getMessage());
+        return 0;
+    }
+}
+
+/**
+ * Helper function to get follower count (Actual Implementation)
+ */
+function getFollowerCountByUserId($db, $userId) {
+    try {
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM followers WHERE following_user_id = ?");
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] ?? 0;
+    } catch (Exception $e) {
+        error_log("Error counting followers for user $userId: " . $e->getMessage());
+        return 0;
+    }
+}
+
+/**
+ * Helper function to get following count (Actual Implementation)
+ */
+function getFollowingCountByUserId($db, $userId) {
+    try {
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM followers WHERE follower_user_id = ?");
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] ?? 0;
+    } catch (Exception $e) {
+        error_log("Error counting following for user $userId: " . $e->getMessage());
+        return 0;
+    }
+}
+
+// --- API Endpoint Logic ---
+
+if ($requestMethod === 'GET') {
+    if (!$action) {
+        sendResponse(400, ['message' => 'Action parameter is required for GET requests']);
+        exit;
+    }
+
+    if ($action === 'get_active_users') {
+        try {
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
+            $result = $userHandler->getActiveUsers($limit);
+            sendResponse($result['success'] ? 200 : 500, $result);
+            exit;
+        } catch (Exception $e) {
+            error_log("Error fetching active users: " . $e->getMessage());
+            sendResponse(500, ['success' => false, 'message' => 'Internal Server Error']);
+            exit;
+        }
+    } else if ($isAdmin && $action === 'get_all_users') {
+        // Admin-only: Get all users for admin panel
+        try {
+            $stmt = $db->prepare("
+                SELECT u.user_id, u.username, u.email, u.role, u.status, u.created_at, u.last_login,
+                       u.profile_picture, u.bio, u.ban_until
+                FROM users u
+                ORDER BY u.created_at DESC
+            ");
+            $stmt->execute();
+            $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            sendResponse(200, $users);
+            exit;
+        } catch (Exception $e) {
+            error_log("Error fetching all users for admin: " . $e->getMessage());
+            sendResponse(500, ['success' => false, 'message' => 'Internal Server Error']);
+            exit;
+        }
+    } else if ($action === 'get_profile_details') {
+        if (!$userId) {
+            sendResponse(400, ['message' => 'User ID parameter is required for get_profile_details']);
+            exit;
+        }
+
+        try {
+            // 1. Get User Details
+            $userResult = $userHandler->getUserById($userId);
+            if (!$userResult || !isset($userResult['success']) || !$userResult['success']) {
+                sendResponse(404, ['message' => 'User not found']);
+                exit;
+            }
+            $userData = $userResult['data'];
+            
+            // Exclude sensitive data like password hash, maybe email depending on privacy settings (not implemented yet)
+            unset($userData['password']);
+            // Decide whether to show email based on if it's the user's own profile
+            if ($loggedInUserId != $userId) {
+                 unset($userData['email']); 
+            }
+
+            // 2. Get Counts (Using updated helper functions)
+            $postCount = getPostCountByUserId($db, $userId);
+            $reviewCount = getReviewCountByUserId($db, $userId);
+            $commentCount = getCommentCountByUserId($db, $userId);
+            $followerCount = getFollowerCountByUserId($db, $userId); // Actual count
+            $followingCount = getFollowingCountByUserId($db, $userId); // Actual count
+
+            // 3. Format the response data
+            $profileData = [
+                'user' => $userData, // Already contains necessary fields
+                'counts' => [
+                    'posts' => (int)$postCount,
+                    'reviews' => (int)$reviewCount,
+                    'comments' => (int)$commentCount,
+                    'followers' => (int)$followerCount,
+                    'following' => (int)$followingCount
+                ]
+            ];
+
+            // Send response using the standardized format
+            sendResponse(200, $profileData); // Pass the data directly
+
+        } catch (Exception $e) {
+            error_log("Error in users.php (get_profile_details): " . $e->getMessage());
+            sendResponse(500, [
+                'message' => 'Internal Server Error',
+                'debug' => [
+                    'error' => $e->getMessage(),
+                    'file' => basename($e->getFile()),
+                    'line' => $e->getLine()
+                ]
+            ]);
+        }
+    } else {
+        sendResponse(400, ['message' => 'Invalid GET action specified']);
+    }
+
+} elseif ($requestMethod === 'POST') { // Changed from PUT for simplicity with form data
+    if ($action === 'update_profile') {
+        if (!$loggedInUserId) {
+            sendResponse(401, ['message' => 'Yêu cầu đăng nhập để cập nhật hồ sơ.']);
+            exit;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        // Validate input data (add more robust validation as needed)
+        $updateData = [];
+        if (isset($data['email']) && filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            // Check if email is already taken by another user
+            $stmtCheck = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $stmtCheck->execute([$data['email'], $loggedInUserId]);
+            if ($stmtCheck->fetch()) {
+                 sendResponse(400, ['message' => 'Địa chỉ email này đã được sử dụng.']);
+                 exit;
+            }
+            $updateData['email'] = $data['email'];
+        }
+        if (isset($data['full_name'])) {
+             $updateData['full_name'] = trim(htmlspecialchars($data['full_name']));
+        }
+        if (isset($data['bio'])) {
+            $updateData['bio'] = trim(htmlspecialchars($data['bio']));
+        }
+        // Removed: if (isset($data['location'])) { ... }
+        // Add other updatable fields here (e.g., full_name)
+
+        if (empty($updateData)) {
+            sendResponse(400, ['message' => 'Không có dữ liệu hợp lệ để cập nhật.']);
+            exit;
+        }
+
+        try {
+            $result = $userHandler->updateUserById($loggedInUserId, $updateData);
+            if ($result && $result['success']) {
+                // Lấy lại thông tin user mới nhất để trả về cho frontend
+                $userResult = $userHandler->getUserById($loggedInUserId);
+                $userData = $userResult && $userResult['success'] ? $userResult['data'] : null;
+                sendResponse(200, [
+                    'message' => 'Hồ sơ đã được cập nhật thành công.',
+                    'user' => $userData
+                ]);
+            } else {
+                sendResponse(500, ['message' => $result['message'] ?? 'Không thể cập nhật hồ sơ.']);
+            }
+        } catch (Exception $e) {
+            error_log("Error updating profile for user $loggedInUserId: " . $e->getMessage());
+            sendResponse(500, ['message' => 'Lỗi máy chủ nội bộ khi cập nhật hồ sơ.']);
+        }
+    } else {
+        sendResponse(400, ['message' => 'Invalid POST action specified']);
+    }
+
+} else {
+    sendResponse(405, ['message' => 'Method Not Allowed']);
+}
+
+?>

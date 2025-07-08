@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết bài đăng - YouTalk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/post-detail.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script defer src="js/notifications.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/avatar.js"></script>
+    <script defer src="js/post-detail.js"></script>
+
+</head>
+<body>
+    <header id="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                 <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="post-detail-container">
+                <section class="post-content">
+                    <div class="post-header">
+                        <div class="post-meta">
+                            <span class="category" id="post-category">Đang tải...</span>
+                            <span class="date" id="post-date">Đang tải...</span>
+                        </div>
+                        <h1 class="post-title" id="post-title">Đang tải...</h1>
+                        <div class="post-author">
+                            <div id="author-avatar-container" class="author-avatar"></div>
+                            <div class="author-info">
+                                <span class="author-name" id="author-name">Đang tải...</span>
+                                <span class="author-role" id="author-role">Thành viên</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-body" id="post-body">
+                        <div class="loading-placeholder">
+                            <div class="loading-spinner"></div>
+                            <p>Đang tải nội dung...</p>
+                        </div>
+                    </div>
+                    <div class="post-media-gallery" id="post-media-gallery" style="display: none;">
+                        <h3>Hình ảnh</h3>
+                        <div class="media-grid" id="media-grid">
+                        </div>
+                    </div>
+                    <div class="post-tags" id="post-tags">
+                    </div>
+                    <div class="post-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-eye"></i>
+                            <span id="view-count">0</span> lượt xem
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-comment"></i>
+                            <span id="comment-count">0</span> bình luận
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-share-alt"></i>
+                            Chia sẻ
+                            <div class="share-buttons">
+                                <a href="https://facebook.com" class="facebook-share"><i class="fab fa-facebook-f"></i></a>
+                                <a href="https://twitter.com" class="twitter-share"><i class="fab fa-twitter"></i></a>
+                                <a href="https://linkedin.com" class="linkedin-share"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="#" class="copy-link"><i class="fas fa-link"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="author-bio" id="author-bio">
+                        <h3>Về tác giả</h3>
+                        <div class="author-bio-content">
+                            <div id="author-bio-avatar-container" class="author-avatar"></div>
+                            <div class="author-bio-info">
+                                <h4 id="author-bio-name">Đang tải...</h4>
+                                <p id="author-bio-description">Đang tải thông tin tác giả...</p>
+                                <div class="author-stats">
+                                    <span><i class="fas fa-file-alt"></i> <span id="author-post-count">0</span> bài đăng</span>
+                                    <span><i class="fas fa-comment"></i> <span id="author-comment-count">0</span> bình luận</span>
+                                    <span><i class="fas fa-calendar-alt"></i> Tham gia <span id="author-join-date">--/--/----</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="comments-section">
+                    <h2>Bình luận (<span id="total-comments">0</span>)</h2>
+                    <div class="comment-form-container auth-required" style="display: none;">
+                        <h3>Để lại bình luận</h3>
+                        <form id="comment-form">
+                            <div class="form-group">
+                                <textarea name="comment" id="comment-content" rows="4" placeholder="Nhập bình luận của bạn..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="cta-button">Gửi bình luận</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="login-prompt guest-only">
+                        <p>Vui lòng <a href="login-register.html?redirect=post-detail.html?id=1">đăng nhập</a> để bình luận.</p>
+                    </div>
+                    <div class="comments-list" id="comments-list">
+                        <div class="loading-placeholder">
+                            <div class="loading-spinner"></div>
+                            <p>Đang tải bình luận...</p>
+                        </div>
+                    </div>
+                    <div class="load-more-container" id="load-more-container" style="display: none;">
+                        <button id="load-more-comments" class="load-more-button">Xem thêm bình luận</button>
+                    </div>
+                </section>
+                <section class="related-posts">
+                    <h2>Bài đăng liên quan</h2>
+                    <div class="related-posts-list" id="related-posts-list">
+                        <div class="loading-placeholder">
+                            <div class="loading-spinner"></div>
+                            <p>Đang tải bài đăng liên quan...</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer id="main-footer">
+         <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

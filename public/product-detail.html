@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Sản phẩm/Dịch vụ - YouTalk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/product-detail.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script defer src="js/main.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/avatar.js"></script>
+    <script defer src="js/notifications.js"></script>
+    <script defer src="js/product-detail.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                 <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="product-detail-content">
+            <div class="container">
+                <nav aria-label="breadcrumb" class="breadcrumbs">
+                    <ol>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="category.html?id=1" id="breadcrumb-category">Danh mục</a></li> 
+                        <li aria-current="page" id="breadcrumb-product-name">Tên Sản phẩm</li>
+                    </ol>
+                </nav>
+                <div class="product-main-info card-box">
+                    <div class="product-gallery">
+                        <div class="product-image-main">
+                            <img src="#" alt="Product Image" id="main-product-image" style="display: none;">
+                        </div>
+                        <div class="thumbnail-list">
+                        </div>
+                    </div>
+                    <div class="product-summary">
+                        <h1 id="product-name">Tên Sản phẩm/Dịch vụ</h1>
+                        <div class="rating-summary">
+                            <span class="stars" id="product-avg-rating">★★★★☆</span>
+                            <span id="product-review-count">(0 đánh giá)</span>
+                        </div>
+                        <div id="product-price" class="price">Giá: Liên hệ</div>
+                        <div id="product-description" class="product-description">
+                        </div>
+                        <div id="product-specs" class="product-specs">
+                            <h4>Thông số kỹ thuật:</h4>
+                            <ul id="product-specs-list">
+                            </ul>
+                        </div>
+                        <div class="purchase-links">
+                            <p class="purchase-label">🛒 Mua tại:</p>
+                            <div class="platform-buttons">
+                                <a href="#" id="shopee-link" class="platform-btn shopee-btn" target="_blank" style="display: none;">
+                                    <i class="fas fa-shopping-bag"></i> Shopee
+                                </a>
+                                <a href="#" id="lazada-link" class="platform-btn lazada-btn" target="_blank" style="display: none;">
+                                    <i class="fas fa-store"></i> Lazada
+                                </a>
+                                <a href="#" id="tiki-link" class="platform-btn tiki-btn" target="_blank" style="display: none;">
+                                    <i class="fas fa-shopping-cart"></i> Tiki
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-filters">
+                    <label for="review-sort">Sắp xếp:</label>
+                    <select id="review-sort">
+                        <option value="newest">Mới nhất</option>
+                        <option value="helpful">Hữu ích nhất</option>
+                        <option value="highest">Đánh giá cao nhất</option>
+                        <option value="lowest">Đánh giá thấp nhất</option>
+                    </select>
+                </div>
+                <div class="reviews-container card-box">
+                    <h3>Đánh giá từ người dùng</h3>
+                    <div class="write-review-section">
+                        <div class="login-prompt card-box" id="login-prompt">
+                            Vui lòng đăng nhập để bình luận.
+                        </div>
+                        <div class="review-form card-box" id="review-form-container" style="display: none;">
+                            <div class="user-info">
+                                <img class="avatar" id="current-user-avatar" src="" alt="" style="display: none;">
+                                <span class="fullname" id="current-user-name"></span>
+                            </div>
+                            <div class="rating-input">
+                                <label>Đánh giá:</label>
+                                <span class="star-rating" id="user-rating-stars">
+                                    <i data-value="1" class="star far fa-star"></i>
+                                    <i data-value="2" class="star far fa-star"></i>
+                                    <i data-value="3" class="star far fa-star"></i>
+                                    <i data-value="4" class="star far fa-star"></i>
+                                    <i data-value="5" class="star far fa-star"></i>
+                                </span>
+                                <input type="hidden" id="user-rating-value" value="0">
+                            </div>
+                            <div class="content-input">
+                                <label for="review-content">Nội dung:</label>
+                                <textarea id="review-content" placeholder="Nhập đánh giá của bạn..." rows="4"></textarea>
+                            </div>
+                            <button id="submit-review-btn" class="submit-review">Gửi đánh giá</button>
+                        </div>
+                    </div>
+                    
+                    <hr class="section-divider">
+                    <div class="reviews-list" id="reviews-list">
+                    </div>
+                    <div class="pagination" id="reviews-pagination">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer id="main-footer">
+         <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <a href="https://facebook.com" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="https://twitter.com" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

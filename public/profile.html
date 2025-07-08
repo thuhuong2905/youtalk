@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ của [Tên người dùng] - YouTalk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script defer src="js/main.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/avatar.js"></script>
+    <script defer src="js/notifications.js"></script>
+    <script defer src="js/profile.js"></script>
+</head>
+<body>
+    <header id="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                 <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="profile-header">
+            <div class="container profile-header-content">
+                <div id="profile-avatar-container" class="profile-picture-container">
+                    <div id="profile-picture-container" class="profile-picture"></div>
+                    <div id="avatar-upload-container" class="avatar-upload-container">
+                        <button id="change-avatar-button" class="change-avatar-button" title="Thay đổi ảnh đại diện">
+                            <i class="icon-camera"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profile-fullname">Tên người dùng</h1>
+                    <p id="profile-bio" class="bio">Tiểu sử ngắn gọn...</p>
+                    <div class="profile-meta">
+                        <span id="profile-joindate"><i class="icon-calendar"></i> Tham gia ngày...</span>
+                    </div>
+                    <div class="profile-stats">
+                        <span><strong id="profile-post-count">0</strong> Bài đăng</span>
+                        <span><strong id="profile-review-count">0</strong> Đánh giá</span>
+                        <span><strong id="profile-follower-count">0</strong> Người theo dõi</span>
+                        <span><strong id="profile-following-count">0</strong> Đang theo dõi</span>
+                    </div>
+                    <div class="profile-actions">
+                        <button id="edit-profile-button" class="cta-button secondary">Chỉnh sửa hồ sơ</button>
+                        <button id="follow-button" class="cta-button">Theo dõi</button>
+                        <button id="unfollow-button" class="cta-button" style="display:none">Hủy theo dõi</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="profile-content">
+            <div class="container profile-tabs">
+                <div class="tab-navigation">
+                    <button class="tab-link active" data-tab="posts">Bài đăng</button>
+                    <button class="tab-link" data-tab="reviews">Đánh giá</button>
+                    <button class="tab-link" data-tab="comments">Bình luận</button>
+                    <button class="tab-link" data-tab="followers">Người theo dõi</button>
+                    <button class="tab-link" data-tab="following">Đang theo dõi</button>
+                    <button class="tab-link" data-tab="settings">Cài đặt</button>
+                </div>
+
+                <div id="tab-posts" class="tab-content active">
+                    <h2>Bài đăng của <span class="dynamic-username">Người dùng</span></h2>
+                    <div id="user-posts-list">
+                        <p>Chưa có bài đăng nào.</p>
+                    </div>
+                </div>
+
+                <div id="tab-reviews" class="tab-content">
+                    <h2>Đánh giá của <span class="dynamic-username">Người dùng</span></h2>
+                    <div id="user-reviews-list">
+                        <p>Chưa có đánh giá nào.</p>
+                    </div>
+                </div>
+
+                <div id="tab-comments" class="tab-content">
+                    <h2>Bình luận của <span class="dynamic-username">Người dùng</span></h2>
+                    <div id="user-comments-list">
+                        <p>Chưa có bình luận nào.</p>
+                    </div>
+                </div>
+                
+                <div id="tab-followers" class="tab-content">
+                    <h2>Người theo dõi <span class="dynamic-username">Người dùng</span></h2>
+                    <div id="user-followers-list" class="user-grid">
+                        <p>Chưa có người theo dõi nào.</p>
+                    </div>
+                </div>
+
+                <div id="tab-following" class="tab-content">
+                    <h2>Đang theo dõi</h2>
+                    <div id="user-following-list" class="user-grid">
+                        <p>Chưa theo dõi ai.</p>
+                    </div>
+                </div>
+
+                <div id="tab-settings" class="tab-content">
+                    <h2>Cài đặt tài khoản</h2>
+                    
+                    <div class="settings-container">
+                        <div class="settings-section">
+                            <h3>Thông tin cá nhân</h3>
+                            <form id="profile-settings-form">
+                                <div class="form-group">
+                                    <label for="username">Tên đăng nhập</label>
+                                    <input type="text" id="username" name="username" autocomplete="username" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="full_name">Họ và tên</label>
+                                    <input type="text" id="full_name" name="full_name" autocomplete="name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" autocomplete="email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="bio">Giới thiệu</label>
+                                    <textarea id="bio" name="bio" rows="3"></textarea>
+                                </div>
+                                <div class="form-error" id="profile-error"></div>
+                                <div class="form-success" id="profile-success"></div>
+                                <button type="submit" class="cta-button">Lưu thay đổi</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Đổi mật khẩu</h3>
+                            <form id="change-password-form">
+                                <div class="form-group">
+                                    <label for="current_password">Mật khẩu hiện tại</label>
+                                    <div class="password-input-wrapper">
+                                      <input type="password" id="current_password" name="current_password" autocomplete="current-password">
+                                      <span class="toggle-password"><i class="fas fa-eye"></i></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_password">Mật khẩu mới</label>
+                                    <div class="password-input-wrapper">
+                                      <input type="password" id="new_password" name="new_password" autocomplete="new-password">
+                                      <span class="toggle-password"><i class="fas fa-eye"></i></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm_password">Xác nhận mật khẩu mới</label>
+                                    <div class="password-input-wrapper">
+                                      <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password">
+                                      <span class="toggle-password"><i class="fas fa-eye"></i></span>
+                                    </div>
+                                </div>
+                                <div class="form-error" id="password-error"></div>
+                                <div class="form-success" id="password-success"></div>
+                                <button type="submit" class="cta-button">Đổi mật khẩu</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-section danger-zone">
+                            <h3>Quản lý tài khoản</h3>
+                            <p class="warning-text">Cảnh báo: Các hành động dưới đây không thể hoàn tác.</p>
+                            
+                            <div class="account-actions">
+                                <div class="account-action">
+                                    <h4>Vô hiệu hóa tài khoản</h4>
+                                    <p>Tài khoản của bạn sẽ bị ẩn và không thể truy cập cho đến khi bạn đăng nhập lại.</p>
+                                    <button id="deactivate-account-button" class="danger-button">Vô hiệu hóa tài khoản</button>
+                                </div>
+                                
+                                <div class="account-action">
+                                    <h4>Xóa tài khoản</h4>
+                                    <p>Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
+                                    <button id="delete-account-button" class="danger-button">Xóa tài khoản</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="avatar-upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Cập nhật ảnh đại diện</h3>
+            <form id="avatar-upload-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="avatar-file">Chọn ảnh:</label>
+                    <input type="file" id="avatar-file" name="avatarFile" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <small>Kích thước tối đa: 5MB. Định dạng: JPG, PNG, GIF, WEBP.</small>
+                </div>
+                <div id="avatar-preview-container" class="avatar-preview">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cta-button secondary" id="cancel-avatar-upload">Hủy</button>
+                    <button type="submit" class="cta-button">Tải lên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="account-action-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="account-action-title">Xác nhận hành động</h3>
+            <p id="account-action-message">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            <form id="account-action-form">
+                <div class="form-group">
+                    <label for="confirm-password-action">Nhập mật khẩu để xác nhận:</label>
+                    <input type="password" id="confirm-password-action" name="password" required>
+                </div>
+                <input type="hidden" id="account-action-type" name="action" value="">
+                <div class="form-actions">
+                    <button type="button" class="cta-button secondary" id="cancel-account-action">Hủy</button>
+                    <button type="submit" class="danger-button" id="confirm-account-action">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer id="main-footer">
+         <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <a href="https://facebook.com" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="https://twitter.com" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .toggle-password {
+      cursor: pointer;
+      margin-left: -30px;
+      user-select: none;
+    }
+    </style>
+</body>
+</html>

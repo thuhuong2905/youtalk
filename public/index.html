@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTalk - Cộng đồng chia sẻ trải nghiệm</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/category_colors.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script defer src="js/api.js"></script>
+    <script defer src="js/auth.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/avatar.js"></script>
+    <script defer src="js/home.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <!-- Các hành động người dùng sẽ được cập nhật bởi JS -->
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="hero-section">
+            <div class="container hero-container">
+                <div class="hero-content">
+                    <h1>YouTalk - Kết nối và đánh giá sản phẩm/dịch vụ</h1>
+                    <p>Khám phá, thảo luận và chia sẻ trải nghiệm của bạn!</p>
+                    <div class="hero-buttons">
+                        <a href="category.html" class="primary-button">Khám phá ngay</a>
+                        <a href="forum.html" class="secondary-button">Tham gia thảo luận</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="featured-categories">
+            <div class="container">
+                <h2 class="section-title">Khám phá theo danh mục</h2>
+                <div class="categories-container">
+                    <button class="category-nav-button prev-button" aria-label="Previous categories">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="categories-wrapper">
+                        <div class="categories-grid" id="categories-grid">
+                            <!-- Các danh mục sẽ được tải ở đây bởi JS -->
+                        </div>
+                    </div>
+                    <button class="category-nav-button next-button" aria-label="Next categories">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="featured-reviews">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Đánh giá nổi bật</h2>
+                    <a href="category.html" class="view-all">Xem tất cả &rarr;</a>
+                </div>
+                <div class="reviews-grid" id="featured-reviews-grid">
+                    <!-- Các đánh giá sẽ được tải ở đây bởi JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="hot-topics">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Chủ đề nóng</h2>
+                    <a href="forum.html" class="view-all">Xem tất cả &rarr;</a>
+                </div>
+                <div class="topics-list" id="hot-topics-list">
+                    <!-- Các chủ đề sẽ được tải ở đây bởi JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="cta-section">
+            <div class="container">
+                <h2>Tham gia cộng đồng YouTalk ngay hôm nay</h2>
+                <p>Chia sẻ trải nghiệm, đánh giá sản phẩm và kết nối với hàng nghìn người dùng khác</p>
+                <div class="cta-buttons">
+                    <a href="login-register.html?tab=register" class="primary-button">Đăng ký miễn phí</a>
+                    <a href="post-create.html" class="secondary-button">Viết đánh giá</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <!-- Liên kết mạng xã hội -->
+                    <a href="https://facebook.com" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="https://twitter.com" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

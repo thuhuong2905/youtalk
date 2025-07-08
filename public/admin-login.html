@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Admin - YouTalk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin-login.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="admin-login-header">
+            <div class="admin-logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 class="admin-title">Admin Panel</h2>
+            <p class="admin-subtitle">Đăng nhập để quản trị hệ thống</p>
+        </div>        <form id="admin-login-form">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="username" placeholder="Tên đăng nhập" required>
+                <label for="username"><i class="fas fa-user me-2"></i>Tên đăng nhập</label>
+            </div>
+
+            <div class="form-floating">
+                <input type="password" class="form-control" id="password" placeholder="Mật khẩu" required>
+                <label for="password"><i class="fas fa-lock me-2"></i>Mật khẩu</label>
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="remember">
+                <label class="form-check-label" for="remember">
+                    Ghi nhớ đăng nhập
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-admin text-white">
+                <span class="button-text">Đăng nhập</span>
+                <span class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Đang xử lý...
+                </span>
+            </button>
+        </form>        <div class="back-to-site">
+            <a href="index.html">
+                <i class="fas fa-arrow-left"></i>
+                Quay lại trang chủ
+            </a>
+        </div>
+    </div>
+        <!-- Scripts -->
+    <script src="js/notifications.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/admin-auth.js"></script>
+</body>
+</html>

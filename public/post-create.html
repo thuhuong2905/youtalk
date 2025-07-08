@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng bài - YouTalk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/post-create.css">
+    <script defer src="js/notifications.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/api.js"></script>
+    <script defer src="js/post-create.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">YouTalk</a>
+            <nav class="main-nav">
+                 <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions" id="user-actions">
+                <a href="login-register.html" class="auth-link">Đăng nhập</a>
+                <a href="post-create.html" class="cta-button-header">Đăng bài ngay</a>
+            </div>
+            <button class="hamburger">&#9776;</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="post-create-section">
+            <div class="container">
+                <h1 class="page-title">Tạo bài viết mới</h1>
+                
+                <div class="post-create-form-container">
+                    <form id="post-create-form" novalidate>
+                        <div class="form-group">
+                            <label for="post-title">Tiêu đề <span style="color: red;">*</span></label>
+                            <input type="text" id="post-title" name="title" placeholder="Nhập tiêu đề bài viết">
+                            <small>Tiêu đề nên ngắn gọn, rõ ràng và thu hút (tối đa 100 ký tự)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="post-type">Loại bài viết <span style="color: red;">*</span></label>
+                            <select id="post-type" name="post_type">
+                                <option value="" disabled selected>Chọn loại bài viết</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="post-category">Danh mục <span style="color: red;">*</span></label>
+                            <select id="post-category" name="category_id">
+                                <option value="" disabled selected>Chọn danh mục</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="post-content">Nội dung <span style="color: red;">*</span></label>
+                            <textarea id="post-content" name="content" rows="8" placeholder="Nhập nội dung bài viết..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="tags-input">Thẻ (tối đa 5 thẻ, cách nhau bằng dấu phẩy hoặc Enter)</label>
+                            <div id="tags-container" class="tags-container"></div>
+                            <input type="text" id="tags-input" placeholder="Nhập thẻ...">
+                            <input type="hidden" id="post-tags" name="tags">
+                            <div id="tag-error" class="tag-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="post-media">Hình ảnh (tối đa 10 ảnh)</label>
+                            <input type="file" id="post-media" name="media[]" accept="image/*" multiple>
+                            <div id="media-preview" class="media-preview"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="submit-post-btn" class="submit-button">Đăng bài</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="post-guidelines">
+                    <h3>Hướng dẫn đăng bài</h3>
+                    <ul>
+                        <li>Viết tiêu đề ngắn gọn, rõ ràng và thu hút</li>
+                        <li>Nội dung bài viết nên chi tiết, có cấu trúc rõ ràng</li>
+                        <li>Thêm hình ảnh để minh họa (nếu có)</li>
+                        <li>Tuân thủ <a href="#">quy định cộng đồng</a> của YouTalk</li>
+                        <li>Không đăng nội dung vi phạm bản quyền hoặc thông tin sai lệch</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="main-footer">
+         <div class="container footer-grid">
+            <div class="footer-column about">
+                <h3>Về YouTalk</h3>
+                <p>YouTalk - Kết nối cộng đồng, chia sẻ trải nghiệm sản phẩm/dịch vụ.</p>
+            </div>
+            <div class="footer-column navigation">
+                <h3>Điều hướng</h3>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="category.html">Danh mục</a></li>
+                    <li><a href="forum.html">Diễn đàn</a></li>
+                    <li><a href="post-create.html">Đăng bài</a></li>
+                </ul>
+            </div>
+            <div class="footer-column support">
+                <h3>Hỗ trợ</h3>
+                <p>Email: support@youtalk.com</p>
+                <p>Hotline: 1900 1234</p>
+                <div class="social-links">
+                    <a href="https://facebook.com" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="https://twitter.com" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-column legal">
+                <h3>Pháp lý</h3>
+                <ul>
+                    <li><a href="#">Chính sách quyền riêng tư</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                    <li><a href="#">Hướng dẫn cộng đồng</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>© 2025 YouTalk. All rights reserved.</p>
+            <div class="footer-extras">
+                <div class="language-switcher">
+                    <span>Tiếng Việt</span> | <span>English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
